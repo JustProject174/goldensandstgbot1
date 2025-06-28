@@ -35,12 +35,12 @@ async function loadKnowledgeBase() {
         }
 
         console.log(`Загружено ${knowledgeBase.length} записей из базы знаний`);
-        
+
         // Выводим отладочную информацию о записях
         knowledgeBase.forEach((item, index) => {
             console.log(`Запись ${index + 1}: ключевые слова = [${item.keywords.join(', ')}], есть ответ = ${!!item.answer && item.answer.trim() !== ''}`);
         });
-        
+
         return knowledgeBase;
     } catch (error) {
         console.log('Файл базы знаний не найден, создаем начальную базу');
@@ -104,9 +104,9 @@ ANSWER:🚖 Трансфер и проезд:
 async function saveToKnowledgeBase(keywords, answer) {
     const keywordsStr = keywords.join(',');
     const newEntry = `\nKEYWORDS:${keywordsStr}\nANSWER:${answer}`;
-    
+
     await fs.appendFile(config.KNOWLEDGE_BASE_FILE, newEntry, 'utf8');
-    
+
     // Перезагружаем базу знаний чтобы обновить память
     await loadKnowledgeBase();
     console.log('Новый ответ добавлен в базу знаний и база перезагружена');
@@ -115,36 +115,36 @@ async function saveToKnowledgeBase(keywords, answer) {
 
 function findAnswerInKnowledgeBase(message) {
     const lowerMessage = message.toLowerCase();
-    
+
     // Убираем знаки препинания и лишние пробелы
     const cleanMessage = lowerMessage.replace(/[^\w\sа-яё]/gi, ' ').replace(/\s+/g, ' ').trim();
     const messageWords = cleanMessage.split(' ').filter(word => word.length > 1); // Исключаем слова длиной 1 символ
-    
+
     // Если в сообщении меньше 2 слов, возвращаем null
     if (messageWords.length < 2) {
         console.log(`Сообщение "${message}" содержит менее 2 значимых слов`);
         return null;
     }
-    
+
     let bestMatch = null;
     let maxMatches = 0;
-    
+
     for (const item of knowledgeBase) {
         // Пропускаем записи без ключевых слов или ответов
         if (!item.keywords || item.keywords.length === 0 || !item.answer || item.answer.trim() === '') {
             continue;
         }
-        
+
         let matchCount = 0;
         const matchedKeywords = [];
-        
+
         // Подсчитываем количество совпадений с ключевыми словами
         for (const keyword of item.keywords) {
             if (!keyword || keyword.trim() === '') continue;
-            
+
             const cleanKeyword = keyword.toLowerCase().trim();
             let keywordMatched = false;
-            
+
             // Точное совпадение ключевого слова
             if (cleanMessage.includes(cleanKeyword)) {
                 matchCount++;
@@ -152,8 +152,6 @@ function findAnswerInKnowledgeBase(message) {
                 keywordMatched = true;
             } else {
                 // Проверяем совпадение частей слов
-                const keywordWords = cleanKeyword.split(' ').filter(word => word.length > 1);
-                
                 for (const keywordWord of keywordWords) {
                     for (const messageWord of messageWords) {
                         // Проверяем включение части слова (минимум 3 символа)
@@ -166,13 +164,39 @@ function findAnswerInKnowledgeBase(message) {
                                 }
                                 break;
                             }
+
+                            // Проверяем частичное совпадение с различием в 2 последних буквах
+                            if (keywordWord.length >= 4 && messageWord.length >= 4) {
+                                const keywordBase = keywordWord.slice(0, -2);
+                                const messageBase = messageWord.slice(0, -2);
+
+                                // Если основы слов совпадают (без последних 2 букв)
+                                if (keywordBase.length >= 3 && keywordBase === messageBase) {
+                                    if (!keywordMatched) {
+                                        matchCount++;
+                                        matchedKeywords.push(cleanKeyword);
+                                        keywordMatched = true;
+                                    }
+                                    break;
+                                }
+
+                                // Также проверяем обратное направление
+                                if (messageBase.length >= 3 && messageWord.slice(0, -2) === keywordWord.slice(0, -2)) {
+                                    if (!keywordMatched) {
+                                        matchCount++;
+                                        matchedKeywords.push(cleanKeyword);
+                                        keywordMatched = true;
+                                    }
+                                    break;
+                                }
+                            }
                         }
                     }
                     if (keywordMatched) break;
                 }
             }
         }
-        
+
         // Требуем минимум 2 совпадения
         if (matchCount >= 2 && matchCount > maxMatches) {
             maxMatches = matchCount;
@@ -183,12 +207,12 @@ function findAnswerInKnowledgeBase(message) {
             };
         }
     }
-    
+
     if (bestMatch) {
         console.log(`Найдено совпадение для "${message}" по ${bestMatch.matchCount} ключевым словам: ${bestMatch.matchedKeywords.join(', ')}`);
         return bestMatch.answer;
     }
-    
+
     console.log(`Не найдено совпадений для сообщения: "${message}" (требуется минимум 2 совпадения)`);
     return null;
 }
