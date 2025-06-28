@@ -106,8 +106,10 @@ async function saveToKnowledgeBase(keywords, answer) {
     const newEntry = `\nKEYWORDS:${keywordsStr}\nANSWER:${answer}`;
     
     await fs.appendFile(config.KNOWLEDGE_BASE_FILE, newEntry, 'utf8');
-    knowledgeBase.push({ keywords, answer });
-    console.log('Новый ответ добавлен в базу знаний');
+    
+    // Перезагружаем базу знаний чтобы обновить память
+    await loadKnowledgeBase();
+    console.log('Новый ответ добавлен в базу знаний и база перезагружена');
     return knowledgeBase;
 }
 

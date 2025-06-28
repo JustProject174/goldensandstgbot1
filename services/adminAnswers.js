@@ -150,6 +150,7 @@ async function loadAndProcessAdminAnswers() {
                             try {
                                 await knowledgeBaseService.saveToKnowledgeBase(keywords, answer);
                                 console.log(`Добавлен ответ в базу знаний: ${keywords.join(', ')}`);
+                                console.log(`Обновленная база знаний содержит ${knowledgeBaseService.getKnowledgeBase().length} записей`);
                             } catch (saveError) {
                                 console.error('Ошибка при сохранении в базу знаний:', saveError);
                             }
