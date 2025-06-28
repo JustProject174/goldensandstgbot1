@@ -53,6 +53,45 @@ module.exports = function setupMessageHandlers(bot, userStates) {
             return;
         }
 
+        // Обработка ответа администратора через кнопку
+        if (currentState === states.ADMIN_ANSWERING_BUTTON) {
+            const targetUserId = userStates.get(`${userId}_target_user`);
+            
+            if (targetUserId) {
+                try {
+                    // Очищаем ответ от потенциально проблематичных символов
+                    const cleanAnswer = messageText.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, '');
+                    
+                    await utils.safeSendMessage(bot, parseInt(targetUserId), `💬 Ответ от менеджера:\n\n${cleanAnswer}`, {
+                        parse_mode: 'Markdown',
+                        ...keyboards.getBackToMenuKeyboard()
+                    });
+                    
+                    // Удаляем из ожидающих вопросов
+                    services.adminAnswers.getPendingQuestions().delete(targetUserId);
+                    
+                    // Сброс состояния
+                    userStates.delete(`${userId}_target_user`);
+                    userStates.set(userId, states.MAIN_MENU);
+                    
+                    // Запрашиваем ключевые слова
+                    userStates.set(userId, states.ADMIN_ANSWERING);
+                    userStates.set(`${userId}_answer_data`, { targetUserId, answer: cleanAnswer });
+                    
+                    await utils.safeSendMessage(bot, chatId, `✅ Ответ отправлен пользователю.\n\nТеперь укажите ключевые слова через запятую для добавления в базу знаний:\n\n_Например: бронирование, резерв, забронировать_`, {
+                        parse_mode: 'MarkdownV2'
+                    });
+                    
+                } catch (error) {
+                    await utils.safeSendMessage(bot, chatId, `❌ Ошибка при отправке ответа: ${error.message}`);
+                    userStates.delete(`${userId}_target_user`);
+                    userStates.set(userId, states.MAIN_MENU);
+                }
+            }
+            // ВАЖНО: прерываем выполнение для администратора в ЛЮБОМ случае
+            return;
+        }
+
         // Если администратор не в состоянии ADMIN_ANSWERING, но все равно администратор - тоже прерываем
         if (utils.isAdmin(userId)) {
             return;

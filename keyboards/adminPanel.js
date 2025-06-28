@@ -22,5 +22,48 @@ module.exports = {
                 ]
             }
         };
+    },
+
+    getPendingQuestionsListKeyboard(pendingQuestions) {
+        const keyboard = [];
+        
+        let count = 1;
+        for (const [userId, questionData] of pendingQuestions) {
+            if (count > 8) break; // Ограничиваем количество кнопок
+            
+            const preview = questionData.question.length > 25 
+                ? questionData.question.substring(0, 25) + '...'
+                : questionData.question;
+            
+            keyboard.push([{ 
+                text: `${count}. ${preview}`, 
+                callback_data: `view_question_${userId}` 
+            }]);
+            count++;
+        }
+        
+        keyboard.push([{ text: '🔙 Админ-панель', callback_data: 'admin_panel' }]);
+        
+        return {
+            reply_markup: {
+                inline_keyboard: keyboard
+            }
+        };
+    },
+
+    getQuestionManagementKeyboard(userId) {
+        return {
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        { text: '✅ Ответить', callback_data: `answer_btn_${userId}` },
+                        { text: '❌ Отклонить', callback_data: `reject_btn_${userId}` }
+                    ],
+                    [
+                        { text: '🔙 К вопросам', callback_data: 'admin_pending' }
+                    ]
+                ]
+            }
+        };
     }
 };

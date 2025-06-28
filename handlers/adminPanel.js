@@ -79,6 +79,33 @@ module.exports = function setupAdminHandlers(bot, userStates) {
                 await handleAdminReload(bot, chatId);
                 break;
         }
+
+        // Обработка просмотра конкретного вопроса
+        if (data.startsWith('view_question_')) {
+            const userId = data.replace('view_question_', '');
+            await handleViewQuestion(bot, chatId, userId);
+        }
+
+        // Обработка ответа на вопрос через кнопку
+        if (data.startsWith('answer_btn_')) {
+            const targetUserId = data.replace('answer_btn_', '');
+            userStates.set(userId, states.ADMIN_ANSWERING_BUTTON);
+            userStates.set(`${userId}_target_user`, targetUserId);
+            
+            await utils.safeSendMessage(bot, chatId, '✍️ Напишите ваш ответ пользователю:', {
+                reply_markup: {
+                    inline_keyboard: [[
+                        { text: '❌ Отмена', callback_data: 'admin_pending' }
+                    ]]
+                }
+            });
+        }
+
+        // Обработка отклонения вопроса
+        if (data.startsWith('reject_btn_')) {
+            const targetUserId = data.replace('reject_btn_', '');
+            await handleRejectQuestion(bot, chatId, targetUserId);
+        }
     });
 
     async function handleAdminStats(bot, chatId) {
@@ -109,23 +136,49 @@ module.exports = function setupAdminHandlers(bot, userStates) {
     }
 
     async function handleAdminPending(bot, chatId) {
-        let pendingInfo = '❓ Неотвеченные вопросы:\n\n';
         const pendingQuestions = services.adminAnswers.getPendingQuestions();
         
         if (pendingQuestions.size === 0) {
-            pendingInfo += 'Нет неотвеченных вопросов';
+            await utils.safeSendMessage(bot, chatId, '❓ Нет неотвеченных вопросов', keyboards.getBackToAdminKeyboard());
         } else {
-            let count = 1;
-            for (const [userId, questionData] of pendingQuestions) {
-                const timestamp = new Date(questionData.timestamp).toLocaleString('ru-RU');
-                pendingInfo += `${count}. ID: ${userId}\n`;
-                pendingInfo += `   Время: ${timestamp}\n`;
-                pendingInfo += `   Вопрос: ${questionData.question}\n\n`;
-                count++;
-            }
+            await utils.safeSendMessage(bot, chatId, '❓ Выберите вопрос для ответа:', keyboards.getPendingQuestionsListKeyboard(pendingQuestions));
         }
+    }
+
+    async function handleViewQuestion(bot, chatId, userId) {
+        const pendingQuestions = services.adminAnswers.getPendingQuestions();
+        const questionData = pendingQuestions.get(userId);
         
-        await utils.safeSendMessage(bot, chatId, pendingInfo, keyboards.getBackToAdminKeyboard());
+        if (!questionData) {
+            await utils.safeSendMessage(bot, chatId, '❌ Вопрос не найден', keyboards.getBackToAdminKeyboard());
+            return;
+        }
+
+        const timestamp = new Date(questionData.timestamp).toLocaleString('ru-RU');
+        const questionInfo = `👤 Пользователь ID: ${userId}
+📅 Время: ${timestamp}
+❓ Вопрос: ${questionData.question}`;
+
+        await utils.safeSendMessage(bot, chatId, questionInfo, keyboards.getQuestionManagementKeyboard(userId));
+    }
+
+    async function handleRejectQuestion(bot, chatId, targetUserId) {
+        try {
+            const rejectionMessage = 'Ваш вопрос некорректен, сформулируйте пожалуйста снова';
+            
+            await utils.safeSendMessage(bot, parseInt(targetUserId), rejectionMessage, {
+                parse_mode: 'Markdown',
+                ...mainKeyboards.getBackToMenuKeyboard()
+            });
+            
+            // Удаляем вопрос из ожидающих
+            services.adminAnswers.getPendingQuestions().delete(targetUserId);
+            
+            await utils.safeSendMessage(bot, chatId, `✅ Вопрос отклонен, пользователю отправлено сообщение об ошибке`, keyboards.getBackToAdminKeyboard());
+            
+        } catch (error) {
+            await utils.safeSendMessage(bot, chatId, `❌ Ошибка при отклонении вопроса: ${error.message}`, keyboards.getBackToAdminKeyboard());
+        }
     }
 
     async function handleAdminReload(bot, chatId) {
