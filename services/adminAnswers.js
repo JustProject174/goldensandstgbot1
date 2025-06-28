@@ -78,6 +78,9 @@ async function loadPendingQuestions() {
                 // Если ответ пустой и есть все необходимые данные, добавляем в ожидающие
                 if (!answer.trim() && userId && question && timestamp) {
                     pendingQuestions.set(userId, { question, timestamp });
+                } else if (answer.trim() && userId) {
+                    // Если есть ответ, удаляем из ожидающих
+                    pendingQuestions.delete(userId);
                 }
             } catch (parseError) {
                 console.error('Ошибка при парсинге записи:', parseError);
@@ -235,6 +238,8 @@ async function updateAdminAnswer(userId, answer, keywords) {
         
         // Удаляем из ожидающих вопросов (тоже приводим к строке)
         pendingQuestions.delete(searchUserId);
+        
+        console.log(`Удален из ожидающих вопросов пользователь: ${searchUserId}`);
         
         console.log(`Ответ администратора для пользователя ${searchUserId} сохранен`);
     } catch (error) {
