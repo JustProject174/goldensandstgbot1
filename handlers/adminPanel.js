@@ -35,8 +35,6 @@ module.exports = function setupAdminHandlers(bot, userStates) {
 
             await utils.safeSendMessage(bot, chatId, `✅ Ответ отправлен пользователю.\n\nТеперь укажите ключевые слова через запятую для добавления в базу знаний:\n\n_Например: бронирование, резерв, забронировать_`, {
                 parse_mode: 'Markdown'
-            });рез запятую для добавления в базу знаний:\n\nНапример: бронирование, резерв, забронировать`, {
-                parse_mode: 'Markdown'
             });
 
         } catch (error) {
