@@ -15,7 +15,7 @@ async function safeSendMessage(bot, chatId, text, options = {}) {
                 .replace(/[*_`\[\]()~>#+\-=|{}.!\\]/g, '') // Удаляем все markdown символы
                 .replace(/\n{3,}/g, '\n\n') // Убираем избыточные переносы строк
                 .trim();
-            
+
             // Отправляем без форматирования
             await bot.sendMessage(chatId, cleanText, { ...options, parse_mode: undefined });
         } catch (secondError) {
@@ -41,10 +41,10 @@ async function forwardToAdmins(bot, userId, username, message) {
         console.log('Нет настроенных администраторов');
         return;
     }
-    
+
     const userInfo = username ? `@${username}` : `ID: ${userId}`;
     const adminMessage = `❓ Новый вопрос от пользователя ${userInfo}:\n\n${message}\n\n_Для ответа используйте: /answer ${userId} [ваш ответ]_`;
-    
+
     for (const adminId of config.admins) {
         await safeSendMessage(bot, adminId, adminMessage, { parse_mode: 'Markdown' });
     }

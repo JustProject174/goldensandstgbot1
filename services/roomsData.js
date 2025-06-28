@@ -113,10 +113,6 @@ function isValidImageUrl(url) {
 async function loadRoomsData() {
     try {
         const csvFilePath = path.join(__dirname, "../rooms/rooms.csv");
-        console.log(
-            "Загружаем данные номеров из локального файла:",
-            csvFilePath,
-        );
 
         const data = await fs.readFile(csvFilePath, "utf8");
 
@@ -142,14 +138,6 @@ async function loadRoomsData() {
             // Фильтруем только валидные фотографии
             const validPhotos = photos.filter(isValidImageUrl);
 
-            if (validPhotos.length === 0) {
-                console.warn(`⚠️ Нет валидных фотографий для номера ${roomId}`);
-            } else {
-                console.log(
-                    `✅ Добавлено ${validPhotos.length} валидных фотографий для номера ${roomId}`,
-                );
-            }
-
             return {
                 ...room,
                 ID: roomId, // Сохраняем ID как число
@@ -158,43 +146,14 @@ async function loadRoomsData() {
             };
         });
 
-        // Тестирование номера 10 ПОСЛЕ обработки всех данных
-        console.log("=== ТЕСТИРОВАНИЕ НОМЕРА 10 ===");
-        console.log(
-            "Все ID номеров:",
-            roomsData.map((r) => `"${r.ID}" (тип: ${typeof r.ID})`),
-        );
-
-        const room10 = roomsData.find((r) => r.ID === 10);
-        console.log("Номер 10 из массива:", room10);
-        console.log(
-            "Фотографии номера 10 из объекта roomPhotos:",
-            roomPhotos[10],
-        );
-        console.log("Валидные фотографии номера 10 в данных:", room10?.photos);
-        console.log("Есть ли фотографии у номера 10:", room10?.hasPhotos);
-
-        console.log(
-            `✅ Загружено ${roomsData.length} номеров из локального файла`,
-        );
-
         // Статистика по фотографиям
         const roomsWithPhotos = roomsData.filter(
             (room) => room.hasPhotos,
         ).length;
-        const roomsWithoutPhotos = roomsData.length - roomsWithPhotos;
-        console.log(`📊 Номеров с фотографиями: ${roomsWithPhotos}`);
-        console.log(`📊 Номеров без фотографий: ${roomsWithoutPhotos}`);
 
-        if (roomsData.length > 0) {
-            console.log(
-                "Структура первого номера:",
-                JSON.stringify(roomsData[0], null, 2),
-            );
-            console.log("Все колонки в CSV:", Object.keys(roomsData[0] || {}));
-        } else {
-            console.warn("⚠️ Не удалось загрузить данные номеров из файла");
-        }
+        console.log(
+            `✅ Загружено ${roomsData.length} номеров из CSV файла (${roomsWithPhotos} с фотографиями)`,
+        );
 
         return roomsData;
     } catch (error) {
