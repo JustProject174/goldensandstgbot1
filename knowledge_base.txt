@@ -66,3 +66,5 @@ KEYWORDS:ага
 ANSWER:рога
 KEYWORDS:фыавФ
 ANSWER:фывывф
+KEYWORDS:ыв
+ANSWER:бу бу
