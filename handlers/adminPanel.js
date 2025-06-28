@@ -33,7 +33,9 @@ module.exports = function setupAdminHandlers(bot, userStates) {
             userStates.set(userId, states.ADMIN_ANSWERING);
             userStates.set(`${userId}_answer_data`, { targetUserId, answer });
 
-            await utils.safeSendMessage(bot, chatId, `✅ Ответ отправлен пользователю.\n\nТеперь укажите ключевые слова через запятую для добавления в базу знаний:\n\nНапример: бронирование, резерв, забронировать`, {
+            await utils.safeSendMessage(bot, chatId, `✅ Ответ отправлен пользователю.\n\nТеперь укажите ключевые слова через запятую для добавления в базу знаний:\n\n_Например: бронирование, резерв, забронировать_`, {
+                parse_mode: 'Markdown'
+            });рез запятую для добавления в базу знаний:\n\nНапример: бронирование, резерв, забронировать`, {
                 parse_mode: 'Markdown'
             });
 

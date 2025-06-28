@@ -79,12 +79,12 @@ module.exports = function setupMessageHandlers(bot, userStates) {
                     userStates.delete(`${userId}_target_user`);
                     userStates.set(userId, states.MAIN_MENU);
                     
-                    // Запрашиваем ключевые слова
+                    // Запрашиваем ключевые слова у администратора
                     userStates.set(userId, states.ADMIN_ANSWERING);
                     userStates.set(`${userId}_answer_data`, { targetUserId, answer: cleanAnswer });
                     
-                    await utils.safeSendMessage(bot, chatId, `✅ Ответ отправлен пользователю.\n\nТеперь укажите ключевые слова через запятую для добавления в базу знаний:\n\n_Например: бронирование, резерв, забронировать_`, {
-                        parse_mode: 'MarkdownV2'
+                    await utils.safeSendMessage(bot, userId, `✅ Ответ отправлен пользователю.\n\nТеперь укажите ключевые слова через запятую для добавления в базу знаний:\n\n_Например: бронирование, резерв, забронировать_`, {
+                        parse_mode: 'Markdown'
                     });
                     
                 } catch (error) {
