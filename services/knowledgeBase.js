@@ -118,6 +118,16 @@ function findAnswerInKnowledgeBase(message) {
     
     // Убираем знаки препинания и лишние пробелы
     const cleanMessage = lowerMessage.replace(/[^\w\sа-яё]/gi, ' ').replace(/\s+/g, ' ').trim();
+    const messageWords = cleanMessage.split(' ').filter(word => word.length > 1); // Исключаем слова длиной 1 символ
+    
+    // Если в сообщении меньше 2 слов, возвращаем null
+    if (messageWords.length < 2) {
+        console.log(`Сообщение "${message}" содержит менее 2 значимых слов`);
+        return null;
+    }
+    
+    let bestMatch = null;
+    let maxMatches = 0;
     
     for (const item of knowledgeBase) {
         // Пропускаем записи без ключевых слов или ответов
@@ -125,34 +135,61 @@ function findAnswerInKnowledgeBase(message) {
             continue;
         }
         
-        const hasKeyword = item.keywords.some(keyword => {
-            if (!keyword || keyword.trim() === '') return false;
+        let matchCount = 0;
+        const matchedKeywords = [];
+        
+        // Подсчитываем количество совпадений с ключевыми словами
+        for (const keyword of item.keywords) {
+            if (!keyword || keyword.trim() === '') continue;
             
             const cleanKeyword = keyword.toLowerCase().trim();
+            let keywordMatched = false;
             
-            // Точное совпадение
+            // Точное совпадение ключевого слова
             if (cleanMessage.includes(cleanKeyword)) {
-                return true;
+                matchCount++;
+                matchedKeywords.push(cleanKeyword);
+                keywordMatched = true;
+            } else {
+                // Проверяем совпадение частей слов
+                const keywordWords = cleanKeyword.split(' ').filter(word => word.length > 1);
+                
+                for (const keywordWord of keywordWords) {
+                    for (const messageWord of messageWords) {
+                        // Проверяем включение части слова (минимум 3 символа)
+                        if (keywordWord.length >= 3 && messageWord.length >= 3) {
+                            if (messageWord.includes(keywordWord) || keywordWord.includes(messageWord)) {
+                                if (!keywordMatched) {
+                                    matchCount++;
+                                    matchedKeywords.push(cleanKeyword);
+                                    keywordMatched = true;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    if (keywordMatched) break;
+                }
             }
-            
-            // Проверяем совпадение отдельных слов
-            const messageWords = cleanMessage.split(' ');
-            const keywordWords = cleanKeyword.split(' ');
-            
-            return keywordWords.every(keywordWord => 
-                messageWords.some(messageWord => 
-                    messageWord.includes(keywordWord) || keywordWord.includes(messageWord)
-                )
-            );
-        });
+        }
         
-        if (hasKeyword) {
-            console.log(`Найдено совпадение для "${message}" по ключевым словам: ${item.keywords.join(', ')}`);
-            return item.answer;
+        // Требуем минимум 2 совпадения
+        if (matchCount >= 2 && matchCount > maxMatches) {
+            maxMatches = matchCount;
+            bestMatch = {
+                answer: item.answer,
+                matchedKeywords: matchedKeywords,
+                matchCount: matchCount
+            };
         }
     }
     
-    console.log(`Не найдено совпадений для сообщения: "${message}"`);
+    if (bestMatch) {
+        console.log(`Найдено совпадение для "${message}" по ${bestMatch.matchCount} ключевым словам: ${bestMatch.matchedKeywords.join(', ')}`);
+        return bestMatch.answer;
+    }
+    
+    console.log(`Не найдено совпадений для сообщения: "${message}" (требуется минимум 2 совпадения)`);
     return null;
 }
 
