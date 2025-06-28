@@ -28,13 +28,13 @@ module.exports = function setupAdminHandlers(bot, userStates) {
                 ...mainKeyboards.getBackToMenuKeyboard() // Используем mainKeyboards
             });
 
-            services.adminAnswers.getPendingQuestions().delete(targetUserId);
+            services.adminAnswers.getPendingQuestions().delete(targetUserId.toString());
 
             userStates.set(userId, states.ADMIN_ANSWERING);
             userStates.set(`${userId}_answer_data`, { targetUserId, answer });
 
-            await utils.safeSendMessage(bot, chatId, `✅ Ответ отправлен пользователю\\.\n\nТеперь укажите ключевые слова через запятую для добавления в базу знаний:\n\n_Например: бронирование, резерв, забронировать_`, {
-                parse_mode: 'MarkdownV2'
+            await utils.safeSendMessage(bot, chatId, `✅ Ответ отправлен пользователю.\n\nТеперь укажите ключевые слова через запятую для добавления в базу знаний:\n\nНапример: бронирование, резерв, забронировать`, {
+                parse_mode: 'Markdown'
             });
 
         } catch (error) {
@@ -179,15 +179,15 @@ module.exports = function setupAdminHandlers(bot, userStates) {
             const rejectionMessage = 'Ваш вопрос некорректен, сформулируйте пожалуйста снова';
 
             // Убеждаемся, что targetUserId - это число
-            const chatId = typeof targetUserId === 'string' ? parseInt(targetUserId) : targetUserId;
+            const targetChatId = typeof targetUserId === 'string' ? parseInt(targetUserId) : targetUserId;
 
-            await utils.safeSendMessage(bot, chatId, rejectionMessage, {
+            await utils.safeSendMessage(bot, targetChatId, rejectionMessage, {
                 parse_mode: 'Markdown',
                 ...mainKeyboards.getBackToMenuKeyboard()
             });
 
             // Удаляем вопрос из ожидающих
-            services.adminAnswers.getPendingQuestions().delete(targetUserId);
+            services.adminAnswers.getPendingQuestions().delete(targetUserId.toString());
 
             await utils.safeSendMessage(bot, chatId, `✅ Вопрос отклонен, пользователю отправлено сообщение об ошибке`, keyboards.getBackToAdminKeyboard());
 
