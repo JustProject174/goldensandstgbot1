@@ -66,31 +66,3 @@ bot.on('polling_error', (error) => {
 
 // Запуск бота
 initializeBot();
-
-
-bot.on('callback_query', async (query) => {
-    const chatId = query.message.chat.id;
-    const data = query.data;
-
-    if (data.startsWith('answer_')) {
-        const userId = data.split('_')[1];
-
-        await bot.sendMessage(chatId, `Введите ответ для пользователя ID ${userId}:`, {
-            reply_markup: { force_reply: true }
-        });
-
-        bot.once('message', async (msg) => {
-            const answer = msg.text;
-
-            // Отправляем ответ пользователю
-            await bot.sendMessage(userId, `💬 Администратор ответил:\n\n${answer}`);
-
-            // Здесь можно сохранить ответ в БД
-            // await saveAnswerToDB(userId, answer);
-
-            await bot.sendMessage(chatId, '✅ Ответ отправлен пользователю.');
-        });
-    }
-
-    await bot.answerCallbackQuery(query.id);
-});

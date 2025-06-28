@@ -73,10 +73,12 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
         const data = callbackQuery.data;
 
         try {
+        try {
             await bot.answerCallbackQuery(callbackQuery.id);
         } catch (error) {
-            console.error("Ошибка ответа на callback:", error.message);
+            console.error("Ошибка при ответе на callback query:", error.message);
         }
+        
 
         switch (data) {
             case "important_info":
@@ -146,6 +148,14 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     await handleRoomDetails(bot, chatId, data);
                 }
                 break;
+        }
+        } catch (error) {
+            console.error("Ошибка в обработчике callback query:", error.message);
+            try {
+                await bot.answerCallbackQuery(callbackQuery.id);
+            } catch (answerError) {
+                console.error("Не удалось ответить на callback query:", answerError.message);
+            }
         }
     });
 
@@ -454,4 +464,3 @@ https://yandex.ru/maps/?ll=60.061851%2C55.187183&mode=routes&rtext=~55.187969%2C
         }
     }
 };
-
