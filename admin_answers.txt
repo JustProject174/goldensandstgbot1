@@ -19,13 +19,6 @@ QUESTION:sdg
 ANSWER:
 KEYWORDS:
 ===ENTRY_END===
-TIMESTAMP:2025-06-28T17:02:03.050Z
-USER:@JProj_174
-USER_ID:5141494913
-QUESTION:Как васм найть?
-ANSWER:📌 Наша база расположена на берегу озера в заповедной зоне
-KEYWORDS:Почему вы
-===ENTRY_END===
 TIMESTAMP:2025-06-28T17:09:21.211Z
 USER:@JProj_174
 USER_ID:5141494913
