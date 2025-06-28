@@ -68,3 +68,9 @@ KEYWORDS:фыавФ
 ANSWER:фывывф
 KEYWORDS:ыв
 ANSWER:бу бу
+KEYWORDS:а га
+ANSWER:ро га
+KEYWORDS:аба ба
+ANSWER:аба аба
+KEYWORDS:что случилось
+ANSWER:лось лось
