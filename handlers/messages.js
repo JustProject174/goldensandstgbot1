@@ -64,7 +64,10 @@ module.exports = function setupMessageHandlers(bot, userStates) {
                     // Очищаем ответ от потенциально проблематичных символов
                     const cleanAnswer = messageText.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, '');
                     
-                    await utils.safeSendMessage(bot, parseInt(targetUserId), `💬 Ответ от менеджера:\n\n${cleanAnswer}`, {
+                    // Убеждаемся, что targetUserId - это число
+                    const chatId = typeof targetUserId === 'string' ? parseInt(targetUserId) : targetUserId;
+                    
+                    await utils.safeSendMessage(bot, chatId, `💬 Ответ от менеджера:\n\n${cleanAnswer}`, {
                         parse_mode: 'Markdown',
                         ...keyboards.getBackToMenuKeyboard()
                     });

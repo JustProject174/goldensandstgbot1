@@ -169,7 +169,10 @@ module.exports = function setupAdminHandlers(bot, userStates) {
         try {
             const rejectionMessage = 'Ваш вопрос некорректен, сформулируйте пожалуйста снова';
             
-            await utils.safeSendMessage(bot, parseInt(targetUserId), rejectionMessage, {
+            // Убеждаемся, что targetUserId - это число
+            const chatId = typeof targetUserId === 'string' ? parseInt(targetUserId) : targetUserId;
+            
+            await utils.safeSendMessage(bot, chatId, rejectionMessage, {
                 parse_mode: 'Markdown',
                 ...mainKeyboards.getBackToMenuKeyboard()
             });

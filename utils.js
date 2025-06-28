@@ -6,9 +6,21 @@ const config = require('./config');
 // Безопасная отправка сообщения
 async function safeSendMessage(bot, chatId, text, options = {}) {
     try {
+        // Проверяем валидность chatId
+        if (!chatId || isNaN(chatId)) {
+            console.error(`Неверный chat ID: ${chatId}`);
+            return;
+        }
+        
         await bot.sendMessage(chatId, text, options);
     } catch (error) {
         console.error(`Ошибка отправки сообщения пользователю ${chatId}:`, error.message);
+        
+        // Если чат не найден, не пытаемся повторно отправить
+        if (error.message.includes('chat not found')) {
+            console.error(`Чат ${chatId} не найден или заблокирован`);
+            return;
+        }
         try {
             // Более тщательная очистка текста от специальных символов
             let cleanText = text.toString()
