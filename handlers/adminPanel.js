@@ -82,8 +82,8 @@ module.exports = function setupAdminHandlers(bot, userStates) {
 
         // Обработка просмотра конкретного вопроса
         if (data.startsWith('view_question_')) {
-            const userId = data.replace('view_question_', '');
-            await handleViewQuestion(bot, chatId, userId);
+            const targetUserId = data.replace('view_question_', '');
+            await handleViewQuestion(bot, chatId, targetUserId);
         }
 
         // Обработка ответа на вопрос через кнопку
@@ -92,7 +92,10 @@ module.exports = function setupAdminHandlers(bot, userStates) {
             userStates.set(userId, states.ADMIN_ANSWERING_BUTTON);
             userStates.set(`${userId}_target_user`, targetUserId);
             
-            await utils.safeSendMessage(bot, chatId, '✍️ Напишите ваш ответ пользователю:', {
+            const questionData = services.adminAnswers.getPendingQuestions().get(targetUserId);
+            const questionText = questionData ? questionData.question : 'Вопрос не найден';
+            
+            await utils.safeSendMessage(bot, chatId, `✍️ Напишите ваш ответ пользователю ID: ${targetUserId}\n\nВопрос: "${questionText}"`, {
                 reply_markup: {
                     inline_keyboard: [[
                         { text: '❌ Отмена', callback_data: 'admin_pending' }

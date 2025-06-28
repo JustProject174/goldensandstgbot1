@@ -54,6 +54,8 @@ module.exports = function setupMessageHandlers(bot, userStates) {
         }
 
         // Обработка ответа администратора через кнопку
+        const currentState = userStates.get(userId);
+        
         if (currentState === states.ADMIN_ANSWERING_BUTTON) {
             const targetUserId = userStates.get(`${userId}_target_user`);
             

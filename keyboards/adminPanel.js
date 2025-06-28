@@ -35,9 +35,10 @@ module.exports = {
                 ? questionData.question.substring(0, 25) + '...'
                 : questionData.question;
             
+            // Убеждаемся, что userId передается корректно
             keyboard.push([{ 
                 text: `${count}. ${preview}`, 
-                callback_data: `view_question_${userId}` 
+                callback_data: `view_question_${userId.toString()}` 
             }]);
             count++;
         }
@@ -56,8 +57,8 @@ module.exports = {
             reply_markup: {
                 inline_keyboard: [
                     [
-                        { text: '✅ Ответить', callback_data: `answer_btn_${userId}` },
-                        { text: '❌ Отклонить', callback_data: `reject_btn_${userId}` }
+                        { text: '✅ Ответить', callback_data: `answer_btn_${userId.toString()}` },
+                        { text: '❌ Отклонить', callback_data: `reject_btn_${userId.toString()}` }
                     ],
                     [
                         { text: '🔙 К вопросам', callback_data: 'admin_pending' }
