@@ -42,19 +42,15 @@ module.exports = function setupMessageHandlers(bot, userStates) {
                         userStates.set(userId, states.MAIN_MENU);
                         
                         await utils.safeSendMessage(bot, chatId, `✅ Ответ добавлен в базу знаний с ключевыми словами: ${keywords.join(', ')}`);
-                        
-                        // ВАЖНО: прерываем выполнение функции
-                        return;
                     } catch (error) {
                         console.error('Ошибка при сохранении ответа:', error);
                         await utils.safeSendMessage(bot, chatId, '❌ Произошла ошибка при сохранении. Попробуйте ещё раз.');
-                        return; // Прерываем и при ошибке
                     }
                 } else {
                     await utils.safeSendMessage(bot, chatId, '❌ Укажите хотя бы одно ключевое слово');
-                    return; // Прерываем если нет ключевых слов
                 }
             }
+            return; // Прерываем выполнение для администратора в любом случае
         }
         
         // Проверка специальных команд
@@ -82,17 +78,19 @@ module.exports = function setupMessageHandlers(bot, userStates) {
                 ...keyboards.getBackToMenuKeyboard()
             });
         } else {
-            // Сохраняем вопрос только если пользователь НЕ администратор в состоянии ADMIN_ANSWERING
-            await services.adminAnswers.saveUnknownQuestion(userId, username, messageText);
-            
-            await utils.safeSendMessage(bot, chatId, `Спасибо за ваш вопрос! 🤔
-            
+            // Сохраняем вопрос только если пользователь НЕ администратор
+            if (!utils.isAdmin(userId)) {
+                await services.adminAnswers.saveUnknownQuestion(userId, username, messageText);
+                
+                await utils.safeSendMessage(bot, chatId, `Спасибо за ваш вопрос! 🤔
+                
 Я передам его нашему менеджеру, и он ответит вам в ближайшее время.
 
 А пока вы можете воспользоваться меню с готовыми ответами 👇`, 
-                keyboards.getMainMenuKeyboard());
-            
-            await utils.forwardToAdmins(bot, userId, username, messageText);
+                    keyboards.getMainMenuKeyboard());
+                
+                await utils.forwardToAdmins(bot, userId, username, messageText);
+            }
         }
     });
 };
