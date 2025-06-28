@@ -6,6 +6,12 @@ const services = {
     adminAnswers: require('../services/adminAnswers')
 };
 const keyboards = require('../keyboards/mainMenu');
+const utils = require('../utils');
+const states = require('../states');
+const services = {
+    knowledgeBase: require('../services/knowledgeBase'),
+    adminAnswers: require('../services/adminAnswers')
+};
 
 module.exports = function setupMessageHandlers(bot, userStates) {
     bot.on('message', async (msg) => {
