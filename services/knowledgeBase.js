@@ -35,6 +35,12 @@ async function loadKnowledgeBase() {
         }
 
         console.log(`Загружено ${knowledgeBase.length} записей из базы знаний`);
+        
+        // Выводим отладочную информацию о записях
+        knowledgeBase.forEach((item, index) => {
+            console.log(`Запись ${index + 1}: ключевые слова = [${item.keywords.join(', ')}], есть ответ = ${!!item.answer && item.answer.trim() !== ''}`);
+        });
+        
         return knowledgeBase;
     } catch (error) {
         console.log('Файл базы знаний не найден, создаем начальную базу');
@@ -108,16 +114,43 @@ async function saveToKnowledgeBase(keywords, answer) {
 function findAnswerInKnowledgeBase(message) {
     const lowerMessage = message.toLowerCase();
     
+    // Убираем знаки препинания и лишние пробелы
+    const cleanMessage = lowerMessage.replace(/[^\w\sа-яё]/gi, ' ').replace(/\s+/g, ' ').trim();
+    
     for (const item of knowledgeBase) {
-        const hasKeyword = item.keywords.some(keyword => 
-            lowerMessage.includes(keyword.toLowerCase())
-        );
+        // Пропускаем записи без ключевых слов или ответов
+        if (!item.keywords || item.keywords.length === 0 || !item.answer || item.answer.trim() === '') {
+            continue;
+        }
+        
+        const hasKeyword = item.keywords.some(keyword => {
+            if (!keyword || keyword.trim() === '') return false;
+            
+            const cleanKeyword = keyword.toLowerCase().trim();
+            
+            // Точное совпадение
+            if (cleanMessage.includes(cleanKeyword)) {
+                return true;
+            }
+            
+            // Проверяем совпадение отдельных слов
+            const messageWords = cleanMessage.split(' ');
+            const keywordWords = cleanKeyword.split(' ');
+            
+            return keywordWords.every(keywordWord => 
+                messageWords.some(messageWord => 
+                    messageWord.includes(keywordWord) || keywordWord.includes(messageWord)
+                )
+            );
+        });
         
         if (hasKeyword) {
+            console.log(`Найдено совпадение для "${message}" по ключевым словам: ${item.keywords.join(', ')}`);
             return item.answer;
         }
     }
     
+    console.log(`Не найдено совпадений для сообщения: "${message}"`);
     return null;
 }
 
