@@ -41,19 +41,21 @@ module.exports = function setupMessageHandlers(bot, userStates) {
                         userStates.set(userId, states.MAIN_MENU);
 
                         await utils.safeSendMessage(bot, chatId, `✅ Ответ сохранен и будет добавлен в базу знаний с ключевыми словами: ${keywords.join(', ')}`);
-
-                        // ВАЖНО: прерываем выполнение функции
-                        return;
                     } catch (error) {
                         console.error('Ошибка при сохранении ответа:', error);
                         await utils.safeSendMessage(bot, chatId, '❌ Произошла ошибка при сохранении. Попробуйте ещё раз.');
-                        return; // Прерываем и при ошибке
                     }
                 } else {
                     await utils.safeSendMessage(bot, chatId, '❌ Укажите хотя бы одно ключевое слово');
-                    return; // Прерываем если нет ключевых слов
                 }
             }
+            // ВАЖНО: прерываем выполнение для администратора в ЛЮБОМ случае
+            return;
+        }
+
+        // Если администратор не в состоянии ADMIN_ANSWERING, но все равно администратор - тоже прерываем
+        if (utils.isAdmin(userId)) {
+            return;
         }
 
         // Проверка специальных команд
