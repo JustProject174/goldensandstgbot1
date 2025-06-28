@@ -19,8 +19,8 @@ module.exports = function setupAdminHandlers(bot, userStates) {
         const targetUserId = parseInt(match[1]);
         let answer = match[2];
         
-        // Экранируем специальные символы Markdown
-        answer = answer.replace(/([_*[\]()~`>#+\-=|{}.!])/g, '\\$1');
+        // Очищаем ответ от потенциально проблематичных символов
+        answer = answer.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, '');
         
         try {
             await utils.safeSendMessage(bot, targetUserId, `💬 Ответ от менеджера:\n\n${answer}`, {
