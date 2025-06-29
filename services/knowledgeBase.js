@@ -149,9 +149,9 @@ function findAnswerInKnowledgeBase(message) {
     
     // Убираем знаки препинания и лишние пробелы
     const cleanMessage = lowerMessage.replace(/[^\w\sа-яё]/gi, ' ').replace(/\s+/g, ' ').trim();
-    const messageWords = cleanMessage.split(' ').filter(word => word.length > 1); // Исключаем слова длиной 1 символ
+    const messageWords = cleanMessage.split(' ').filter(word => word.length > 2); // Исключаем слова длиной меньше 3 символов
     
-    // Если в сообщении меньше 1 слова, возвращаем null
+    // Если в сообщении меньше 1 значимого слова, возвращаем null
     if (messageWords.length < 1) {
         console.log(`Сообщение "${message}" не содержит значимых слов`);
         return null;
@@ -159,6 +159,7 @@ function findAnswerInKnowledgeBase(message) {
     
     let bestMatch = null;
     let maxMatches = 0;
+    let maxRelevanceScore = 0;
     
     for (const item of knowledgeBase) {
         // Пропускаем записи без ключевых слов или ответов
@@ -167,6 +168,7 @@ function findAnswerInKnowledgeBase(message) {
         }
         
         let matchCount = 0;
+        let relevanceScore = 0;
         const matchedKeywords = [];
         
         // Подсчитываем количество совпадений с ключевыми словами
@@ -175,25 +177,31 @@ function findAnswerInKnowledgeBase(message) {
             
             const cleanKeyword = keyword.toLowerCase().trim();
             let keywordMatched = false;
+            let currentRelevance = 0;
             
-            // Точное совпадение ключевого слова
+            // Точное совпадение ключевого слова (максимальная релевантность)
             if (cleanMessage.includes(cleanKeyword)) {
                 matchCount++;
                 matchedKeywords.push(cleanKeyword);
                 keywordMatched = true;
+                currentRelevance = cleanKeyword.length * 3; // Точное совпадение важнее
             } else {
                 // Проверяем совпадение частей слов и корней
-                const keywordWords = cleanKeyword.split(' ').filter(word => word.length > 1);
+                const keywordWords = cleanKeyword.split(' ').filter(word => word.length > 2);
                 
                 for (const keywordWord of keywordWords) {
+                    // Пропускаем очень короткие слова для частичного совпадения
+                    if (keywordWord.length < 4) continue;
+                    
                     for (const messageWord of messageWords) {
-                        // Проверяем точное включение части слова (минимум 3 символа)
-                        if (keywordWord.length >= 3 && messageWord.length >= 3) {
+                        // Проверяем точное включение части слова (минимум 4 символа)
+                        if (keywordWord.length >= 4 && messageWord.length >= 4) {
                             if (messageWord.includes(keywordWord) || keywordWord.includes(messageWord)) {
                                 if (!keywordMatched) {
                                     matchCount++;
                                     matchedKeywords.push(cleanKeyword);
                                     keywordMatched = true;
+                                    currentRelevance = Math.min(keywordWord.length, messageWord.length) * 2;
                                 }
                                 break;
                             }
@@ -210,6 +218,7 @@ function findAnswerInKnowledgeBase(message) {
                                 matchCount++;
                                 matchedKeywords.push(cleanKeyword + ' (корень)');
                                 keywordMatched = true;
+                                currentRelevance = Math.min(keywordRoot.length, messageRoot.length);
                                 break;
                             }
                         }
@@ -217,21 +226,30 @@ function findAnswerInKnowledgeBase(message) {
                     if (keywordMatched) break;
                 }
             }
+            
+            relevanceScore += currentRelevance;
         }
         
-        // Теперь требуем минимум 1 совпадение вместо 2
-        if (matchCount >= 1 && matchCount > maxMatches) {
-            maxMatches = matchCount;
-            bestMatch = {
-                answer: item.answer,
-                matchedKeywords: matchedKeywords,
-                matchCount: matchCount
-            };
+        // Требуем минимум 1 совпадение и учитываем релевантность
+        if (matchCount >= 1) {
+            // Отдаем предпочтение записям с большим количеством совпадений
+            // или с более высокой релевантностью при равном количестве совпадений
+            if (matchCount > maxMatches || 
+                (matchCount === maxMatches && relevanceScore > maxRelevanceScore)) {
+                maxMatches = matchCount;
+                maxRelevanceScore = relevanceScore;
+                bestMatch = {
+                    answer: item.answer,
+                    matchedKeywords: matchedKeywords,
+                    matchCount: matchCount,
+                    relevanceScore: relevanceScore
+                };
+            }
         }
     }
     
     if (bestMatch) {
-        console.log(`Найдено совпадение для "${message}" по ${bestMatch.matchCount} ключевым словам: ${bestMatch.matchedKeywords.join(', ')}`);
+        console.log(`Найдено совпадение для "${message}" по ${bestMatch.matchCount} ключевым словам: ${bestMatch.matchedKeywords.join(', ')} (релевантность: ${bestMatch.relevanceScore})`);
         return bestMatch.answer;
     }
     
