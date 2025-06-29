@@ -1,15 +1,19 @@
-const states = require('../states');
-const utils = require('../utils');
+const states = require("../states");
+const utils = require("../utils");
 const services = {
-    knowledgeBase: require('../services/knowledgeBase'),
-    roomsData: require('../services/roomsData'),
-    adminAnswers: require('../services/adminAnswers')
+    knowledgeBase: require("../services/knowledgeBase"),
+    roomsData: require("../services/roomsData"),
+    adminAnswers: require("../services/adminAnswers"),
 };
-const keyboards = require('../keyboards/mainMenu');
+const keyboards = require("../keyboards/mainMenu");
 
 module.exports = function setupMessageHandlers(bot, userStates) {
-    bot.on('message', async (msg) => {
-        if (!msg.text || msg.text.startsWith('/') || msg.text.match(/меню|menu/i)) {
+    bot.on("message", async (msg) => {
+        if (
+            !msg.text ||
+            msg.text.startsWith("/") ||
+            msg.text.match(/меню|menu/i)
+        ) {
             return;
         }
 
@@ -26,7 +30,10 @@ module.exports = function setupMessageHandlers(bot, userStates) {
         if (userState === states.ADMIN_ANSWERING && utils.isAdmin(userId)) {
             const answerData = userStates.get(`${userId}_answer_data`);
             if (answerData) {
-                const keywords = messageText.split(',').map(k => k.trim()).filter(k => k);
+                const keywords = messageText
+                    .split(",")
+                    .map((k) => k.trim())
+                    .filter((k) => k);
 
                 if (keywords.length > 0) {
                     try {
@@ -34,19 +41,35 @@ module.exports = function setupMessageHandlers(bot, userStates) {
                         const targetUserId = answerData.targetUserId.toString();
 
                         // Обновляем файл администратора (НЕ добавляем в базу знаний сразу)
-                        await services.adminAnswers.updateAdminAnswer(targetUserId, answerData.answer, keywords);
+                        await services.adminAnswers.updateAdminAnswer(
+                            targetUserId,
+                            answerData.answer,
+                            keywords,
+                        );
 
                         // Очищаем состояние
                         userStates.delete(`${userId}_answer_data`);
                         userStates.set(userId, states.MAIN_MENU);
 
-                        await utils.safeSendMessage(bot, chatId, `✅ Ответ сохранен и будет добавлен в базу знаний с ключевыми словами: ${keywords.join(', ')}`);
+                        await utils.safeSendMessage(
+                            bot,
+                            chatId,
+                            `✅ Ответ сохранен и будет добавлен в базу знаний с ключевыми словами: ${keywords.join(", ")}`,
+                        );
                     } catch (error) {
-                        console.error('Ошибка при сохранении ответа:', error);
-                        await utils.safeSendMessage(bot, chatId, '❌ Произошла ошибка при сохранении. Попробуйте ещё раз.');
+                        console.error("Ошибка при сохранении ответа:", error);
+                        await utils.safeSendMessage(
+                            bot,
+                            chatId,
+                            "❌ Произошла ошибка при сохранении. Попробуйте ещё раз.",
+                        );
                     }
                 } else {
-                    await utils.safeSendMessage(bot, chatId, '❌ Укажите хотя бы одно ключевое слово');
+                    await utils.safeSendMessage(
+                        bot,
+                        chatId,
+                        "❌ Укажите хотя бы одно ключевое слово",
+                    );
                 }
             }
             // ВАЖНО: прерываем выполнение для администратора в ЛЮБОМ случае
@@ -62,18 +85,31 @@ module.exports = function setupMessageHandlers(bot, userStates) {
             if (targetUserId) {
                 try {
                     // Очищаем ответ от потенциально проблематичных символов
-                    const cleanAnswer = messageText.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, '');
+                    const cleanAnswer = messageText.replace(
+                        /[_*[\]()~`>#+\-=|{}.!\\]/g,
+                        "",
+                    );
 
                     // Убеждаемся, что targetUserId - это число
-                    const chatId = typeof targetUserId === 'string' ? parseInt(targetUserId) : targetUserId;
+                    const chatId =
+                        typeof targetUserId === "string"
+                            ? parseInt(targetUserId)
+                            : targetUserId;
 
-                    await utils.safeSendMessage(bot, chatId, `💬 Ответ от менеджера:\n\n${cleanAnswer}`, {
-                        parse_mode: 'Markdown',
-                        ...keyboards.getBackToMenuKeyboard()
-                    });
+                    await utils.safeSendMessage(
+                        bot,
+                        chatId,
+                        `💬 Ответ от менеджера:\n\n${cleanAnswer}`,
+                        {
+                            parse_mode: "Markdown",
+                            ...keyboards.getBackToMenuKeyboard(),
+                        },
+                    );
 
                     // Удаляем из ожидающих вопросов
-                    services.adminAnswers.getPendingQuestions().delete(targetUserId);
+                    services.adminAnswers
+                        .getPendingQuestions()
+                        .delete(targetUserId);
 
                     // Сброс состояния
                     userStates.delete(`${userId}_target_user`);
@@ -81,14 +117,25 @@ module.exports = function setupMessageHandlers(bot, userStates) {
 
                     // Запрашиваем ключевые слова у администратора
                     userStates.set(userId, states.ADMIN_ANSWERING);
-                    userStates.set(`${userId}_answer_data`, { targetUserId, answer: cleanAnswer });
-
-                    await utils.safeSendMessage(bot, userId, `✅ Ответ отправлен пользователю.\n\n🔤 Укажите ключевые слова через запятую (для поиска похожих вопросов)\n\n💡 Или напишите "авто" для автоматической генерации ключевых слов с помощью AI`, {
-                        parse_mode: 'Markdown'
+                    userStates.set(`${userId}_answer_data`, {
+                        targetUserId,
+                        answer: cleanAnswer,
                     });
 
+                    await utils.safeSendMessage(
+                        bot,
+                        userId,
+                        `✅ Ответ отправлен пользователю.\n\n🔤 Укажите ключевые слова через запятую (для поиска похожих вопросов)\n\n💡 Или напишите "авто" для автоматической генерации ключевых слов с помощью AI`,
+                        {
+                            parse_mode: "Markdown",
+                        },
+                    );
                 } catch (error) {
-                    await utils.safeSendMessage(bot, chatId, `❌ Ошибка при отправке ответа: ${error.message}`);
+                    await utils.safeSendMessage(
+                        bot,
+                        chatId,
+                        `❌ Ошибка при отправке ответа: ${error.message}`,
+                    );
                     userStates.delete(`${userId}_target_user`);
                     userStates.set(userId, states.MAIN_MENU);
                 }
@@ -102,56 +149,53 @@ module.exports = function setupMessageHandlers(bot, userStates) {
             return;
         }
 
-        // Проверка специальных команд
-        if (messageText.toLowerCase().includes('трансфер')) {
-            userStates.set(userId, states.TRANSFER_REQUEST);
-            await utils.safeSendMessage(bot, chatId, `🚖 Заказ трансфера
-
-Для оформления трансфера, пожалуйста, укажите:
-• Дату и время
-• Количество человек
-• Откуда забрать
-• Контактный телефон
-
-Наш менеджер свяжется с вами для уточнения деталей.`, 
-                { parse_mode: 'Markdown' });
-            return;
-        }
-
         // Проверяем, есть ли уже ожидающий вопрос от этого пользователя
         const pendingQuestions = services.adminAnswers.getPendingQuestions();
         const hasPendingQuestion = pendingQuestions.has(userId.toString());
 
         // Поиск в базе знаний
-        const autoAnswer = services.knowledgeBase.findAnswerInKnowledgeBase(messageText);
+        const autoAnswer =
+            services.knowledgeBase.findAnswerInKnowledgeBase(messageText);
 
         if (autoAnswer) {
             // Если есть автоответ, удаляем ожидающий вопрос (если был)
             if (hasPendingQuestion) {
                 pendingQuestions.delete(userId.toString());
             }
-            await utils.safeSendMessage(bot, chatId, autoAnswer, { 
-                parse_mode: 'Markdown',
-                ...keyboards.getBackToMenuKeyboard()
+            await utils.safeSendMessage(bot, chatId, autoAnswer, {
+                parse_mode: "Markdown",
+                ...keyboards.getBackToMenuKeyboard(),
             });
         } else {
             // Сохраняем вопрос только если нет ожидающего вопроса от этого пользователя
             if (!hasPendingQuestion) {
-                await services.adminAnswers.saveUnknownQuestion(userId, username, messageText);
+                await services.adminAnswers.saveUnknownQuestion(
+                    userId,
+                    username,
+                    messageText,
+                );
 
-                await utils.safeSendMessage(bot, chatId, `Спасибо за ваш вопрос! 🤔
+                await utils.safeSendMessage(
+                    bot,
+                    chatId,
+                    `Спасибо за ваш вопрос! 🤔
 
 Я передам его нашему менеджеру, и он ответит вам в ближайшее время.
 
-А пока вы можете воспользоваться меню с готовыми ответами 👇`, 
-                    keyboards.getMainMenuKeyboard());
+А пока вы можете воспользоваться меню с готовыми ответами 👇`,
+                    keyboards.getMainMenuKeyboard(),
+                );
 
                 await utils.forwardToAdmins(bot, userId, username, messageText);
             } else {
-                await utils.safeSendMessage(bot, chatId, `Ваш предыдущий вопрос еще обрабатывается. 
+                await utils.safeSendMessage(
+                    bot,
+                    chatId,
+                    `Ваш предыдущий вопрос еще обрабатывается. 
 
-Пожалуйста, дождитесь ответа от менеджера или воспользуйтесь меню с готовыми ответами 👇`, 
-                    keyboards.getMainMenuKeyboard());
+Пожалуйста, дождитесь ответа от менеджера или воспользуйтесь меню с готовыми ответами 👇`,
+                    keyboards.getMainMenuKeyboard(),
+                );
             }
         }
     });

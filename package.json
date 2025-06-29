@@ -1,27 +1,49 @@
 {
   "name": "golden-sands-bot",
   "version": "1.0.0",
-  "description": "Telegram bot for Golden Sands resort booking and information",
+  "description": "Telegram bot for Golden Sands resort booking and information with semantic search",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
-    "dev": "nodemon bot.js"
+    "dev": "nodemon bot.js",
+    "test": "node test.js",
+    "lint": "eslint .",
+    "knowledge:test": "node scripts/test-knowledge.js"
   },
   "dependencies": {
-    "@huggingface/inference": "^4.1.0",
-    "dotenv": "^17.0.0",
-    "node-telegram-bot-api": "^0.61.0",
-    "papaparse": "^5.5.3"
+    "@huggingface/inference": "^2.8.0",
+    "dotenv": "^16.4.5",
+    "node-telegram-bot-api": "^0.66.0",
+    "papaparse": "^5.4.1"
   },
   "devDependencies": {
-    "nodemon": "^3.0.0"
+    "nodemon": "^3.1.0",
+    "eslint": "^8.57.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
   "keywords": [
     "telegram",
     "bot",
     "booking",
-    "resort"
+    "resort",
+    "semantic-search",
+    "knowledge-base",
+    "sentence-transformers",
+    "nlp",
+    "embeddings",
+    "golden-sands"
   ],
   "author": "JustProject174",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JustProject174/golden-sands-bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JustProject174/golden-sands-bot/issues"
+  },
+  "homepage": "https://github.com/JustProject174/golden-sands-bot#readme"
 }

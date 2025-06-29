@@ -73,88 +73,96 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
         const data = callbackQuery.data;
 
         try {
-        try {
-            await bot.answerCallbackQuery(callbackQuery.id);
+            try {
+                await bot.answerCallbackQuery(callbackQuery.id);
+            } catch (error) {
+                console.error(
+                    "Ошибка при ответе на callback query:",
+                    error.message,
+                );
+            }
+
+            switch (data) {
+                case "important_info":
+                    await handleImportantInfo(bot, chatId);
+                    break;
+
+                case "rooms":
+                    const roomsData = services.roomsData.getRoomsData();
+                    console.log(
+                        "Отображение номеров. Количество:",
+                        roomsData.length,
+                    );
+                    console.log(
+                        "Первый номер:",
+                        JSON.stringify(roomsData[0], null, 2),
+                    );
+                    await utils.safeSendMessage(
+                        bot,
+                        chatId,
+                        "Выберите номер:",
+                        roomsKeyboards.getRoomsKeyboard(roomsData),
+                    );
+                    break;
+
+                case "entertainment":
+                    await handleEntertainment(bot, chatId);
+                    break;
+
+                case "facilities":
+                    await handleFacilities(bot, chatId);
+                    break;
+
+                case "directions":
+                    await handleDirections(bot, chatId);
+                    break;
+
+                case "booking":
+                    userStates.set(userId, states.BOOKING_PROCESS);
+                    await utils.safeSendMessage(
+                        bot,
+                        chatId,
+                        "Были ли вы у нас?",
+                        mainMenuKeyboards.getBookingKeyboard(),
+                    );
+                    break;
+
+                case "back_to_menu":
+                    userStates.set(userId, states.MAIN_MENU);
+                    await utils.safeSendMessage(
+                        bot,
+                        chatId,
+                        "Главное меню:",
+                        mainMenuKeyboards.getMainMenuKeyboard(),
+                    );
+                    break;
+
+                case "booking_yes":
+                    await handleBookingYes(bot, chatId);
+                    break;
+
+                case "booking_no":
+                    await handleBookingNo(bot, chatId);
+                    break;
+
+                default:
+                    if (data.startsWith("room_")) {
+                        await handleRoomDetails(bot, chatId, data);
+                    }
+                    break;
+            }
         } catch (error) {
-            console.error("Ошибка при ответе на callback query:", error.message);
-        }
-        
-
-        switch (data) {
-            case "important_info":
-                await handleImportantInfo(bot, chatId);
-                break;
-
-            case "rooms":
-                const roomsData = services.roomsData.getRoomsData();
-                console.log(
-                    "Отображение номеров. Количество:",
-                    roomsData.length,
-                );
-                console.log(
-                    "Первый номер:",
-                    JSON.stringify(roomsData[0], null, 2),
-                );
-                await utils.safeSendMessage(
-                    bot,
-                    chatId,
-                    "Выберите номер:",
-                    roomsKeyboards.getRoomsKeyboard(roomsData),
-                );
-                break;
-
-            case "entertainment":
-                await handleEntertainment(bot, chatId);
-                break;
-
-            case "facilities":
-                await handleFacilities(bot, chatId);
-                break;
-
-            case "directions":
-                await handleDirections(bot, chatId);
-                break;
-
-            case "booking":
-                userStates.set(userId, states.BOOKING_PROCESS);
-                await utils.safeSendMessage(
-                    bot,
-                    chatId,
-                    "Были ли вы у нас?",
-                    mainMenuKeyboards.getBookingKeyboard(),
-                );
-                break;
-
-            case "back_to_menu":
-                userStates.set(userId, states.MAIN_MENU);
-                await utils.safeSendMessage(
-                    bot,
-                    chatId,
-                    "Главное меню:",
-                    mainMenuKeyboards.getMainMenuKeyboard(),
-                );
-                break;
-
-            case "booking_yes":
-                await handleBookingYes(bot, chatId);
-                break;
-
-            case "booking_no":
-                await handleBookingNo(bot, chatId);
-                break;
-
-            default:
-                if (data.startsWith("room_")) {
-                    await handleRoomDetails(bot, chatId, data);
-                }
-                break;
-        }
-        } catch (error) {
-            console.error("Ошибка в обработчике callback query:", error.message);
+            console.error(
+                "Ошибка в обработчике callback query:",
+                error.message,
+            );
             try {
                 await bot.answerCallbackQuery(callbackQuery.id);
             } catch (answerError) {
-                console.error("Не удалось ответить на callback query:", answerError.message);
+                console.error(
+                    "Не удалось ответить на callback query:",
+                    answerError.message,
+                );
             }
         }
     });
@@ -260,13 +268,7 @@ https://yandex.ru/maps/?ll=60.061851%2C55.187183&mode=routes&rtext=~55.187969%2C
 🚙 Возможен заезд на автомобиле, парковка платная.
 🚖 Трансфер:
 • Индивидуальный трансфер - уточняйте стоимость
-• Групповой трансфер - уточняйте стоимость
-
-Для заказа трансфера напишите "трансфер"`,
-            {
-                parse_mode: "Markdown",
-                ...mainMenuKeyboards.getBackToMenuKeyboard(),
-            },
+• Групповой трансфер - уточняйте стоимость`,
         );
     }
 
