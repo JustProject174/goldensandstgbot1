@@ -96,6 +96,15 @@ module.exports = function setupAdminHandlers(bot, userStates) {
                 const questionData = services.adminAnswers.getPendingQuestions().get(targetUserId);
                 const questionText = questionData ? questionData.question : 'Вопрос не найден';
 
+                await utils.safeSendMessage(bot, chatId, `📝 Напишите ответ на вопрос:\n\n"${questionText}"`);
+            }
+
+            // Обработка отклонения вопроса через кнопку
+            if (data.startsWith('reject_btn_')) {
+                const targetUserId = data.replace('reject_btn_', '');
+                await handleRejectQuestion(bot, chatId, targetUserId);
+            }йден';
+
                 await utils.safeSendMessage(bot, chatId, `✍️ Напишите ваш ответ пользователю ID: ${targetUserId}\n\nВопрос: "${questionText}"`, {
                     reply_markup: {
                         inline_keyboard: [[
@@ -179,6 +188,23 @@ module.exports = function setupAdminHandlers(bot, userStates) {
             const rejectionMessage = 'Ваш вопрос некорректен, сформулируйте пожалуйста снова';
 
             // Убеждаемся, что targetUserId - это число
+            const userChatId = typeof targetUserId === 'string' ? parseInt(targetUserId) : targetUserId;
+
+            await utils.safeSendMessage(bot, userChatId, rejectionMessage, keyboards.getMainMenuKeyboard());
+
+            // Удаляем из памяти
+            services.adminAnswers.getPendingQuestions().delete(targetUserId.toString());
+
+            // Удаляем из файла
+            await services.adminAnswers.removeQuestionFromFile(targetUserId);
+
+            await utils.safeSendMessage(bot, chatId, '✅ Вопрос отклонен и удален из очереди', keyboards.getBackToAdminKeyboard());
+
+        } catch (error) {
+            console.error('Ошибка при отклонении вопроса:', error);
+            await utils.safeSendMessage(bot, chatId, `❌ Ошибка при отклонении вопроса: ${error.message}`, keyboards.getBackToAdminKeyboard());
+        }
+    }даемся, что targetUserId - это число
             const targetChatId = typeof targetUserId === 'string' ? parseInt(targetUserId) : targetUserId;
 
             await utils.safeSendMessage(bot, targetChatId, rejectionMessage, {

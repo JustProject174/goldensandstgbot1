@@ -315,6 +315,44 @@ function getQuestionPreview(question, maxLength = 30) {
         : safeQuestion;
 }
 
+async function removeQuestionFromFile(userId) {
+    if (!userId) {
+        throw new Error('userId обязателен');
+    }
+
+    try {
+        await ensureFileExists(config.ADMIN_ANSWERS_FILE);
+        const data = await fs.readFile(config.ADMIN_ANSWERS_FILE, 'utf8');
+
+        if (!data.trim()) {
+            return; // Файл пуст, нечего удалять
+        }
+
+        const entries = data.split(ENTRY_SEPARATOR).filter(entry => entry.trim());
+        const searchUserId = userId.toString();
+
+        // Фильтруем записи, исключая нужную
+        const filteredEntries = entries.filter(entry => {
+            return !entry.includes(`USER_ID:${searchUserId}`);
+        });
+
+        // Сохраняем обновленный файл
+        const updatedData = filteredEntries.length > 0 
+            ? filteredEntries.join(ENTRY_SEPARATOR) + ENTRY_SEPARATOR
+            : '';
+        
+        await fs.writeFile(config.ADMIN_ANSWERS_FILE, updatedData, 'utf8');
+
+        // Удаляем из памяти
+        pendingQuestions.delete(searchUserId);
+
+        console.log(`Вопрос пользователя ${searchUserId} удален из файла и памяти`);
+    } catch (error) {
+        console.error('Ошибка при удалении вопроса из файла:', error);
+        throw error;
+    }
+}
+
 // Инициализация при загрузке модуля
 loadPendingQuestions().catch(console.error);
 
@@ -325,5 +363,6 @@ module.exports = {
     getPendingQuestions,
     loadPendingQuestions,
     getSafeTextForTelegram,
-    getQuestionPreview
+    getQuestionPreview,
+    removeQuestionFromFile
 };
