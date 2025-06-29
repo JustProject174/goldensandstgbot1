@@ -8,6 +8,7 @@
     "dev": "nodemon bot.js"
   },
   "dependencies": {
+    "@huggingface/inference": "^4.1.0",
     "dotenv": "^17.0.0",
     "node-telegram-bot-api": "^0.61.0",
     "papaparse": "^5.5.3"
