@@ -64,5 +64,18 @@ bot.on('polling_error', (error) => {
     console.error('Ошибка polling:', error);
 });
 
+// Обработка завершения процесса
+process.on('SIGINT', () => {
+    console.log('Получен сигнал SIGINT, завершаем работу...');
+    knowledgeBaseService.closeFileWatcher();
+    process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+    console.log('Получен сигнал SIGTERM, завершаем работу...');
+    knowledgeBaseService.closeFileWatcher();
+    process.exit(0);
+});
+
 // Запуск бота
 initializeBot();

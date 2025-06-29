@@ -3,6 +3,7 @@ const path = require('path');
 const config = require('../config');
 
 let knowledgeBase = [];
+let fileWatcher = null;
 
 async function loadKnowledgeBase() {
     try {
@@ -40,11 +41,33 @@ async function loadKnowledgeBase() {
         knowledgeBase.forEach((item, index) => {
             console.log(`Запись ${index + 1}: ключевые слова = [${item.keywords.join(', ')}], есть ответ = ${!!item.answer && item.answer.trim() !== ''}`);
         });
+
+        // Настраиваем автообновление файла
+        setupFileWatcher();
         
         return knowledgeBase;
     } catch (error) {
         console.log('Файл базы знаний не найден, создаем начальную базу');
         return await createInitialKnowledgeBase();
+    }
+}
+
+// Функция настройки отслеживания файла
+function setupFileWatcher() {
+    if (fileWatcher) {
+        fileWatcher.close();
+    }
+
+    try {
+        fileWatcher = fs.watch(config.KNOWLEDGE_BASE_FILE, async (eventType, filename) => {
+            if (eventType === 'change') {
+                console.log('Обнаружены изменения в файле базы знаний, перезагружаем...');
+                await loadKnowledgeBase();
+            }
+        });
+        console.log('Автообновление базы знаний настроено');
+    } catch (error) {
+        console.error('Ошибка настройки автообновления:', error);
     }
 }
 
@@ -113,6 +136,14 @@ async function saveToKnowledgeBase(keywords, answer) {
     return knowledgeBase;
 }
 
+// Функция для получения корня слова (убираем последние 2 символа если слово длиннее 4 символов)
+function getWordRoot(word) {
+    if (word.length <= 4) {
+        return word;
+    }
+    return word.slice(0, -2);
+}
+
 function findAnswerInKnowledgeBase(message) {
     const lowerMessage = message.toLowerCase();
     
@@ -120,9 +151,9 @@ function findAnswerInKnowledgeBase(message) {
     const cleanMessage = lowerMessage.replace(/[^\w\sа-яё]/gi, ' ').replace(/\s+/g, ' ').trim();
     const messageWords = cleanMessage.split(' ').filter(word => word.length > 1); // Исключаем слова длиной 1 символ
     
-    // Если в сообщении меньше 2 слов, возвращаем null
-    if (messageWords.length < 2) {
-        console.log(`Сообщение "${message}" содержит менее 2 значимых слов`);
+    // Если в сообщении меньше 1 слова, возвращаем null
+    if (messageWords.length < 1) {
+        console.log(`Сообщение "${message}" не содержит значимых слов`);
         return null;
     }
     
@@ -151,12 +182,12 @@ function findAnswerInKnowledgeBase(message) {
                 matchedKeywords.push(cleanKeyword);
                 keywordMatched = true;
             } else {
-                // Проверяем совпадение частей слов
+                // Проверяем совпадение частей слов и корней
                 const keywordWords = cleanKeyword.split(' ').filter(word => word.length > 1);
                 
                 for (const keywordWord of keywordWords) {
                     for (const messageWord of messageWords) {
-                        // Проверяем включение части слова (минимум 3 символа)
+                        // Проверяем точное включение части слова (минимум 3 символа)
                         if (keywordWord.length >= 3 && messageWord.length >= 3) {
                             if (messageWord.includes(keywordWord) || keywordWord.includes(messageWord)) {
                                 if (!keywordMatched) {
@@ -167,14 +198,29 @@ function findAnswerInKnowledgeBase(message) {
                                 break;
                             }
                         }
+                        
+                        // Проверяем совпадение корней слов (убираем последние 2 символа)
+                        if (!keywordMatched && keywordWord.length > 4 && messageWord.length > 4) {
+                            const keywordRoot = getWordRoot(keywordWord);
+                            const messageRoot = getWordRoot(messageWord);
+                            
+                            if (keywordRoot === messageRoot || 
+                                messageWord.includes(keywordRoot) || 
+                                keywordWord.includes(messageRoot)) {
+                                matchCount++;
+                                matchedKeywords.push(cleanKeyword + ' (корень)');
+                                keywordMatched = true;
+                                break;
+                            }
+                        }
                     }
                     if (keywordMatched) break;
                 }
             }
         }
         
-        // Требуем минимум 2 совпадения
-        if (matchCount >= 2 && matchCount > maxMatches) {
+        // Теперь требуем минимум 1 совпадение вместо 2
+        if (matchCount >= 1 && matchCount > maxMatches) {
             maxMatches = matchCount;
             bestMatch = {
                 answer: item.answer,
@@ -189,13 +235,23 @@ function findAnswerInKnowledgeBase(message) {
         return bestMatch.answer;
     }
     
-    console.log(`Не найдено совпадений для сообщения: "${message}" (требуется минимум 2 совпадения)`);
+    console.log(`Не найдено совпадений для сообщения: "${message}"`);
     return null;
+}
+
+// Функция для корректного завершения работы
+function closeFileWatcher() {
+    if (fileWatcher) {
+        fileWatcher.close();
+        fileWatcher = null;
+        console.log('Автообновление базы знаний отключено');
+    }
 }
 
 module.exports = {
     loadKnowledgeBase,
     saveToKnowledgeBase,
     findAnswerInKnowledgeBase,
-    getKnowledgeBase: () => knowledgeBase
+    getKnowledgeBase: () => knowledgeBase,
+    closeFileWatcher
 };
