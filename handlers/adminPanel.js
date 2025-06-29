@@ -180,12 +180,16 @@ module.exports = function setupAdminHandlers(bot, userStates) {
                 ...mainKeyboards.getBackToMenuKeyboard()
             });
 
-            // Удаляем вопрос из ожидающих
+            // Удаляем из памяти
             services.adminAnswers.getPendingQuestions().delete(targetUserId.toString());
 
-            await utils.safeSendMessage(bot, chatId, `✅ Вопрос отклонен, пользователю отправлено сообщение об ошибке`, keyboards.getBackToAdminKeyboard());
+            // Удаляем из файла
+            await services.adminAnswers.removeQuestionFromFile(targetUserId);
+
+            await utils.safeSendMessage(bot, chatId, `✅ Вопрос отклонен и удален из очереди`, keyboards.getBackToAdminKeyboard());
 
         } catch (error) {
+            console.error('Ошибка при отклонении вопроса:', error);
             await utils.safeSendMessage(bot, chatId, `❌ Ошибка при отклонении вопроса: ${error.message}`, keyboards.getBackToAdminKeyboard());
         }
     }
