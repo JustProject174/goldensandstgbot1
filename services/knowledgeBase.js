@@ -466,6 +466,21 @@ function findAnswerByKeywords(message) {
 function findAnswerInKnowledgeBase(message) {
     console.log(`Начинаем поиск для сообщения: "${message}"`);
 
+    // === ДОБАВЛЯЕМ ПРОВЕРКУ НА КОРОТКИЙ ВОПРОС ===
+    // Убираем знаки препинания и лишние пробелы
+    const cleanMessage = message
+        .replace(/[^\w\sа-яё]/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    const messageWords = cleanMessage.split(" ").filter((w) => w.length > 0);
+
+    if (messageWords.length <= 2) {
+        console.log("Вопрос слишком короткий для автоответа");
+        // Вернуть null — передать админу, либо строку-отказ
+        return "Пожалуйста, уточните ваш вопрос, он слишком короткий.";
+        // return null; // <- если хотите передавать админу
+    }
+
     // 1. Семантический поиск через Natural.js
     console.log("Этап 1: Семантический поиск...");
     const semanticResult = semanticSearch(message);
