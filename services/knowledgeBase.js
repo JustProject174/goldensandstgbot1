@@ -4,8 +4,17 @@ const config = require('../config');
 
 let knowledgeBase = [];
 let fileWatcher = null;
+let isLoading = false;
 
 async function loadKnowledgeBase() {
+    // Предотвращаем множественные одновременные загрузки
+    if (isLoading) {
+        console.log('База знаний уже загружается, пропускаем...');
+        return knowledgeBase;
+    }
+    
+    isLoading = true;
+    
     try {
         const data = await fs.readFile(config.KNOWLEDGE_BASE_FILE, 'utf8');
         const lines = data.split('\n');
@@ -37,32 +46,48 @@ async function loadKnowledgeBase() {
 
         console.log(`Загружено ${knowledgeBase.length} записей из базы знаний`);
         
-        // Выводим отладочную информацию о записях
-        knowledgeBase.forEach((item, index) => {
-            console.log(`Запись ${index + 1}: ключевые слова = [${item.keywords.join(', ')}], есть ответ = ${!!item.answer && item.answer.trim() !== ''}`);
-        });
+        // Выводим отладочную информацию о записях только при первой загрузке
+        if (!fileWatcher) {
+            knowledgeBase.forEach((item, index) => {
+                console.log(`Запись ${index + 1}: ключевые слова = [${item.keywords.join(', ')}], есть ответ = ${!!item.answer && item.answer.trim() !== ''}`);
+            });
+        }
 
-        // Настраиваем автообновление файла
-        setupFileWatcher();
+        // Настраиваем автообновление файла только если еще не настроено
+        if (!fileWatcher) {
+            setupFileWatcher();
+        }
         
+        isLoading = false;
         return knowledgeBase;
     } catch (error) {
         console.log('Файл базы знаний не найден, создаем начальную базу');
-        return await createInitialKnowledgeBase();
+        const result = await createInitialKnowledgeBase();
+        isLoading = false;
+        return result;
     }
 }
 
 // Функция настройки отслеживания файла
+let reloadTimeout = null;
+
 function setupFileWatcher() {
     if (fileWatcher) {
         fileWatcher.close();
     }
 
     try {
-        fileWatcher = fs.watch(config.KNOWLEDGE_BASE_FILE, async (eventType, filename) => {
-            if (eventType === 'change') {
-                console.log('Обнаружены изменения в файле базы знаний, перезагружаем...');
-                await loadKnowledgeBase();
+        fileWatcher = require('fs').watch(config.KNOWLEDGE_BASE_FILE, async (eventType, filename) => {
+            if (eventType === 'change' && !isLoading) {
+                // Используем debouncing чтобы избежать множественных перезагрузок
+                if (reloadTimeout) {
+                    clearTimeout(reloadTimeout);
+                }
+                
+                reloadTimeout = setTimeout(async () => {
+                    console.log('Обнаружены изменения в файле базы знаний, перезагружаем...');
+                    await loadKnowledgeBase();
+                }, 1000); // Ждем 1 секунду перед перезагрузкой
             }
         });
         console.log('Автообновление базы знаний настроено');
@@ -72,6 +97,7 @@ function setupFileWatcher() {
 }
 
 async function createInitialKnowledgeBase() {
+    console.log('Создаем начальную базу знаний...');
     const initialData = `KEYWORDS:цена,стоимость,сколько,деньги
 ANSWER:💰 Цены на размещение:
 
@@ -121,7 +147,37 @@ ANSWER:🚖 Трансфер и проезд:
 Для заказа трансфера напишите "трансфер"`;
 
     await fs.writeFile(config.KNOWLEDGE_BASE_FILE, initialData, 'utf8');
-    return await loadKnowledgeBase();
+    console.log('Начальная база знаний создана');
+    
+    // Парсим данные напрямую вместо рекурсивного вызова loadKnowledgeBase
+    const lines = initialData.split('\n');
+    knowledgeBase = [];
+
+    let i = 0;
+    while (i < lines.length) {
+        if (lines[i].startsWith('KEYWORDS:')) {
+            const keywords = lines[i].replace('KEYWORDS:', '').split(',').map(k => k.trim());
+            i++;
+
+            let answerLines = [];
+            while (i < lines.length && !lines[i].startsWith('KEYWORDS:')) {
+                if (lines[i].startsWith('ANSWER:')) {
+                    answerLines.push(lines[i].replace('ANSWER:', '').trim());
+                } else {
+                    answerLines.push(lines[i]);
+                }
+                i++;
+            }
+
+            const answer = answerLines.join('\n').trim();
+            knowledgeBase.push({ keywords, answer });
+        } else {
+            i++;
+        }
+    }
+    
+    console.log(`Начальная база содержит ${knowledgeBase.length} записей`);
+    return knowledgeBase;
 }
 
 async function saveToKnowledgeBase(keywords, answer) {
