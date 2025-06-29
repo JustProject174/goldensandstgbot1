@@ -31,13 +31,13 @@ module.exports = {
         for (const [userId, questionData] of pendingQuestions) {
             if (count > 8) break; // Ограничиваем количество кнопок
             
-            const preview = questionData.question.length > 25 
-                ? questionData.question.substring(0, 25) + '...'
+            const preview = questionData.question.length > 30 
+                ? questionData.question.substring(0, 30) + '...'
                 : questionData.question;
             
             // Убеждаемся, что userId передается корректно
             keyboard.push([{ 
-                text: `${count}. ${preview}`, 
+                text: `❓ ${count}. ${preview}`, 
                 callback_data: `view_question_${userId.toString()}` 
             }]);
             count++;
@@ -57,11 +57,11 @@ module.exports = {
             reply_markup: {
                 inline_keyboard: [
                     [
-                        { text: '✅ Ответить', callback_data: `answer_btn_${userId.toString()}` },
-                        { text: '❌ Отклонить', callback_data: `reject_btn_${userId.toString()}` }
+                        { text: '✅ Ответить на вопрос', callback_data: `answer_btn_${userId.toString()}` },
+                        { text: '❌ Отклонить вопрос', callback_data: `reject_btn_${userId.toString()}` }
                     ],
                     [
-                        { text: '🔙 К вопросам', callback_data: 'admin_pending' }
+                        { text: '🔙 К списку вопросов', callback_data: 'admin_pending' }
                     ]
                 ]
             }

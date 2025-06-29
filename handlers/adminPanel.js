@@ -161,9 +161,15 @@ module.exports = function setupAdminHandlers(bot, userStates) {
         }
 
         const timestamp = new Date(questionData.timestamp).toLocaleString('ru-RU');
-        const questionInfo = `👤 Пользователь ID: ${userId}
-📅 Время: ${timestamp}
-❓ Вопрос: ${questionData.question}`;
+        const questionInfo = `📋 **НОВЫЙ ВОПРОС**
+
+👤 **Пользователь:** ID ${userId}
+📅 **Время получения:** ${timestamp}
+
+❓ **Текст вопроса:**
+${questionData.question}
+
+🔽 **Выберите действие:**`;
 
         await utils.safeSendMessage(bot, chatId, questionInfo, keyboards.getQuestionManagementKeyboard(userId));
     }
