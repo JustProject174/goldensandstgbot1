@@ -8,12 +8,12 @@ let roomsData = [];
 // ВАЖНО: Замените example.com на реальные URL ваших изображений
 const roomPhotos = {
     1: [
-        "https://optim.tildacdn.com/tild3763-3238-4564-b264-636233333163/-/format/webp/IMG_6017.JPG.webp",
+        "https://optim.tildacdn.com/tild3934-6239-4737-b539-323730306566/-/format/webp/20250627_164118.JPG.webp",
         "https://optim.tildacdn.com/tild3732-3866-4166-b036-303231376162/-/format/webp/2025-06-27_22-03-09.JPG.webp",
         "https://optim.tildacdn.com/tild3232-6431-4735-b264-323733353565/-/format/webp/WhatsApp_Image_2025-.jpeg.webp",
     ],
     2: [
-        "https://optim.tildacdn.com/tild3063-3937-4763-b761-383339613662/-/contain/673x897/center/center/-/format/webp/IMG_2914.jpg.webp",
+        "https://optim.tildacdn.com/tild3763-3238-4564-b264-636233333163/-/format/webp/IMG_6017.JPG.webp",
         "https://optim.tildacdn.com/tild3139-3639-4532-b664-613564386239/-/contain/673x897/center/center/-/format/webp/IMG_2873.jpg.webp",
         "https://optim.tildacdn.com/tild3232-6431-4735-b264-323733353565/-/format/webp/WhatsApp_Image_2025-.jpeg.webp",
     ],
@@ -80,13 +80,12 @@ const roomPhotos = {
         "https://optim.tildacdn.com/tild3232-6431-4735-b264-323733353565/-/format/webp/WhatsApp_Image_2025-.jpeg.webp",
     ],
     14: [
-        "hhttps://optim.tildacdn.com/tild3666-3238-4734-b161-303439336239/-/format/webp/IMG_0815.jpg.webp",
+        "https://optim.tildacdn.com/tild3666-3238-4734-b161-303439336239/-/format/webp/IMG_0815.jpg.webp",
         "https://optim.tildacdn.com/tild6561-3339-4462-a239-323030636132/-/contain/661x881/center/center/-/format/webp/IMG_0816.jpg.webp",
         "https://optim.tildacdn.com/tild3834-6135-4864-b461-306136323432/-/contain/661x881/center/center/-/format/webp/IMG_0978.jpg.webp",
         "https://optim.tildacdn.com/tild6661-3334-4832-a263-306534323063/-/contain/661x881/center/center/-/format/webp/IMG_0980.jpg.webp",
         "https://optim.tildacdn.com/tild3131-6334-4064-b731-333733366561/-/contain/661x881/center/center/-/format/webp/IMG_1298.jpg.webp",
         "https://optim.tildacdn.com/tild6430-3739-4161-b637-666362373335/-/contain/661x881/center/center/-/format/webp/IMG_1305.jpg.webp",
-
         "https://optim.tildacdn.com/tild6135-3363-4666-a566-623637333838/-/contain/661x881/center/center/-/format/webp/IMG_1025.jpg.webp",
         "https://optim.tildacdn.com/tild3232-6431-4735-b264-323733353565/-/format/webp/WhatsApp_Image_2025-.jpeg.webp",
     ],

@@ -4,30 +4,36 @@
 
 function getRoomsKeyboard(roomsData) {
     const keyboard = [];
-
     // Создаем кнопки для каждого номера (по 2 в ряд)
     for (let i = 0; i < roomsData.length; i += 2) {
         const row = [];
-
         // Добавляем первый номер в ряд
         const room1 = roomsData[i];
+        const room1Text =
+            room1.Комнат && room1.Комнат !== null && room1.Комнат !== ""
+                ? `${room1.Название} (${room1.Комнат})`
+                : room1.Название;
+
         row.push({
-            text: `${room1.Название} (${room1.Вместимость} чел.)`,
+            text: room1Text,
             callback_data: `room_${i}`,
         });
 
         // Добавляем второй номер в ряд, если он существует
         if (i + 1 < roomsData.length) {
             const room2 = roomsData[i + 1];
+            const room2Text =
+                room2.Комнат && room2.Комнат !== null && room2.Комнат !== ""
+                    ? `${room2.Название} (${room2.Комнат})`
+                    : room2.Название;
+
             row.push({
-                text: `${room2.Название} (${room2.Вместимость} чел.)`,
+                text: room2Text,
                 callback_data: `room_${i + 1}`,
             });
         }
-
         keyboard.push(row);
     }
-
     // Добавляем кнопку "Назад в меню"
     keyboard.push([
         {
@@ -35,7 +41,6 @@ function getRoomsKeyboard(roomsData) {
             callback_data: "back_to_menu",
         },
     ]);
-
     return {
         reply_markup: {
             inline_keyboard: keyboard,
