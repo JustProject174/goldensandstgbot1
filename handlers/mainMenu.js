@@ -240,6 +240,8 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             "https://optim.tildacdn.com/tild3365-6632-4535-b766-643438353633/-/format/webp/1.jpg.webp",
             "https://optim.tildacdn.com/tild6361-6636-4137-a430-346130363231/-/contain/666x888/center/center/-/format/webp/IMG_4608.jpg.webp",
             "https://optim.tildacdn.com/tild3634-3766-4234-b166-373130393134/-/format/webp/IMG_4614.jpg.webp",
+            "content/camping/18ea8cb1-b4ac-4001-b329-f2eb09f71c00.jfif",
+            "content/camping/c8f49629-141d-45c9-b3e6-0915274613ac.jfif",
         ];
 
         const message = `Размещение с палатками:
@@ -266,7 +268,10 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
         — Шатёр = палатка  
         — *Бронирование* — только для групп от 8–10 палаток. Остальные выбирают место на месте с администратором.
         🏖 Гости кемпинга могут пользоваться нашим *основным песчаным пляжем* — одним из лучших на всём озере!
-        *Будем рады видеть вас у воды! 🌊*`;
+        *Будем рады видеть вас у воды! 🌊*
+        
+        📍 *Как добраться:*
+        От главного поворота на нашу базу , проехать еще 100 метров и повернуть налево, перед вывеской синено цвета (последние 2 фото)`;
 
         // Отправляем медиа-группу с фотографиями без текста
         try {
@@ -417,20 +422,42 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
     }
 
     async function handleDirections(bot, chatId) {
-        await utils.safeSendMessage(
-            bot,
-            chatId,
-            `📍 Координаты: 55.1881079369311, 60.05969764417703.
-[https://yandex.ru/maps/?ll=60.061851%2C55.187183&mode=routes&rtext=~55.187969%2C60.059069&rtt=auto&ruri=~ymapsbm1%3A%2F%2Forg%3Foid%3D109014041624&source=serp_navig&z=15.3]
+        const photos = [
+            "content/road/Маршрут.png",
+            "content/road/50c10319-d3d4-4488-bccf-58b2f16b00df.jfif",
+            "content/road/d6f84703-8cba-4217-a3ca-b42d2da16d27.jfif",
+        ];
 
-🚙 Возможен заезд на автомобиле, парковка платная.
+        const message = `📍 Координаты: 
+            55.1881079369311, 60.05969764417703
+            [https://yandex.ru/maps/?ll=60.061851%2C55.187183&mode=routes&rtext=~55.187969%2C60.059069&rtt=auto&ruri=~ymapsbm1%3A%2F%2Forg%3Foid%3D109014041624&source=serp_navig&z=15.3]
 
-Остались вопросы? Выберите команду из меню или задайте вопрос в чате:`,
-            {
+            🚙 Возможен заезд на автомобиле, парковка платная.
+
+            Остались вопросы? Выберите команду из меню или задайте вопрос в чате:`;
+
+        try {
+            await bot.sendMediaGroup(
+                chatId,
+                photos.map((photo) => ({
+                    type: "photo",
+                    media: photo,
+                })),
+            );
+
+            // Отправляем текст отдельным сообщением
+            await utils.safeSendMessage(bot, chatId, message, {
                 parse_mode: "Markdown",
                 ...mainMenuKeyboards.getBackToMenuKeyboard(),
-            },
-        );
+            });
+        } catch (error) {
+            console.error("Ошибка при отправке медиа-группы:", error);
+            // Если не получилось отправить медиа-группу, отправляем обычное текстовое сообщение
+            await utils.safeSendMessage(bot, chatId, message, {
+                parse_mode: "Markdown",
+                ...mainMenuKeyboards.getBackToMenuKeyboard(),
+            });
+        }
     }
 
     async function handleBookingYes(bot, chatId) {
@@ -440,7 +467,7 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             `🛏️ Бронирование для постоянных клиентов
 
 Перейдите по ссылке для быстрого бронирования:
-[Забронировать номер](https://your-booking-link.com)
+[Забронировать номер](https://script.google.com/macros/s/AKfycbywmbK6PsGIqGEJQGEK2ix-IQXPG0TNSBXNr-19QODCRxDXWv-ntNllrh5O6X-amWwV/exec)
 
 Или напишите менеджеру прямо в этом чате!`,
             {
