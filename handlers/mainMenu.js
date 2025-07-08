@@ -189,7 +189,7 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             // Потом отправляем фото с основным текстом и клавиатурой
             await bot.sendPhoto(
                 chatId,
-                "https://optim.tildacdn.com/tild3931-6461-4564-a236-353432383431/-/format/webp/_.png.webp",
+                "content/importantinfo/Important1.png.webp",
                 {
                     caption: `📌 Наша база расположена на берегу озера в заповедной зоне.
     💧 В целях сохранения экологии:
@@ -235,13 +235,13 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
     async function handleCamping(bot, chatId) {
         // Массив с URL фотографий
         const photos = [
-            "https://optim.tildacdn.com/tild3436-6165-4430-b036-346134666563/-/format/webp/2.jpg.webp",
-            "https://optim.tildacdn.com/tild6537-3866-4238-b166-633534666634/-/format/webp/photo.jpg.webp",
-            "https://optim.tildacdn.com/tild3365-6632-4535-b766-643438353633/-/format/webp/1.jpg.webp",
-            "https://optim.tildacdn.com/tild6361-6636-4137-a430-346130363231/-/contain/666x888/center/center/-/format/webp/IMG_4608.jpg.webp",
-            "https://optim.tildacdn.com/tild3634-3766-4234-b166-373130393134/-/format/webp/IMG_4614.jpg.webp",
-            "content/camping/18ea8cb1-b4ac-4001-b329-f2eb09f71c00.jfif",
-            "content/camping/c8f49629-141d-45c9-b3e6-0915274613ac.jfif",
+            "content/camping/1.webp",
+            "content/camping/2.webp",
+            "content/camping/3.webp",
+            "content/camping/4.webp",
+            "content/camping/6.webp",
+            "content/camping/7.jfif",
+            "content/camping/8.jfif",
         ];
 
         const message = `Размещение с палатками:
@@ -300,10 +300,7 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
 
     async function handleOur_beach(bot, chatId) {
         // Массив с URL фотографий
-        const photos = [
-            "https://static.tildacdn.com/tild3762-3137-4136-b336-313638653766/915f260f-a7f6-42f8-9.JPG",
-            "https://static.tildacdn.com/tild6631-3664-4430-b130-633430306232/IMG_6028.JPG",
-        ];
+        const photos = ["content/beach/1.jfif", "content/beach/2.jfif"];
 
         const message = `🏖🌞 *Дневное пребывание и посещение пляжа*
     🚗 *Парковка для гостей* — 1000 ₽ без ограничения по времени.
@@ -341,12 +338,12 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
     async function handleEntertainment(bot, chatId) {
         // Массив с URL фотографий
         const photos = [
-            "https://optim.tildacdn.com/tild6233-3239-4366-b961-353031343162/-/format/webp/IMG_6004.JPG.webp",
-            "https://optim.tildacdn.com/tild6166-3263-4564-a437-663266376430/-/format/webp/attachment_2.jpeg.webp",
-            "https://optim.tildacdn.com/tild6536-3163-4632-a664-373831643865/-/format/webp/DSC04403.JPG.webp",
-            "https://optim.tildacdn.com/tild3665-3063-4737-b034-346261663034/-/contain/673x897/center/center/-/format/webp/IMG_2931.jpg.webp",
-            "https://optim.tildacdn.com/tild6263-6139-4635-b462-346138396261/-/format/webp/IMG_6005.JPG.webp",
-            "https://optim.tildacdn.com/tild3230-3630-4463-b633-373131393963/-/format/webp/photo.jpg.webp",
+            "content/Entertaiment/1.webp",
+            "content/Entertaiment/2.webp",
+            "content/Entertaiment/3.webp",
+            "content/Entertaiment/4.webp",
+            "content/Entertaiment/5.webp",
+            "content/Entertaiment/6.webp",
         ];
 
         const message = `🏖 Развлечения:
@@ -428,13 +425,14 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             "content/road/d6f84703-8cba-4217-a3ca-b42d2da16d27.jfif",
         ];
 
-        const message = `📍 Координаты: 
+        const message = `
+        📍 Координаты: 
             55.1881079369311, 60.05969764417703
             [https://yandex.ru/maps/?ll=60.061851%2C55.187183&mode=routes&rtext=~55.187969%2C60.059069&rtt=auto&ruri=~ymapsbm1%3A%2F%2Forg%3Foid%3D109014041624&source=serp_navig&z=15.3]
 
-            🚙 Возможен заезд на автомобиле, парковка платная.
+        🚙 Возможен заезд на автомобиле, парковка платная.
 
-            Остались вопросы? Выберите команду из меню или задайте вопрос в чате:`;
+        *Остались вопросы? Выберите команду из меню или задайте вопрос в чате:*`;
 
         try {
             await bot.sendMediaGroup(
@@ -484,7 +482,7 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             `📌 Наша база расположена на берегу озера в заповедной зоне.
 
 💧 В целях сохранения экологии:
-• Центральная канализация и водопровод отсут}�твуют
+• Центральная канализация и водопровод отсутcтвуют
 • Душа нет, но есть прекрасные русские бани на дровах (как для помывки, так и для отдыха)
 • Удобства на улице
 
