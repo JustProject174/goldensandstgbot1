@@ -8,13 +8,15 @@ const services = {
     adminAnswers: require("../services/adminAnswers"),
 };
 
+const targetChatId = "-1002826990012"; // Глобальная переменная для чата админов
+
 module.exports = function setupAdminHandlers(bot, userStates) {
     // Обработка команды /answer
     bot.onText(/\/answer (\d+) (.+)/, async (msg, match) => {
         const chatId = msg.chat.id;
         const userId = msg.from.id;
 
-        if (!utils.isAdmin(userId)) return;
+        if (!(await utils.isAdmin(bot, userId))) return;
 
         const targetUserId = parseInt(match[1]);
         let answer = match[2];
@@ -25,11 +27,11 @@ module.exports = function setupAdminHandlers(bot, userStates) {
         try {
             await utils.safeSendMessage(
                 bot,
-                targetUserId,
+                targetUserId, // Отправка пользователю
                 `💬 Ответ от менеджера:\n\n${answer}`,
                 {
                     parse_mode: "Markdown",
-                    ...mainKeyboards.getBackToMenuKeyboard(), // Используем mainKeyboards
+                    ...mainKeyboards.getBackToMenuKeyboard(),
                 },
             );
 
@@ -42,15 +44,23 @@ module.exports = function setupAdminHandlers(bot, userStates) {
 
             await utils.safeSendMessage(
                 bot,
-                chatId,
+                targetChatId,
                 `✅ Ответ отправлен пользователю.\n\n🔤 Укажите ключевые слова через запятую для добавления в базу знаний:\n\n_Например: бронирование, резерв, забронировать_\n\n💡 Или напишите "авто" для автоматической генерации ключевых слов с помощью AI`,
-                keyboards.getBackToAdminKeyboard(),
+                {
+                    parse_mode: "Markdown",
+                    message_thread_id: 102,
+                    ...keyboards.getBackToAdminKeyboard(),
+                },
             );
         } catch (error) {
             await utils.safeSendMessage(
                 bot,
-                chatId,
+                targetChatId,
                 `❌ Ошибка при отправке ответа: ${error.message}`,
+                {
+                    parse_mode: "Markdown",
+                    message_thread_id: 102,
+                },
             );
         }
     });
@@ -62,7 +72,7 @@ module.exports = function setupAdminHandlers(bot, userStates) {
         const userId = callbackQuery.from.id;
         const data = callbackQuery.data;
 
-        if (!utils.isAdmin(userId)) return;
+        if (!(await utils.isAdmin(bot, userId))) return;
 
         try {
             try {
@@ -79,9 +89,13 @@ module.exports = function setupAdminHandlers(bot, userStates) {
                     userStates.set(userId, states.ADMIN_PANEL);
                     await utils.safeSendMessage(
                         bot,
-                        chatId,
+                        targetChatId,
                         "⚙️ Панель администратора",
-                        keyboards.getAdminKeyboard(),
+                        {
+                            parse_mode: "Markdown",
+                            message_thread_id: 102,
+                            ...keyboards.getAdminKeyboard(),
+                        },
                     );
                     break;
 
@@ -123,8 +137,12 @@ module.exports = function setupAdminHandlers(bot, userStates) {
 
                 await utils.safeSendMessage(
                     bot,
-                    chatId,
+                    targetChatId,
                     `📝 Напишите ответ на вопрос:\n\n"${questionText}"`,
+                    {
+                        parse_mode: "Markdown",
+                        message_thread_id: 102,
+                    },
                 );
             }
 
@@ -152,17 +170,16 @@ module.exports = function setupAdminHandlers(bot, userStates) {
     async function handleAdminStats(bot, chatId) {
         const stats = `📊 Статистика бота:
 
-👥 Активных пользователей в сессии: ${userStates.size}
-❓ Вопросов в очереди: ${services.adminAnswers.getPendingQuestions().size}
-📚 Записей в базе знаний: ${services.knowledgeBase.getKnowledgeBase().length}
-🏠 Номеров в базе данных: ${services.roomsData.getRoomsData().length}`;
+    👥 Активных пользователей в сессии: ${userStates.size}
+    ❓ Вопросов в очереди: ${services.adminAnswers.getPendingQuestions().size}
+    📚 Записей в базе знаний: ${services.knowledgeBase.getKnowledgeBase().length}
+    🏠 Номеров в базе данных: ${services.roomsData.getRoomsData().length}`;
 
-        await utils.safeSendMessage(
-            bot,
-            chatId,
-            stats,
-            keyboards.getBackToAdminKeyboard(),
-        );
+        await utils.safeSendMessage(bot, targetChatId, stats, {
+            parse_mode: "Markdown",
+            message_thread_id: 102,
+            ...keyboards.getBackToAdminKeyboard(),
+        });
     }
 
     async function handleAdminKnowledgeBase(bot, chatId) {
@@ -178,12 +195,11 @@ module.exports = function setupAdminHandlers(bot, userStates) {
             });
         }
 
-        await utils.safeSendMessage(
-            bot,
-            chatId,
-            kbInfo,
-            keyboards.getBackToAdminKeyboard(),
-        );
+        await utils.safeSendMessage(bot, targetChatId, kbInfo, {
+            parse_mode: "Markdown",
+            message_thread_id: 102,
+            ...keyboards.getBackToAdminKeyboard(),
+        });
     }
 
     async function handleAdminPending(bot, chatId) {
@@ -192,16 +208,26 @@ module.exports = function setupAdminHandlers(bot, userStates) {
         if (pendingQuestions.size === 0) {
             await utils.safeSendMessage(
                 bot,
-                chatId,
+                targetChatId,
                 "❓ Нет неотвеченных вопросов",
-                keyboards.getBackToAdminKeyboard(),
+                {
+                    parse_mode: "Markdown",
+                    message_thread_id: 102,
+                    ...keyboards.getBackToAdminKeyboard(),
+                },
             );
         } else {
             await utils.safeSendMessage(
                 bot,
-                chatId,
+                targetChatId,
                 "❓ Выберите вопрос для ответа:",
-                keyboards.getPendingQuestionsListKeyboard(pendingQuestions),
+                {
+                    parse_mode: "Markdown",
+                    message_thread_id: 102,
+                    ...keyboards.getPendingQuestionsListKeyboard(
+                        pendingQuestions,
+                    ),
+                },
             );
         }
     }
@@ -213,9 +239,13 @@ module.exports = function setupAdminHandlers(bot, userStates) {
         if (!questionData) {
             await utils.safeSendMessage(
                 bot,
-                chatId,
+                targetChatId,
                 "❌ Вопрос не найден",
-                keyboards.getBackToAdminKeyboard(),
+                {
+                    parse_mode: "Markdown",
+                    message_thread_id: 102,
+                    ...keyboards.getBackToAdminKeyboard(),
+                },
             );
             return;
         }
@@ -225,20 +255,19 @@ module.exports = function setupAdminHandlers(bot, userStates) {
         );
         const questionInfo = `📋 **НОВЫЙ ВОПРОС**
 
-👤 **Пользователь:** ID ${userId}
-📅 **Время получения:** ${timestamp}
+    👤 **Пользователь:** ID ${userId}
+    📅 **Время получения:** ${timestamp}
 
-❓ **Текст вопроса:**
-${questionData.question}
+    ❓ **Текст вопроса:**
+    ${questionData.question}
 
-🔽 **Выберите действие:**`;
+    🔽 **Выберите действие:**`;
 
-        await utils.safeSendMessage(
-            bot,
-            chatId,
-            questionInfo,
-            keyboards.getQuestionManagementKeyboard(userId),
-        );
+        await utils.safeSendMessage(bot, targetChatId, questionInfo, {
+            parse_mode: "Markdown",
+            message_thread_id: 102,
+            ...keyboards.getQuestionManagementKeyboard(userId),
+        });
     }
 
     async function handleRejectQuestion(bot, chatId, targetUserId) {
@@ -247,12 +276,12 @@ ${questionData.question}
                 "Ваш вопрос некорректен, сформулируйте пожалуйста снова";
 
             // Убеждаемся, что targetUserId - это число
-            const targetChatId =
+            const userChatId =
                 typeof targetUserId === "string"
                     ? parseInt(targetUserId)
                     : targetUserId;
 
-            await utils.safeSendMessage(bot, targetChatId, rejectionMessage, {
+            await utils.safeSendMessage(bot, userChatId, rejectionMessage, {
                 parse_mode: "Markdown",
                 ...mainKeyboards.getBackToMenuKeyboard(),
             });
@@ -267,17 +296,25 @@ ${questionData.question}
 
             await utils.safeSendMessage(
                 bot,
-                chatId,
+                targetChatId,
                 `✅ Вопрос отклонен и удален из очереди`,
-                keyboards.getBackToAdminKeyboard(),
+                {
+                    parse_mode: "Markdown",
+                    message_thread_id: 102,
+                    ...keyboards.getBackToAdminKeyboard(),
+                },
             );
         } catch (error) {
             console.error("Ошибка при отклонении вопроса:", error);
             await utils.safeSendMessage(
                 bot,
-                chatId,
+                targetChatId,
                 `❌ Ошибка при отклонении вопроса: ${error.message}`,
-                keyboards.getBackToAdminKeyboard(),
+                {
+                    parse_mode: "Markdown",
+                    message_thread_id: 102,
+                    ...keyboards.getBackToAdminKeyboard(),
+                },
             );
         }
     }
@@ -290,19 +327,25 @@ ${questionData.question}
 
             await utils.safeSendMessage(
                 bot,
-                chatId,
-                `✅ База данных обновлена:
-
-📚 Записей в базе знаний: ${services.knowledgeBase.getKnowledgeBase().length}
-🏠 Номеров загружено: ${services.roomsData.getRoomsData().length}`,
-                keyboards.getBackToAdminKeyboard(),
+                targetChatId,
+                `✅ База данных обновлена:\n\n📚 Записей в базе знаний: ${services.knowledgeBase.getKnowledgeBase().length}\n🏠 Номеров загружено: ${services.roomsData.getRoomsData().length}`,
+                {
+                    parse_mode: "Markdown",
+                    message_thread_id: 102,
+                    ...keyboards.getBackToAdminKeyboard(),
+                },
             );
         } catch (error) {
+            console.error("Ошибка при обновлении базы данных:", error);
             await utils.safeSendMessage(
                 bot,
-                chatId,
+                targetChatId,
                 `❌ Ошибка обновления: ${error.message}`,
-                keyboards.getBackToAdminKeyboard(),
+                {
+                    parse_mode: "Markdown",
+                    message_thread_id: 102,
+                    ...keyboards.getBackToAdminKeyboard(),
+                },
             );
         }
     }

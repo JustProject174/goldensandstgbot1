@@ -29,7 +29,7 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             ...mainMenuKeyboards.getMainMenuKeyboard(),
         });
 
-        if (utils.isAdmin(userId)) {
+        if (await utils.isAdmin(bot, userId)) {
             await utils.safeSendMessage(
                 bot,
                 chatId,

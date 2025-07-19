@@ -7,6 +7,8 @@ const services = {
 };
 const keyboards = require("../keyboards/mainMenu");
 
+const targetChatId = "-1002826990012"; // Глобальная переменная для чата админов
+
 module.exports = function setupMessageHandlers(bot, userStates) {
     bot.on("message", async (msg) => {
         if (
@@ -27,7 +29,10 @@ module.exports = function setupMessageHandlers(bot, userStates) {
         const userState = userStates.get(userId) || states.MAIN_MENU;
 
         // Обработка ответа администратора с ключевыми словами
-        if (userState === states.ADMIN_ANSWERING && utils.isAdmin(userId)) {
+        if (
+            userState === states.ADMIN_ANSWERING &&
+            (await utils.isAdmin(bot, userId))
+        ) {
             const answerData = userStates.get(`${userId}_answer_data`);
             if (answerData) {
                 const keywords = messageText
@@ -53,22 +58,34 @@ module.exports = function setupMessageHandlers(bot, userStates) {
 
                         await utils.safeSendMessage(
                             bot,
-                            chatId,
-                            `✅ Ответ сохранен и будет добавлен в базу знаний с ключевыми словами: ${keywords.join(", ")}`,
+                            targetChatId,
+                            `✅ Ответ сохранен и будет добавлен в базе знаний с ключевыми словами: ${keywords.join(", ")}`,
+                            {
+                                parse_mode: "Markdown",
+                                message_thread_id: 102,
+                            },
                         );
                     } catch (error) {
                         console.error("Ошибка при сохранении ответа:", error);
                         await utils.safeSendMessage(
                             bot,
-                            chatId,
+                            targetChatId,
                             "❌ Произошла ошибка при сохранении. Попробуйте ещё раз.",
+                            {
+                                parse_mode: "Markdown",
+                                message_thread_id: 102,
+                            },
                         );
                     }
                 } else {
                     await utils.safeSendMessage(
                         bot,
-                        chatId,
+                        targetChatId,
                         "❌ Укажите хотя бы одно ключевое слово",
+                        {
+                            parse_mode: "Markdown",
+                            message_thread_id: 102,
+                        },
                     );
                 }
             }
@@ -91,14 +108,14 @@ module.exports = function setupMessageHandlers(bot, userStates) {
                     );
 
                     // Убеждаемся, что targetUserId - это число
-                    const chatId =
+                    const userChatId =
                         typeof targetUserId === "string"
                             ? parseInt(targetUserId)
                             : targetUserId;
 
                     await utils.safeSendMessage(
                         bot,
-                        chatId,
+                        userChatId,
                         `💬 Ответ от менеджера:\n\n${cleanAnswer}`,
                         {
                             parse_mode: "Markdown",
@@ -124,17 +141,22 @@ module.exports = function setupMessageHandlers(bot, userStates) {
 
                     await utils.safeSendMessage(
                         bot,
-                        userId,
+                        targetChatId,
                         `✅ Ответ отправлен пользователю.\n\n🔤 Укажите ключевые слова через запятую (для поиска похожих вопросов)\n\n💡 Или напишите "авто" для автоматической генерации ключевых слов с помощью AI`,
                         {
                             parse_mode: "Markdown",
+                            message_thread_id: 102,
                         },
                     );
                 } catch (error) {
                     await utils.safeSendMessage(
                         bot,
-                        chatId,
+                        targetChatId,
                         `❌ Ошибка при отправке ответа: ${error.message}`,
+                        {
+                            parse_mode: "Markdown",
+                            message_thread_id: 102,
+                        },
                     );
                     userStates.delete(`${userId}_target_user`);
                     userStates.set(userId, states.MAIN_MENU);
@@ -145,7 +167,7 @@ module.exports = function setupMessageHandlers(bot, userStates) {
         }
 
         // Если администратор не в состоянии ADMIN_ANSWERING, но все равно администратор - тоже прерываем
-        if (utils.isAdmin(userId)) {
+        if (await utils.isAdmin(bot, userId)) {
             return;
         }
 
