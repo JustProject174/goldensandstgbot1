@@ -56,18 +56,6 @@ module.exports = {
                     ],
                     [
                         {
-                            text: "📍 Как добраться",
-                            callback_data: "directions",
-                        },
-                    ],
-                    [
-                        {
-                            text: "📞 Бронирование",
-                            callback_data: "booking",
-                        },
-                    ],
-                    [
-                        {
                             text: "⛺ Размещение с палатками",
                             callback_data: "camping",
                         },
@@ -76,6 +64,24 @@ module.exports = {
                         {
                             text: "🏖️ Посещение нашего пляжа",
                             callback_data: "our_beach",
+                        },
+                    ],
+                    [
+                        {
+                            text: "🍖 Аренда мангальной зоны",
+                            callback_data: "Mangalchik",
+                        },
+                    ],
+                    [
+                        {
+                            text: "📍 Как добраться",
+                            callback_data: "directions",
+                        },
+                    ],
+                    [
+                        {
+                            text: "📞 Бронирование",
+                            callback_data: "booking",
                         },
                     ],
                 ],
