@@ -256,7 +256,6 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             "content/camping/6.webp",
             "content/camping/7.jfif",
             "content/camping/8.jfif",
-            "content/camping/9.jfif",
         ];
 
         const message = `Размещение с палатками:
