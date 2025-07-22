@@ -1,4 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
+const express = require("express"); // Добавляем Express
 const config = require("./config");
 const utils = require("./utils");
 const states = require("./states");
@@ -25,6 +26,19 @@ const bot = new TelegramBot(config.BOT_TOKEN, { polling: true });
 // Хранилище состояний пользователей
 const userStates = new Map();
 
+// Создаем HTTP-сервер с Express
+const app = express();
+const PORT = process.env.PORT || 3000; // Порт для сервера, можно настроить в .env
+
+// Эндпоинт для UptimeRobot
+app.get("/health", (req, res) => {
+    res.status(200).send("OK"); // Отвечаем 200 OK для UptimeRobot
+});
+
+// Запускаем сервер
+app.listen(PORT, () => {
+    console.log(`🌐 HTTP-сервер запущен на порту ${PORT}`);
+});
 
 // Инициализация бота
 async function initializeBot() {
@@ -55,11 +69,10 @@ async function initializeBot() {
         }
 
         // Настраиваем обработчики
-
         setupMainMenuHandlers(bot, userStates);
         setupAdminHandlers(bot, userStates);
         setupMessageHandlers(bot, userStates);
-        setupCommandHandlers(bot, userStates); 
+        setupCommandHandlers(bot, userStates);
 
         console.log("✅ Бот успешно запущен и готов к работе!");
         console.log(`📊 Статистика загрузки:
@@ -71,9 +84,6 @@ async function initializeBot() {
         process.exit(1);
     }
 }
-
-// Данные номеров загружаются из локального CSV файла
-// Для обновления данных нужно изменить файл rooms/rooms.csv и перезапустить бота
 
 // Обработка ошибок
 bot.on("error", (error) => {
