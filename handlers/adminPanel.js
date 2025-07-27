@@ -35,9 +35,8 @@ module.exports = function setupAdminHandlers(bot, userStates) {
                 },
             );
 
-            services.adminAnswers
-                .getPendingQuestions()
-                .delete(targetUserId.toString());
+            // Удаляем вопрос из списка ожидающих
+            services.adminAnswers.getPendingQuestions().delete(targetUserId.toString());
 
             userStates.set(userId, states.ADMIN_ANSWERING);
             userStates.set(`${userId}_answer_data`, { targetUserId, answer });
@@ -45,7 +44,7 @@ module.exports = function setupAdminHandlers(bot, userStates) {
             await utils.safeSendMessage(
                 bot,
                 targetChatId,
-                `✅ Ответ отправлен пользователю.\n\n🔤 Укажите ключевые слова через запятую для добавления в базу знаний:\n\n_Например: бронирование, резерв, забронировать_\n\n💡 Или напишите "авто" для автоматической генерации ключевых слов с помощью AI`,
+                `✅ Ответ отправлен пользователю.\n\n🔤 Укажите ключевые слова через запятую для добавления в базу знаний в Supabase:\n\n_Например: бронирование, резерв, забронировать_\n\n💡 Или напишите "авто" для автоматической генерации ключевых слов с помощью AI`,
                 {
                     parse_mode: "Markdown",
                     message_thread_id: 102,
@@ -172,7 +171,7 @@ module.exports = function setupAdminHandlers(bot, userStates) {
 
     👥 Активных пользователей в сессии: ${userStates.size}
     ❓ Вопросов в очереди: ${services.adminAnswers.getPendingQuestions().size}
-    📚 Записей в базе знаний: ${services.knowledgeBase.getKnowledgeBase().length}
+    📚 Записей в базе знаний: ${await services.knowledgeBase.getKnowledgeBaseLength()}
     🏠 Номеров в базе данных: ${services.roomsData.getRoomsData().length}`;
 
         await utils.safeSendMessage(bot, targetChatId, stats, {
@@ -184,7 +183,7 @@ module.exports = function setupAdminHandlers(bot, userStates) {
 
     async function handleAdminKnowledgeBase(bot, chatId) {
         let kbInfo = "📚 База знаний:\n\n";
-        const knowledgeBase = services.knowledgeBase.getKnowledgeBase();
+        const knowledgeBase = await services.knowledgeBase.getKnowledgeBase();
 
         if (knowledgeBase.length === 0) {
             kbInfo += "База знаний пуста";
@@ -261,7 +260,7 @@ module.exports = function setupAdminHandlers(bot, userStates) {
     ❓ **Текст вопроса:**
     ${questionData.question}
 
-    🔽 **Выберите действие:**`;
+    🔽 **Выберите действие:`;
 
         await utils.safeSendMessage(bot, targetChatId, questionInfo, {
             parse_mode: "Markdown",
@@ -275,7 +274,6 @@ module.exports = function setupAdminHandlers(bot, userStates) {
             const rejectionMessage =
                 "Ваш вопрос некорректен, сформулируйте пожалуйста снова";
 
-            // Убеждаемся, что targetUserId - это число
             const userChatId =
                 typeof targetUserId === "string"
                     ? parseInt(targetUserId)
@@ -286,13 +284,8 @@ module.exports = function setupAdminHandlers(bot, userStates) {
                 ...mainKeyboards.getBackToMenuKeyboard(),
             });
 
-            // Удаляем из памяти
-            services.adminAnswers
-                .getPendingQuestions()
-                .delete(targetUserId.toString());
-
-            // Удаляем из файла
-            await services.adminAnswers.removeQuestionFromFile(targetUserId);
+            // Удаляем из очереди в Supabase
+            await services.adminAnswers.removeQuestion(targetUserId);
 
             await utils.safeSendMessage(
                 bot,
@@ -328,7 +321,7 @@ module.exports = function setupAdminHandlers(bot, userStates) {
             await utils.safeSendMessage(
                 bot,
                 targetChatId,
-                `✅ База данных обновлена:\n\n📚 Записей в базе знаний: ${services.knowledgeBase.getKnowledgeBase().length}\n🏠 Номеров загружено: ${services.roomsData.getRoomsData().length}`,
+                `✅ База данных обновлена:\n\n📚 Записей в базе знаний: ${await services.knowledgeBase.getKnowledgeBaseLength()}\n🏠 Номеров загружено: ${services.roomsData.getRoomsData().length}`,
                 {
                     parse_mode: "Markdown",
                     message_thread_id: 102,
