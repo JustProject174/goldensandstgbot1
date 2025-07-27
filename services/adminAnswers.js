@@ -164,6 +164,10 @@ async function updateAdminAnswer(userId, answer, keywords) {
         pendingQuestions.delete(searchUserId);
         console.log(`Удален из ожидающих вопросов пользователь: ${searchUserId}`);
         console.log(`Ответ администратора для пользователя ${searchUserId} сохранен`);
+
+        // ⬇️ Автоматический запуск переноса
+        await loadAndProcessAdminAnswers();
+
     } catch (error) {
         console.error('Ошибка при сохранении ответа администратора:', error);
         throw error;
