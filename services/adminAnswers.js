@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const knowledgeBaseService = require('./knowledgeBase');
+const fs = require('fs');
 
 // Инициализация Supabase клиента
 const supabase = createClient(
@@ -9,7 +10,7 @@ const supabase = createClient(
 
 const pendingQuestions = new Map();
 
-// Функция для экранирования специальных символов
+// Экранирование спецсимволов
 function escapeSpecialChars(text) {
     if (!text) return '';
     return text.toString()
@@ -20,7 +21,7 @@ function escapeSpecialChars(text) {
         .trim();
 }
 
-// Функция для восстановления специальных символов
+// Восстановление спецсимволов
 function unescapeSpecialChars(text) {
     if (!text) return '';
     return text.toString()
@@ -28,13 +29,7 @@ function unescapeSpecialChars(text) {
         .replace(/\\t/g, '\t');
 }
 
-// Функция для безопасного извлечения значения
-function extractValue(line, prefix) {
-    if (!line || !line.startsWith(prefix)) return '';
-    return line.substring(prefix.length).trim();
-}
-
-// Загрузка ожидающих вопросов из Supabase
+// Загрузка ожидающих вопросов
 async function loadPendingQuestions() {
     try {
         const { data, error } = await supabase
@@ -42,12 +37,10 @@ async function loadPendingQuestions() {
             .select('timestamp, user_id, question, answer')
             .is('answer', null);
 
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
 
         pendingQuestions.clear();
-        if (data && data.length > 0) {
+        if (data?.length > 0) {
             for (const entry of data) {
                 if (entry.user_id && entry.question && entry.timestamp) {
                     pendingQuestions.set(entry.user_id, {
@@ -64,57 +57,48 @@ async function loadPendingQuestions() {
     }
 }
 
-// Обработка ответов администраторов и добавление в базу знаний
+// Обработка и сохранение ответов администратора
 async function loadAndProcessAdminAnswers() {
     try {
         const { data, error } = await supabase
             .from('admin_answers')
             .select('id, user_id, question, answer, keywords');
 
-        if (error) {
-            throw error;
-        }
-
+        if (error) throw error;
         if (!data || data.length === 0) {
-            console.log('Таблица ответов администраторов пуста');
+            console.log('Таблица ответов пуста');
             return;
         }
 
         const processedIds = [];
+        const knowledgeBase = knowledgeBaseService.getKnowledgeBase();
 
         for (const entry of data) {
             try {
                 const { id, user_id, question, answer, keywords } = entry;
 
-                if (answer && answer.trim() && keywords && keywords.length > 0) {
-                    let exists = false;
-                    try {
-                        const knowledgeBase = knowledgeBaseService.getKnowledgeBase();
-                        exists = knowledgeBase.some(item =>
-                            item.keywords.some(keyword => keywords.includes(keyword))
-                        );
-                    } catch (kbError) {
-                        console.error('Ошибка при проверке базы знаний:', kbError);
-                    }
-
-                    if (!exists) {
-                        try {
-                            await knowledgeBaseService.saveToKnowledgeBase(keywords, answer);
-                            console.log(`Добавлен ответ в базу знаний: ${keywords.join(', ')}`);
-                            console.log(`Обновленная база знаний содержит ${knowledgeBaseService.getKnowledgeBase().length} записей`);
-                        } catch (saveError) {
-                            console.error('Ошибка при сохранении в базу знаний:', saveError);
-                        }
-                    }
-
-                    processedIds.push(id);
-                    if (user_id) {
-                        pendingQuestions.delete(user_id.toString());
-                    }
+                if (!answer?.trim() || !Array.isArray(keywords) || keywords.every(k => !k.trim())) {
+                    console.log(`⏩ Пропущено ID ${id} — пустой ответ или ключевые слова`);
+                    continue;
                 }
-            } catch (entryError) {
-                console.error('Ошибка при обработке записи:', entryError);
-                continue;
+
+                const exists = knowledgeBase.some(item =>
+                    item.answer === answer &&
+                    item.keywords.length === keywords.length &&
+                    item.keywords.every(k => keywords.includes(k))
+                );
+
+                if (!exists) {
+                    await knowledgeBaseService.saveToKnowledgeBase(keywords, answer);
+                    console.log(`✅ Добавлен в базу знаний: ${keywords.join(', ')}`);
+                } else {
+                    console.log(`⚠️ Ответ ID ${id} уже существует в базе знаний — пропущен`);
+                }
+
+                processedIds.push(id);
+                if (user_id) pendingQuestions.delete(user_id.toString());
+            } catch (err) {
+                console.error(`Ошибка в записи ID ${entry.id}:`, err);
             }
         }
 
@@ -124,61 +108,19 @@ async function loadAndProcessAdminAnswers() {
                 .delete()
                 .in('id', processedIds);
 
-            if (deleteError) {
-                console.error('Ошибка при удалении обработанных записей:', deleteError);
-            }
+            if (deleteError) console.error('Ошибка при удалении:', deleteError);
+            else console.log(`🗑️ Удалены записи: ${processedIds.join(', ')}`);
         }
 
-        console.log('Ответы администраторов обработаны и добавлены в базу знаний');
+        console.log('✅ Обработка завершена');
     } catch (error) {
-        console.error('Ошибка при обработке ответов администраторов:', error);
+        console.error('Ошибка при обработке ответов:', error);
     }
 }
 
-// Обновление ответа администратора
-async function updateAdminAnswer(userId, answer, keywords) {
-    if (!userId || !answer || !keywords || !Array.isArray(keywords)) {
-        throw new Error('Все параметры обязательны, keywords должен быть массивом');
-    }
-
-    try {
-        const safeAnswer = escapeSpecialChars(answer);
-        const safeKeywords = keywords.map(k => escapeSpecialChars(k.toString()));
-        const searchUserId = userId.toString();
-
-        const { data, error } = await supabase
-            .from('admin_answers')
-            .update({ answer: safeAnswer, keywords: safeKeywords })
-            .eq('user_id', searchUserId)
-            .is('answer', null)
-            .select();
-
-        if (error) {
-            throw error;
-        }
-
-        if (!data || data.length === 0) {
-            throw new Error(`Запись для пользователя ${searchUserId} не найдена`);
-        }
-
-        pendingQuestions.delete(searchUserId);
-        console.log(`Удален из ожидающих вопросов пользователь: ${searchUserId}`);
-        console.log(`Ответ администратора для пользователя ${searchUserId} сохранен`);
-
-        // ⬇️ Автоматический запуск переноса
-        await loadAndProcessAdminAnswers();
-
-    } catch (error) {
-        console.error('Ошибка при сохранении ответа администратора:', error);
-        throw error;
-    }
-}
-
-// Сохранение неизвестного вопроса
+// Сохранение нового вопроса
 async function saveUnknownQuestion(userId, username, question) {
-    if (!userId || !question) {
-        throw new Error('userId и question обязательны');
-    }
+    if (!userId || !question) throw new Error('userId и question обязательны');
 
     try {
         const timestamp = new Date().toISOString();
@@ -198,28 +140,78 @@ async function saveUnknownQuestion(userId, username, question) {
                 keywords: []
             });
 
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
 
         pendingQuestions.set(stringUserId, {
             question: unescapeSpecialChars(safeQuestion),
             timestamp
         });
 
-        console.log(`Сохранен неизвестный вопрос от пользователя ${userInfo}`);
+        console.log(`📩 Сохранен вопрос от ${userInfo}`);
     } catch (error) {
-        console.error('Ошибка при сохранении неизвестного вопроса:', error);
+        console.error('Ошибка при сохранении вопроса:', error);
         throw error;
     }
 }
 
-// Получение ожидающих вопросов
+// Обновление ответа
+async function updateAdminAnswer(userId, answer, keywords) {
+    if (!userId || !answer || !Array.isArray(keywords)) {
+        throw new Error('Неверные параметры');
+    }
+
+    try {
+        const safeAnswer = escapeSpecialChars(answer);
+        const safeKeywords = keywords.map(k => escapeSpecialChars(k.toString()));
+        const searchUserId = userId.toString();
+
+        const { data, error } = await supabase
+            .from('admin_answers')
+            .update({ answer: safeAnswer, keywords: safeKeywords })
+            .eq('user_id', searchUserId)
+            .is('answer', null)
+            .select();
+
+        if (error) throw error;
+        if (!data || data.length === 0) throw new Error(`Не найдена запись для ${searchUserId}`);
+
+        pendingQuestions.delete(searchUserId);
+        console.log(`💾 Ответ сохранен и удалён из очереди: ${searchUserId}`);
+
+        await loadAndProcessAdminAnswers();
+    } catch (error) {
+        console.error('Ошибка при сохранении ответа администратора:', error);
+        throw error;
+    }
+}
+
+// Удаление вопроса
+async function removeQuestionFromFile(userId) {
+    if (!userId) throw new Error('userId обязателен');
+
+    try {
+        const searchUserId = userId.toString();
+        const { error } = await supabase
+            .from('admin_answers')
+            .delete()
+            .eq('user_id', searchUserId);
+
+        if (error) throw error;
+
+        pendingQuestions.delete(searchUserId);
+        console.log(`🗑️ Вопрос ${searchUserId} удалён`);
+    } catch (error) {
+        console.error('Ошибка при удалении:', error);
+        throw error;
+    }
+}
+
+// Получение очереди
 function getPendingQuestions() {
     return new Map(pendingQuestions);
 }
 
-// Безопасный текст для Telegram
+// Безопасный текст
 function getSafeTextForTelegram(text) {
     if (!text) return '';
     return text.toString()
@@ -238,31 +230,6 @@ function getQuestionPreview(question, maxLength = 30) {
     return safeQuestion.length > maxLength
         ? safeQuestion.substring(0, maxLength) + '...'
         : safeQuestion;
-}
-
-// Удаление вопроса
-async function removeQuestionFromFile(userId) {
-    if (!userId) {
-        throw new Error('userId обязателен');
-    }
-
-    try {
-        const searchUserId = userId.toString();
-        const { error } = await supabase
-            .from('admin_answers')
-            .delete()
-            .eq('user_id', searchUserId);
-
-        if (error) {
-            throw error;
-        }
-
-        pendingQuestions.delete(searchUserId);
-        console.log(`Вопрос пользователя ${searchUserId} удален из базы и памяти`);
-    } catch (error) {
-        console.error('Ошибка при удалении вопроса:', error);
-        throw error;
-    }
 }
 
 // Инициализация
