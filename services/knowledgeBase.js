@@ -665,23 +665,35 @@ async function createInitialKnowledgeBase() {
 // Сохранение новой записи в Supabase
 async function saveToKnowledgeBase(keywords, answer) {
     try {
+        if (!Array.isArray(keywords)) {
+            throw new Error(`Неверный тип: keywords должен быть массивом. Получено: ${typeof keywords}`);
+        }
+
+        if (typeof answer !== 'string' || !answer.trim()) {
+            throw new Error(`Неверный тип: answer должен быть непустой строкой. Получено: ${typeof answer}`);
+        }
+
+        console.log("Перед вставкой в БД:", { keywords, answer });
+
         const { data, error } = await supabase
             .from('Knowledge_goldensands')
             .insert([{ keywords, answer }])
             .select();
 
         if (error) {
-            throw new Error(`Supabase insert error: ${error.message || JSON.stringify(error)}`);
+            console.error("Ошибка Supabase:", error);
+            throw new Error(`Supabase insert error: ${JSON.stringify(error)}`);
         }
 
+        console.log("✅ Ответ добавлен в базу знаний:", answer);
         await loadKnowledgeBase();
-        console.log("Новый ответ добавлен в базу знаний и база перезагружена");
         return knowledgeBase;
     } catch (error) {
         console.error("Ошибка сохранения в базу знаний:", error.message || error);
-        throw error; // ⬅️ чтобы внешний код понял, что неуспешно
+        throw error;
     }
 }
+
 
 // Функция для получения корня слова
 function getWordRoot(word) {
