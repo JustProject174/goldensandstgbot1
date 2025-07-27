@@ -671,15 +671,15 @@ async function saveToKnowledgeBase(keywords, answer) {
             .select();
 
         if (error) {
-            throw error;
+            throw new Error(`Supabase insert error: ${error.message || JSON.stringify(error)}`);
         }
 
         await loadKnowledgeBase();
         console.log("Новый ответ добавлен в базу знаний и база перезагружена");
         return knowledgeBase;
     } catch (error) {
-        console.error("Ошибка сохранения в базу знаний:", error);
-        return knowledgeBase;
+        console.error("Ошибка сохранения в базу знаний:", error.message || error);
+        throw error; // ⬅️ чтобы внешний код понял, что неуспешно
     }
 }
 
