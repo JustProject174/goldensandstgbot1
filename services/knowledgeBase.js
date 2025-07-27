@@ -73,7 +73,7 @@ function semanticSearch(query) {
 async function loadKnowledgeBase() {
     try {
         const { data, error } = await supabase
-            .from('Knowledge_goldensands')
+            .from('knowledge_goldensands')
             .select('keywords, answer');
 
         if (error) {
