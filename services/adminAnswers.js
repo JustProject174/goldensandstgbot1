@@ -1,21 +1,22 @@
-const fs = require('fs').promises;
-const path = require('path');
-const config = require('../config');
+const { createClient } = require('@supabase/supabase-js');
 const knowledgeBaseService = require('./knowledgeBase');
 
-const pendingQuestions = new Map();
+// Инициализация Supabase клиента
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
 
-// Уникальный разделитель записей
-const ENTRY_SEPARATOR = '\n===ENTRY_END===\n';
+const pendingQuestions = new Map();
 
 // Функция для экранирования специальных символов
 function escapeSpecialChars(text) {
     if (!text) return '';
     return text.toString()
-        .replace(/\r\n/g, '\\n')  // Windows переносы
-        .replace(/\n/g, '\\n')    // Unix переносы
-        .replace(/\r/g, '\\n')    // Mac переносы
-        .replace(/\t/g, '\\t')    // Табуляции
+        .replace(/\r\n/g, '\\n')
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\n')
+        .replace(/\t/g, '\\t')
         .trim();
 }
 
@@ -27,64 +28,33 @@ function unescapeSpecialChars(text) {
         .replace(/\\t/g, '\t');
 }
 
-// Функция для безопасного извлечения значения из строки
+// Функция для безопасного извлечения значения
 function extractValue(line, prefix) {
     if (!line || !line.startsWith(prefix)) return '';
     return line.substring(prefix.length).trim();
 }
 
-async function ensureFileExists(filePath) {
-    try {
-        await fs.access(filePath);
-    } catch (error) {
-        // Создаем директорию если не существует
-        const dir = path.dirname(filePath);
-        await fs.mkdir(dir, { recursive: true });
-        // Создаем пустой файл
-        await fs.writeFile(filePath, '', 'utf8');
-    }
-}
-
+// Загрузка ожидающих вопросов из Supabase
 async function loadPendingQuestions() {
     try {
-        await ensureFileExists(config.ADMIN_ANSWERS_FILE);
-        const data = await fs.readFile(config.ADMIN_ANSWERS_FILE, 'utf8');
+        const { data, error } = await supabase
+            .from('admin_answers')
+            .select('timestamp, user_id, question, answer')
+            .is('answer', null);
 
-        if (!data.trim()) return;
+        if (error) {
+            throw error;
+        }
 
-        const entries = data.split(ENTRY_SEPARATOR).filter(entry => entry.trim());
-
-        for (const entry of entries) {
-            try {
-                const lines = entry.split('\n').filter(line => line.trim());
-
-                let timestamp = '';
-                let userId = '';
-                let question = '';
-                let answer = '';
-
-                for (const line of lines) {
-                    if (line.startsWith('TIMESTAMP:')) {
-                        timestamp = extractValue(line, 'TIMESTAMP:');
-                    } else if (line.startsWith('USER_ID:')) {
-                        userId = extractValue(line, 'USER_ID:');
-                    } else if (line.startsWith('QUESTION:')) {
-                        question = unescapeSpecialChars(extractValue(line, 'QUESTION:'));
-                    } else if (line.startsWith('ANSWER:')) {
-                        answer = unescapeSpecialChars(extractValue(line, 'ANSWER:'));
-                    }
+        pendingQuestions.clear();
+        if (data && data.length > 0) {
+            for (const entry of data) {
+                if (entry.user_id && entry.question && entry.timestamp) {
+                    pendingQuestions.set(entry.user_id, {
+                        question: unescapeSpecialChars(entry.question),
+                        timestamp: entry.timestamp
+                    });
                 }
-
-                // Если ответ пустой и есть все необходимые данные, добавляем в ожидающие
-                if (!answer.trim() && userId && question && timestamp) {
-                    pendingQuestions.set(userId, { question, timestamp });
-                } else if (answer.trim() && userId) {
-                    // Если есть ответ, удаляем из ожидающих
-                    pendingQuestions.delete(userId);
-                }
-            } catch (parseError) {
-                console.error('Ошибка при парсинге записи:', parseError);
-                continue;
             }
         }
 
@@ -94,92 +64,70 @@ async function loadPendingQuestions() {
     }
 }
 
+// Обработка ответов администраторов и добавление в базу знаний
 async function loadAndProcessAdminAnswers() {
     try {
-        await ensureFileExists(config.ADMIN_ANSWERS_FILE);
-        const data = await fs.readFile(config.ADMIN_ANSWERS_FILE, 'utf8');
+        const { data, error } = await supabase
+            .from('admin_answers')
+            .select('id, user_id, question, answer, keywords');
 
-        if (!data.trim()) {
-            console.log('Файл ответов администраторов пуст');
+        if (error) {
+            throw error;
+        }
+
+        if (!data || data.length === 0) {
+            console.log('Таблица ответов администраторов пуста');
             return;
         }
 
-        const entries = data.split(ENTRY_SEPARATOR).filter(entry => entry.trim());
-        const processedEntries = [];
+        const processedIds = [];
 
-        for (const entry of entries) {
+        for (const entry of data) {
             try {
-                const lines = entry.split('\n').filter(line => line.trim());
+                const { id, user_id, question, answer, keywords } = entry;
 
-                let question = '';
-                let answer = '';
-                let keywordsStr = '';
-                let userId = '';
-
-                for (const line of lines) {
-                    if (line.startsWith('QUESTION:')) {
-                        question = unescapeSpecialChars(extractValue(line, 'QUESTION:'));
-                    } else if (line.startsWith('ANSWER:')) {
-                        answer = unescapeSpecialChars(extractValue(line, 'ANSWER:'));
-                    } else if (line.startsWith('KEYWORDS:')) {
-                        keywordsStr = extractValue(line, 'KEYWORDS:');
-                    } else if (line.startsWith('USER_ID:')) {
-                        userId = extractValue(line, 'USER_ID:');
+                if (answer && answer.trim() && keywords && keywords.length > 0) {
+                    let exists = false;
+                    try {
+                        const knowledgeBase = knowledgeBaseService.getKnowledgeBase();
+                        exists = knowledgeBase.some(item =>
+                            item.keywords.some(keyword => keywords.includes(keyword))
+                        );
+                    } catch (kbError) {
+                        console.error('Ошибка при проверке базы знаний:', kbError);
                     }
-                }
 
-                // Если есть ответ и ключевые слова
-                if (answer.trim() && keywordsStr.trim()) {
-                    const keywords = keywordsStr.split(',')
-                        .map(k => k.trim())
-                        .filter(k => k.length > 0);
-
-                    if (keywords.length > 0) {
-                        // Проверяем, не существует ли уже такой записи
-                        let exists = false;
+                    if (!exists) {
                         try {
-                            const knowledgeBase = knowledgeBaseService.getKnowledgeBase();
-                            exists = knowledgeBase.some(item =>
-                                item.keywords.some(keyword => keywords.includes(keyword))
-                            );
-                        } catch (kbError) {
-                            console.error('Ошибка при проверке базы знаний:', kbError);
+                            await knowledgeBaseService.saveToKnowledgeBase(keywords, answer);
+                            console.log(`Добавлен ответ в базу знаний: ${keywords.join(', ')}`);
+                            console.log(`Обновленная база знаний содержит ${knowledgeBaseService.getKnowledgeBase().length} записей`);
+                        } catch (saveError) {
+                            console.error('Ошибка при сохранении в базу знаний:', saveError);
                         }
-
-                        if (!exists) {
-                            try {
-                                await knowledgeBaseService.saveToKnowledgeBase(keywords, answer);
-                                console.log(`Добавлен ответ в базу знаний: ${keywords.join(', ')}`);
-                                console.log(`Обновленная база знаний содержит ${knowledgeBaseService.getKnowledgeBase().length} записей`);
-                            } catch (saveError) {
-                                console.error('Ошибка при сохранении в базу знаний:', saveError);
-                            }
-                        }
-
-                        // Удаляем из ожидающих вопросов
-                        if (userId) {
-                            pendingQuestions.delete(userId);
-                        }
-                    } else {
-                        // Если ключевые слова некорректные, оставляем запись
-                        processedEntries.push(entry);
                     }
-                } else {
-                    // Если ответа нет, оставляем запись
-                    processedEntries.push(entry);
+
+                    processedIds.push(id);
+                    if (user_id) {
+                        pendingQuestions.delete(user_id.toString());
+                    }
                 }
-            } catch (parseError) {
-                console.error('Ошибка при обработке записи:', parseError);
-                // Оставляем некорректную запись для ручной проверки
-                processedEntries.push(entry);
+            } catch (entryError) {
+                console.error('Ошибка при обработке записи:', entryError);
+                continue;
             }
         }
 
-        // Сохраняем только необработанные записи
-        const remainingData = processedEntries.length > 0 
-            ? processedEntries.join(ENTRY_SEPARATOR) + ENTRY_SEPARATOR
-            : '';
-        await fs.writeFile(config.ADMIN_ANSWERS_FILE, remainingData, 'utf8');
+        if (processedIds.length > 0) {
+            const { error: deleteError } = await supabase
+                .from('admin_answers')
+                .delete()
+                .in('id', processedIds);
+
+            if (deleteError) {
+                console.error('Ошибка при удалении обработанных записей:', deleteError);
+            }
+        }
 
         console.log('Ответы администраторов обработаны и добавлены в базу знаний');
     } catch (error) {
@@ -187,61 +135,34 @@ async function loadAndProcessAdminAnswers() {
     }
 }
 
+// Обновление ответа администратора
 async function updateAdminAnswer(userId, answer, keywords) {
     if (!userId || !answer || !keywords || !Array.isArray(keywords)) {
         throw new Error('Все параметры обязательны, keywords должен быть массивом');
     }
 
     try {
-        await ensureFileExists(config.ADMIN_ANSWERS_FILE);
-        const data = await fs.readFile(config.ADMIN_ANSWERS_FILE, 'utf8');
-
-        if (!data.trim()) {
-            throw new Error('Файл ответов пуст');
-        }
-
-        const entries = data.split(ENTRY_SEPARATOR);
-        let updated = false;
-
-        // Приводим userId к строке для поиска
-        const searchUserId = userId.toString();
-
-        // Экранируем ответ и ключевые слова
         const safeAnswer = escapeSpecialChars(answer);
         const safeKeywords = keywords.map(k => escapeSpecialChars(k.toString()));
+        const searchUserId = userId.toString();
 
-        for (let i = 0; i < entries.length; i++) {
-            if (entries[i].includes(`USER_ID:${searchUserId}`)) {
-                const lines = entries[i].split('\n');
-                const updatedLines = [];
+        const { data, error } = await supabase
+            .from('admin_answers')
+            .update({ answer: safeAnswer, keywords: safeKeywords })
+            .eq('user_id', searchUserId)
+            .is('answer', null)
+            .select();
 
-                for (const line of lines) {
-                    if (line.startsWith('ANSWER:') && extractValue(line, 'ANSWER:') === '') {
-                        updatedLines.push(`ANSWER:${safeAnswer}`);
-                    } else if (line.startsWith('KEYWORDS:') && extractValue(line, 'KEYWORDS:') === '') {
-                        updatedLines.push(`KEYWORDS:${safeKeywords.join(',')}`);
-                    } else {
-                        updatedLines.push(line);
-                    }
-                }
-
-                entries[i] = updatedLines.join('\n');
-                updated = true;
-                break;
-            }
+        if (error) {
+            throw error;
         }
 
-        if (!updated) {
+        if (!data || data.length === 0) {
             throw new Error(`Запись для пользователя ${searchUserId} не найдена`);
         }
 
-        await fs.writeFile(config.ADMIN_ANSWERS_FILE, entries.join(ENTRY_SEPARATOR), 'utf8');
-
-        // Удаляем из ожидающих вопросов (тоже приводим к строке)
         pendingQuestions.delete(searchUserId);
-
         console.log(`Удален из ожидающих вопросов пользователь: ${searchUserId}`);
-
         console.log(`Ответ администратора для пользователя ${searchUserId} сохранен`);
     } catch (error) {
         console.error('Ошибка при сохранении ответа администратора:', error);
@@ -249,35 +170,37 @@ async function updateAdminAnswer(userId, answer, keywords) {
     }
 }
 
+// Сохранение неизвестного вопроса
 async function saveUnknownQuestion(userId, username, question) {
     if (!userId || !question) {
         throw new Error('userId и question обязательны');
     }
 
     try {
-        await ensureFileExists(config.ADMIN_ANSWERS_FILE);
-
         const timestamp = new Date().toISOString();
         const userInfo = username ? `@${username}` : `ID: ${userId}`;
-
-        // Приводим userId к строке для консистентности
-        const stringUserId = userId.toString();
-
-        // Экранируем специальные символы в тексте
         const safeQuestion = escapeSpecialChars(question);
         const safeUserInfo = escapeSpecialChars(userInfo);
+        const stringUserId = userId.toString();
 
-        const entry = `TIMESTAMP:${timestamp}
-USER:${safeUserInfo}
-USER_ID:${stringUserId}
-QUESTION:${safeQuestion}
-ANSWER:
-KEYWORDS:${ENTRY_SEPARATOR}`;
+        const { error } = await supabase
+            .from('admin_answers')
+            .insert({
+                timestamp,
+                user_info: safeUserInfo,
+                user_id: stringUserId,
+                question: safeQuestion,
+                answer: null,
+                keywords: []
+            });
 
-        await fs.appendFile(config.ADMIN_ANSWERS_FILE, entry, 'utf8');
-        pendingQuestions.set(stringUserId, { 
-            question: unescapeSpecialChars(safeQuestion), 
-            timestamp 
+        if (error) {
+            throw error;
+        }
+
+        pendingQuestions.set(stringUserId, {
+            question: unescapeSpecialChars(safeQuestion),
+            timestamp
         });
 
         console.log(`Сохранен неизвестный вопрос от пользователя ${userInfo}`);
@@ -287,15 +210,14 @@ KEYWORDS:${ENTRY_SEPARATOR}`;
     }
 }
 
+// Получение ожидающих вопросов
 function getPendingQuestions() {
     return new Map(pendingQuestions);
 }
 
-// Функция для получения безопасного текста для отправки в Telegram
+// Безопасный текст для Telegram
 function getSafeTextForTelegram(text) {
     if (!text) return '';
-
-    // Убираем или экранируем проблемные HTML символы
     return text.toString()
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -305,55 +227,41 @@ function getSafeTextForTelegram(text) {
         .trim();
 }
 
-// Функция для получения безопасного превью вопроса
+// Превью вопроса
 function getQuestionPreview(question, maxLength = 30) {
     if (!question) return 'Без текста';
-
     const safeQuestion = getSafeTextForTelegram(question);
-    return safeQuestion.length > maxLength 
+    return safeQuestion.length > maxLength
         ? safeQuestion.substring(0, maxLength) + '...'
         : safeQuestion;
 }
 
+// Удаление вопроса
 async function removeQuestionFromFile(userId) {
     if (!userId) {
         throw new Error('userId обязателен');
     }
 
     try {
-        await ensureFileExists(config.ADMIN_ANSWERS_FILE);
-        const data = await fs.readFile(config.ADMIN_ANSWERS_FILE, 'utf8');
+        const searchUserId = userId.toString();
+        const { error } = await supabase
+            .from('admin_answers')
+            .delete()
+            .eq('user_id', searchUserId);
 
-        if (!data.trim()) {
-            return; // Файл пуст, нечего удалять
+        if (error) {
+            throw error;
         }
 
-        const entries = data.split(ENTRY_SEPARATOR).filter(entry => entry.trim());
-        const searchUserId = userId.toString();
-
-        // Фильтруем записи, исключая нужную
-        const filteredEntries = entries.filter(entry => {
-            return !entry.includes(`USER_ID:${searchUserId}`);
-        });
-
-        // Сохраняем обновленный файл
-        const updatedData = filteredEntries.length > 0 
-            ? filteredEntries.join(ENTRY_SEPARATOR) + ENTRY_SEPARATOR
-            : '';
-        
-        await fs.writeFile(config.ADMIN_ANSWERS_FILE, updatedData, 'utf8');
-
-        // Удаляем из памяти
         pendingQuestions.delete(searchUserId);
-
-        console.log(`Вопрос пользователя ${searchUserId} удален из файла и памяти`);
+        console.log(`Вопрос пользователя ${searchUserId} удален из базы и памяти`);
     } catch (error) {
-        console.error('Ошибка при удалении вопроса из файла:', error);
+        console.error('Ошибка при удалении вопроса:', error);
         throw error;
     }
 }
 
-// Инициализация при загрузке модуля
+// Инициализация
 loadPendingQuestions().catch(console.error);
 
 module.exports = {
