@@ -645,7 +645,7 @@ async function createInitialKnowledgeBase() {
 
     try {
         const { error } = await supabase
-            .from('Knowledge_goldensands')
+            .from('knowledge_goldensands')
             .insert(initialData);
 
         if (error) {
@@ -676,7 +676,7 @@ async function saveToKnowledgeBase(keywords, answer) {
         console.log("Перед вставкой в БД:", { keywords, answer });
 
         const { data, error } = await supabase
-            .from('Knowledge_goldensands')
+            .from('knowledge_goldensands')
             .insert([{ keywords, answer }])
             .select();
 
@@ -864,7 +864,7 @@ function findAnswerInKnowledgeBase(message) {
 }
 async function updateKnowledgeBase(id, keywords, answer) {
     const { error } = await supabase
-        .from('Knowledge_goldensands')
+        .from('knowledge_goldensands')
         .update({ keywords, answer })
         .eq('id', id);
     if (error) throw error;
