@@ -60,7 +60,7 @@ function semanticSearch(query) {
         const bestMatch = scores[0];
         console.log(`Семантический поиск: найдено совпадение с релевантностью ${bestMatch.score.toFixed(4)}`);
 
-        if (bestMatch.score > 43.0) {
+        if (bestMatch.score > 30.0) {
             return bestMatch.item.item.answer;
         }
     }

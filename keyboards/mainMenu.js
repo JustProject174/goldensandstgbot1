@@ -84,6 +84,12 @@ module.exports = {
                             callback_data: "booking",
                         },
                     ],
+                    [
+                        {
+                            text: "❓ Задать вопрос администратору",
+                            callback_data: "ask_admin",
+                        },
+                    ], // Новая кнопка
                 ],
             },
         };
@@ -110,13 +116,13 @@ module.exports = {
                 inline_keyboard: [
                     [
                         {
-                            text: "✅ Да, был(а)",
+                            text: "✅ Да, ознакомлен(а)!",
                             callback_data: "booking_yes",
                         },
                     ],
                     [
                         {
-                            text: "❌ Нет, впервые",
+                            text: "❌ Нет",
                             callback_data: "booking_no",
                         },
                     ],

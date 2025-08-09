@@ -5,4 +5,5 @@ module.exports = {
     TRANSFER_REQUEST: 'transfer_request',
     ADMIN_ANSWERING: 'admin_answering',
     ADMIN_ANSWERING_BUTTON: 'admin_answering_button',
+    ASKING_QUESTIONS: 'asking_questions' // Добавлено новое состояние
 };

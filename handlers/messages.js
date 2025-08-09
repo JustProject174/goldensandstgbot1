@@ -42,17 +42,12 @@ module.exports = function setupMessageHandlers(bot, userStates) {
 
                 if (keywords.length > 0) {
                     try {
-                        // Приводим userId к строке для консистентности
                         const targetUserId = answerData.targetUserId.toString();
-
-                        // Обновляем файл администратора (НЕ добавляем в базу знаний сразу)
                         await services.adminAnswers.updateAdminAnswer(
                             targetUserId,
                             answerData.answer,
                             keywords,
                         );
-
-                        // Очищаем состояние
                         userStates.delete(`${userId}_answer_data`);
                         userStates.set(userId, states.MAIN_MENU);
 
@@ -89,25 +84,18 @@ module.exports = function setupMessageHandlers(bot, userStates) {
                     );
                 }
             }
-            // ВАЖНО: прерываем выполнение для администратора в ЛЮБОМ случае
             return;
         }
 
         // Обработка ответа администратора через кнопку
-        const currentState = userStates.get(userId);
-
-        if (currentState === states.ADMIN_ANSWERING_BUTTON) {
+        if (userState === states.ADMIN_ANSWERING_BUTTON) {
             const targetUserId = userStates.get(`${userId}_target_user`);
-
             if (targetUserId) {
                 try {
-                    // Очищаем ответ от потенциально проблематичных символов
                     const cleanAnswer = messageText.replace(
                         /[_*[\]()~`>#+\-=|{}.!\\]/g,
                         "",
                     );
-
-                    // Убеждаемся, что targetUserId - это число
                     const userChatId =
                         typeof targetUserId === "string"
                             ? parseInt(targetUserId)
@@ -123,16 +111,13 @@ module.exports = function setupMessageHandlers(bot, userStates) {
                         },
                     );
 
-                    // Удаляем из ожидающих вопросов
                     services.adminAnswers
                         .getPendingQuestions()
                         .delete(targetUserId);
 
-                    // Сброс состояния
                     userStates.delete(`${userId}_target_user`);
                     userStates.set(userId, states.MAIN_MENU);
 
-                    // Запрашиваем ключевые слова у администратора
                     userStates.set(userId, states.ADMIN_ANSWERING);
                     userStates.set(`${userId}_answer_data`, {
                         targetUserId,
@@ -162,63 +147,71 @@ module.exports = function setupMessageHandlers(bot, userStates) {
                     userStates.set(userId, states.MAIN_MENU);
                 }
             }
-            // ВАЖНО: прерываем выполнение для администратора в ЛЮБОМ случае
             return;
         }
 
-        // Если администратор не в состоянии ADMIN_ANSWERING, но все равно администратор - тоже прерываем
+        // Если администратор не в состоянии ADMIN_ANSWERING или ADMIN_ANSWERING_BUTTON
         if (await utils.isAdmin(bot, userId)) {
             return;
         }
 
-        // Проверяем, есть ли уже ожидающий вопрос от этого пользователя
-        const pendingQuestions = services.adminAnswers.getPendingQuestions();
-        const hasPendingQuestion = pendingQuestions.has(userId.toString());
+        // Обработка сообщений только в состоянии ASKING_QUESTIONS
+        if (userState === states.ASKING_QUESTIONS) {
+            // Проверяем, есть ли уже ожидающий вопрос от этого пользователя
+            const pendingQuestions = services.adminAnswers.getPendingQuestions();
+            const hasPendingQuestion = pendingQuestions.has(userId.toString());
 
-        // Поиск в базе знаний
-        const autoAnswer =
-            services.knowledgeBase.findAnswerInKnowledgeBase(messageText);
+            // Поиск в базе знаний
+            const autoAnswer =
+                services.knowledgeBase.findAnswerInKnowledgeBase(messageText);
 
-        if (autoAnswer) {
-            // Если есть автоответ, удаляем ожидающий вопрос (если был)
-            if (hasPendingQuestion) {
-                pendingQuestions.delete(userId.toString());
-            }
-            await utils.safeSendMessage(bot, chatId, autoAnswer, {
-                parse_mode: "Markdown",
-                ...keyboards.getBackToMenuKeyboard(),
-            });
-        } else {
-            // Сохраняем вопрос только если нет ожидающего вопроса от этого пользователя
-            if (!hasPendingQuestion) {
-                await services.adminAnswers.saveUnknownQuestion(
-                    userId,
-                    username,
-                    messageText,
-                );
+            if (autoAnswer) {
+                if (hasPendingQuestion) {
+                    pendingQuestions.delete(userId.toString());
+                }
+                await utils.safeSendMessage(bot, chatId, autoAnswer, {
+                    parse_mode: "Markdown",
+                    ...keyboards.getBackToMenuKeyboard(),
+                });
+            } else {
+                if (!hasPendingQuestion) {
+                    await services.adminAnswers.saveUnknownQuestion(
+                        userId,
+                        username,
+                        messageText,
+                    );
 
-                await utils.safeSendMessage(
-                    bot,
-                    chatId,
-                    `Спасибо за ваш вопрос! 🤔
+                    await utils.safeSendMessage(
+                        bot,
+                        chatId,
+                        `Спасибо за ваш вопрос! 🤔
 
 Я передам его нашему менеджеру, и он ответит вам в ближайшее время.
 
 А пока вы можете воспользоваться меню с готовыми ответами 👇`,
-                    keyboards.getMainMenuKeyboard(),
-                );
+                    keyboards.getBackToMenuKeyboard(),
+                    );
 
-                await utils.forwardToAdmins(bot, userId, username, messageText);
-            } else {
-                await utils.safeSendMessage(
-                    bot,
-                    chatId,
-                    `Ваш предыдущий вопрос еще обрабатывается. 
+                    await utils.forwardToAdmins(bot, userId, username, messageText);
+                } else {
+                    await utils.safeSendMessage(
+                        bot,
+                        chatId,
+                        `Ваш предыдущий вопрос еще обрабатывается. 
 
 Пожалуйста, дождитесь ответа от менеджера или воспользуйтесь меню с готовыми ответами 👇`,
-                    keyboards.getMainMenuKeyboard(),
-                );
+                        keyboards.getMainMenuKeyboard(),
+                    );
+                }
             }
+        } else if (userState !== states.BOOKING_PROCESS) {
+            // Если пользователь не в состоянии ASKING_QUESTIONS и не в BOOKING_PROCESS
+            await utils.safeSendMessage(
+                bot,
+                chatId,
+                `Пожалуйста, выберите опцию из меню 👇`,
+                keyboards.getMainMenuKeyboard(),
+            );
         }
     });
 };

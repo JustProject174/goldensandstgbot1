@@ -104,9 +104,7 @@ function isValidImageUrl(url) {
 async function loadRoomsData() {
     try {
         const csvFilePath = path.join(__dirname, "../rooms/rooms.csv");
-
         const data = await fs.readFile(csvFilePath, "utf8");
-
         const parsed = Papa.parse(data, {
             header: true,
             skipEmptyLines: true,
@@ -114,38 +112,20 @@ async function loadRoomsData() {
             delimiter: ",",
             encoding: "UTF-8",
         });
-
-        // Фильтруем пустые строки и проверяем валидность данных
-        roomsData = parsed.data.filter((room) => {
-            return room && Object.keys(room).length > 1 && room.ID;
-        });
-
-        // Добавляем фотографии к каждому номеру по его ID
+        roomsData = parsed.data.filter((room) => room && Object.keys(room).length > 1 && room.ID);
         roomsData = roomsData.map((room) => {
-            // Приводим ID к числу для корректного сравнения
             const roomId = parseInt(room.ID);
             const photos = roomPhotos[roomId] || [];
-
-            // Фильтруем только валидные фотографии
             const validPhotos = photos.filter(isValidImageUrl);
-
+            console.log("Сырой объект room перед обработкой:", JSON.stringify(room, null, 2));
             return {
                 ...room,
-                ID: roomId, // Сохраняем ID как число
+                ID: roomId,
                 photos: validPhotos,
                 hasPhotos: validPhotos.length > 0,
             };
         });
-
-        // Статистика по фотографиям
-        const roomsWithPhotos = roomsData.filter(
-            (room) => room.hasPhotos,
-        ).length;
-
-        console.log(
-            `✅ Загружено ${roomsData.length} номеров из CSV файла (${roomsWithPhotos} с фотографиями)`,
-        );
-
+        console.log("Полные данные roomsData после парсинга:", JSON.stringify(roomsData, null, 2));
         return roomsData;
     } catch (error) {
         console.error("❌ Ошибка загрузки локального CSV файла:", error);
@@ -254,6 +234,55 @@ async function validateAllPhotos() {
     console.log("✅ Проверка всех фотографий завершена");
 }
 
+function decodeHtml(html) {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+}
+
+
+const he = require('he');
+
+function getRoomsKeyboard(roomsData) {
+    const keyboard = [];
+    for (let i = 0; i < roomsData.length; i += 2) {
+        const row = [];
+        const room1 = roomsData[i];
+        const room1Text = room1.Комнат && room1.Комнат !== null && room1.Комнат !== ""
+            ? `${he.decode(room1.Название)} (${room1.Комнат})`
+            : he.decode(room1.Название);
+
+        row.push({
+            text: room1Text,
+            callback_data: `room_${i}`,
+        });
+
+        if (i + 1 < roomsData.length) {
+            const room2 = roomsData[i + 1];
+            const room2Text = room2.Комнат && room2.Комнат !== null && room2.Комнат !== ""
+                ? `${he.decode(room2.Название)} (${room2.Комнат})`
+                : he.decode(room2.Название);
+
+            row.push({
+                text: room2Text,
+                callback_data: `room_${i + 1}`,
+            });
+        }
+        keyboard.push(row);
+    }
+    keyboard.push([
+        {
+            text: "🔙 Назад в меню",
+            callback_data: "back_to_menu",
+        },
+    ]);
+    return {
+        reply_markup: {
+            inline_keyboard: keyboard,
+        },
+    };
+}
+
 module.exports = {
     loadRoomsData,
     getRoomsData,
@@ -261,4 +290,5 @@ module.exports = {
     getRoomById,
     validateAllPhotos,
     isValidImageUrl,
+    getRoomsKeyboard, // Добавьте эту функцию в экспорт, если её там ещё нет
 };

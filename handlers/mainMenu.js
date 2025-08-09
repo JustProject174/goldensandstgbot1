@@ -50,7 +50,12 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
         return total;
     }
 
-    // Обработка текстовых сообщений для бронирования
+    function escapeMarkdown(text) {
+        if (!text) return '';
+        return text.replace(/([_*[\]()~`>#+-=|{}.!])/g, '\\$1');
+    }
+
+    // Обработка текстовых сообщений
     bot.on('message', async (msg) => {
         const chatId = msg.chat.id;
         const userId = msg.from.id;
@@ -59,212 +64,225 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
         // Игнорировать команды
         if (text.startsWith('/')) return;
 
-        // Проверяем, находится ли пользователь в процессе бронирования
-        if (userStates.get(userId) !== states.BOOKING_PROCESS) {
-            // Если не в процессе бронирования, пересылаем как вопрос администраторам (режим приема вопросов)
-            if (userStates.get(userId) === states.MAIN_MENU && text.trim().length > 0) {
-                logger.info(`Forwarding question from user ${userId} in chat ${chatId}: ${text}`);
-                await utils.forwardToAdmins(bot, userId, msg.from.username, msg.text);
-            }
-            return;
-        }
+        const state = userStates.get(userId);
 
-        try {
-            logger.info(`Processing message for user ${userId} in chat ${chatId}: ${text}`);
-            const { data: session, error } = await getBookingSession(chatId);
-            if (error || !session) {
-                logger.error(`Booking session not found for chat ${chatId}`, { error });
-                await utils.safeSendMessage(bot, chatId, '❌ Сессия бронирования не найдена. Начните заново.', {
-                    parse_mode: 'Markdown',
-                    ...mainMenuKeyboards.getBackToMenuKeyboard()
-                });
-                userStates.set(userId, states.MAIN_MENU);
-                return;
-            }
-
-            // Проверка времени жизни сессии (24 часа)
-            if (new Date(session.updated_at) < new Date(Date.now() - 24 * 60 * 60 * 1000)) {
-                logger.warn(`Booking session expired for chat ${chatId}`);
-                await deleteBookingSession(chatId);
-                await utils.safeSendMessage(bot, chatId, '❌ Сессия бронирования истекла. Начните заново.', {
-                    parse_mode: 'Markdown',
-                    ...mainMenuKeyboards.getBackToMenuKeyboard()
-                });
-                userStates.set(userId, states.MAIN_MENU);
-                return;
-            }
-
-            let bookingData = session.data || {};
-
-            if (session.step === 'checkIn') {
-                const checkIn = parseDate(text);
-                if (!checkIn) {
-                    logger.warn(`Invalid check-in date format for chat ${chatId}: ${text}`);
-                    await utils.safeSendMessage(bot, chatId, '❌ Неверный формат даты. Введите дату заезда (ДД.ММ.ГГГГ):', {
+        if (state === states.BOOKING_PROCESS) {
+            // Обработка бронирования
+            try {
+                logger.info(`Processing message for user ${userId} in chat ${chatId}: ${text}`);
+                const { data: session, error } = await getBookingSession(chatId);
+                if (error || !session) {
+                    logger.error(`Booking session not found for chat ${chatId}`, { error });
+                    await utils.safeSendMessage(bot, chatId, '❌ Сессия бронирования не найдена. Начните заново.', {
                         parse_mode: 'Markdown',
                         ...mainMenuKeyboards.getBackToMenuKeyboard()
                     });
-                    return;
-                }
-                if (checkIn < new Date().setHours(0, 0, 0, 0)) {
-                    logger.warn(`Check-in date in the past for chat ${chatId}: ${text}`);
-                    await utils.safeSendMessage(bot, chatId, '❌ Дата заезда не может быть в прошлом.', {
-                        parse_mode: 'Markdown',
-                        ...mainMenuKeyboards.getBackToMenuKeyboard()
-                    });
-                    return;
-                }
-                bookingData.checkIn = formatDateForGAS(checkIn);
-                await saveBookingSession(chatId, 'checkOut', bookingData);
-                logger.info(`Check-in date saved for chat ${chatId}: ${bookingData.checkIn}`);
-                await utils.safeSendMessage(bot, chatId, '📅 Введите дату выезда (в формате ДД.ММ.ГГГГ):', {
-                    parse_mode: 'Markdown',
-                    ...mainMenuKeyboards.getBackToMenuKeyboard()
-                });
-            } else if (session.step === 'checkOut') {
-                const checkOut = parseDate(text);
-                if (!checkOut || checkOut <= new Date(bookingData.checkIn)) {
-                    logger.warn(`Invalid check-out date for chat ${chatId}: ${text}`);
-                    await utils.safeSendMessage(bot, chatId, '❌ Неверная дата выезда. Введите дату позже заезда (ДД.ММ.ГГГГ):', {
-                        parse_mode: 'Markdown',
-                        ...mainMenuKeyboards.getBackToMenuKeyboard()
-                    });
-                    return;
-                }
-                bookingData.checkOut = formatDateForGAS(checkOut);
-
-                const rooms = await bookingModule.getAvailableRooms(bookingData.checkIn, bookingData.checkOut);
-                if (!rooms || rooms.length === 0) {
-                    logger.warn(`No available rooms for dates ${bookingData.checkIn} to ${bookingData.checkOut} for chat ${chatId}`);
-                    await utils.safeSendMessage(bot, chatId, '❌ Нет доступных номеров на указанные даты.', {
-                        parse_mode: 'Markdown',
-                        ...mainMenuKeyboards.getBackToMenuKeyboard()
-                    });
-                    await deleteBookingSession(chatId);
                     userStates.set(userId, states.MAIN_MENU);
                     return;
                 }
 
-                // Фильтрация номеров через services.roomsData
-                const localRooms = services.roomsData.getRoomsData();
-                const filteredRooms = rooms.filter(googleRoom =>
-                    localRooms.some(localRoom => localRoom.ID === googleRoom.id)
-                );
-
-                if (filteredRooms.length === 0) {
-                    logger.warn(`No matching rooms in local data for chat ${chatId}`);
-                    await utils.safeSendMessage(bot, chatId, '❌ Нет доступных номеров, соответствующих нашей базе данных.', {
+                // Проверка времени жизни сессии (24 часа)
+                if (new Date(session.updated_at) < new Date(Date.now() - 24 * 60 * 60 * 1000)) {
+                    logger.warn(`Booking session expired for chat ${chatId}`);
+                    await deleteBookingSession(chatId);
+                    await utils.safeSendMessage(bot, chatId, '❌ Сессия бронирования истекла. Начните заново.', {
                         parse_mode: 'Markdown',
                         ...mainMenuKeyboards.getBackToMenuKeyboard()
                     });
-                    await deleteBookingSession(chatId);
                     userStates.set(userId, states.MAIN_MENU);
                     return;
                 }
 
-                let roomList = '🏠 Доступные номера:\n';
-                filteredRooms.forEach((room, index) => {
-                    const localRoom = localRooms.find(lr => lr.ID === room.id);
-                    roomList += `${index + 1}. ${mainMenuKeyboards.escapeHtml(room.name)} (${room.type}, вместимость: ${room.capacity}${localRoom && localRoom.Цена ? `, цена от ${localRoom.Цена} ₽/ночь` : ''})\n`;
-                });
-                roomList += '\nВыберите номер (введите номер из списка):';
+                let bookingData = session.data || {};
 
-                bookingData.rooms = filteredRooms;
-                await saveBookingSession(chatId, 'roomSelection', bookingData);
-                logger.info(`Available rooms sent to chat ${chatId}, count: ${filteredRooms.length}`);
-                await utils.safeSendMessage(bot, chatId, roomList, {
-                    parse_mode: 'Markdown',
-                    ...mainMenuKeyboards.getBackToMenuKeyboard()
-                });
-            } else if (session.step === 'roomSelection') {
-                const roomIndex = parseInt(text) - 1;
-                if (isNaN(roomIndex) || roomIndex < 0 || roomIndex >= bookingData.rooms.length) {
-                    logger.warn(`Invalid room selection for chat ${chatId}: ${text}`);
-                    await utils.safeSendMessage(bot, chatId, '❌ Неверный номер. Выберите номер из списка:', {
+                if (session.step === 'checkIn') {
+                    const checkIn = parseDate(text);
+                    if (!checkIn) {
+                        logger.warn(`Invalid check-in date format for chat ${chatId}: ${text}`);
+                        await utils.safeSendMessage(bot, chatId, '❌ Неверный формат даты. Введите дату заезда (ДД.ММ.ГГГГ):', {
+                            parse_mode: 'Markdown',
+                            ...mainMenuKeyboards.getBackToMenuKeyboard()
+                        });
+                        return;
+                    }
+                    if (checkIn < new Date().setHours(0, 0, 0, 0)) {
+                        logger.warn(`Check-in date in the past for chat ${chatId}: ${text}`);
+                        await utils.safeSendMessage(bot, chatId, '❌ Дата заезда не может быть в прошлом.', {
+                            parse_mode: 'Markdown',
+                            ...mainMenuKeyboards.getBackToMenuKeyboard()
+                        });
+                        return;
+                    }
+                    bookingData.checkIn = formatDateForGAS(checkIn);
+                    await saveBookingSession(chatId, 'checkOut', bookingData);
+                    logger.info(`Check-in date saved for chat ${chatId}: ${bookingData.checkIn}`);
+                    await utils.safeSendMessage(bot, chatId, '📅 Введите дату выезда (в формате ДД.ММ.ГГГГ):', {
                         parse_mode: 'Markdown',
                         ...mainMenuKeyboards.getBackToMenuKeyboard()
                     });
-                    return;
-                }
-                bookingData.roomId = bookingData.rooms[roomIndex].id;
-                await saveBookingSession(chatId, 'guestName', bookingData);
-                logger.info(`Room selected for chat ${chatId}: roomId ${bookingData.roomId}`);
-                await utils.safeSendMessage(bot, chatId, '👤 Введите ваше имя:', {
-                    parse_mode: 'Markdown',
-                    ...mainMenuKeyboards.getBackToMenuKeyboard()
-                });
-            } else if (session.step === 'guestName') {
-                bookingData.guestName = text.trim();
-                if (!bookingData.guestName) {
-                    logger.warn(`Empty guest name for chat ${chatId}`);
-                    await utils.safeSendMessage(bot, chatId, '❌ Имя не может быть пустым. Введите ваше имя:', {
+                } else if (session.step === 'checkOut') {
+                    const checkOut = parseDate(text);
+                    if (!checkOut || checkOut <= new Date(bookingData.checkIn)) {
+                        logger.warn(`Invalid check-out date for chat ${chatId}: ${text}`);
+                        await utils.safeSendMessage(bot, chatId, '❌ Неверная дата выезда. Введите дату позже заезда (ДД.ММ.ГГГГ):', {
+                            parse_mode: 'Markdown',
+                            ...mainMenuKeyboards.getBackToMenuKeyboard()
+                        });
+                        return;
+                    }
+                    bookingData.checkOut = formatDateForGAS(checkOut);
+
+                    const rooms = await bookingModule.getAvailableRooms(bookingData.checkIn, bookingData.checkOut);
+                    if (!rooms || rooms.length === 0) {
+                        logger.warn(`No available rooms for dates ${bookingData.checkIn} to ${bookingData.checkOut} for chat ${chatId}`);
+                        await utils.safeSendMessage(bot, chatId, '❌ Нет доступных номеров на указанные даты.', {
+                            parse_mode: 'Markdown',
+                            ...mainMenuKeyboards.getBackToMenuKeyboard()
+                        });
+                        await deleteBookingSession(chatId);
+                        userStates.set(userId, states.MAIN_MENU);
+                        return;
+                    }
+
+                    // Фильтрация номеров через services.roomsData
+                    const localRooms = services.roomsData.getRoomsData();
+                    const filteredRooms = rooms.filter(googleRoom =>
+                        localRooms.some(localRoom => localRoom.ID === googleRoom.id)
+                    );
+
+                    if (filteredRooms.length === 0) {
+                        logger.warn(`No matching rooms in local data for chat ${chatId}`);
+                        await utils.safeSendMessage(bot, chatId, '❌ Нет доступных номеров, соответствующих нашей базе данных.', {
+                            parse_mode: 'Markdown',
+                            ...mainMenuKeyboards.getBackToMenuKeyboard()
+                        });
+                        await deleteBookingSession(chatId);
+                        userStates.set(userId, states.MAIN_MENU);
+                        return;
+                    }
+
+                    let roomList = '🏠 Доступные номера:\n';
+                    filteredRooms.forEach((room, index) => {
+                        const localRoom = localRooms.find(lr => lr.ID === room.id);
+                        roomList += `${index + 1}. ${mainMenuKeyboards.escapeHtml(room.name)} (${room.type}, вместимость: ${room.capacity}${localRoom && localRoom.Цена ? `, цена от ${localRoom.Цена} ₽/ночь` : ''})\n`;
+                    });
+                    roomList += '\nВыберите номер (введите номер из списка):';
+
+                    bookingData.rooms = filteredRooms;
+                    await saveBookingSession(chatId, 'roomSelection', bookingData);
+                    logger.info(`Available rooms sent to chat ${chatId}, count: ${filteredRooms.length}`);
+                    await utils.safeSendMessage(bot, chatId, roomList, {
                         parse_mode: 'Markdown',
                         ...mainMenuKeyboards.getBackToMenuKeyboard()
                     });
-                    return;
-                }
-                await saveBookingSession(chatId, 'guestEmail', bookingData);
-                logger.info(`Guest name saved for chat ${chatId}: ${bookingData.guestName}`);
-                await utils.safeSendMessage(bot, chatId, '📧 Введите ваш email:', {
-                    parse_mode: 'Markdown',
-                    ...mainMenuKeyboards.getBackToMenuKeyboard()
-                });
-            } else if (session.step === 'guestEmail') {
-                if (!isValidEmail(text)) {
-                    logger.warn(`Invalid email format for chat ${chatId}: ${text}`);
-                    await utils.safeSendMessage(bot, chatId, '❌ Неверный формат email. Попробуйте снова:', {
+                } else if (session.step === 'roomSelection') {
+                    const roomIndex = parseInt(text) - 1;
+                    if (isNaN(roomIndex) || roomIndex < 0 || roomIndex >= bookingData.rooms.length) {
+                        logger.warn(`Invalid room selection for chat ${chatId}: ${text}`);
+                        await utils.safeSendMessage(bot, chatId, '❌ Неверный номер. Выберите номер из списка:', {
+                            parse_mode: 'Markdown',
+                            ...mainMenuKeyboards.getBackToMenuKeyboard()
+                        });
+                        return;
+                    }
+                    bookingData.roomId = bookingData.rooms[roomIndex].id;
+                    await saveBookingSession(chatId, 'guestName', bookingData);
+                    logger.info(`Room selected for chat ${chatId}: roomId ${bookingData.roomId}`);
+                    await utils.safeSendMessage(bot, chatId, '👤 Введите ваше имя:', {
                         parse_mode: 'Markdown',
                         ...mainMenuKeyboards.getBackToMenuKeyboard()
                     });
-                    return;
-                }
-                bookingData.guestEmail = text.trim();
-                await saveBookingSession(chatId, 'guestPhone', bookingData);
-                logger.info(`Guest email saved for chat ${chatId}: ${bookingData.guestEmail}`);
-                await utils.safeSendMessage(bot, chatId, '📱 Введите ваш номер телефона:', {
-                    parse_mode: 'Markdown',
-                    ...mainMenuKeyboards.getBackToMenuKeyboard()
-                });
-            } else if (session.step === 'guestPhone') {
-                bookingData.guestPhone = text.trim();
-                if (!/^\+?\d{10,15}$/.test(bookingData.guestPhone.replace(/\s/g, ''))) {
-                    logger.warn(`Invalid phone format for chat ${chatId}: ${text}`);
-                    await utils.safeSendMessage(bot, chatId, '❌ Неверный формат телефона. Введите номер в формате +7XXXXXXXXXX:', {
+                } else if (session.step === 'guestName') {
+                    bookingData.guestName = text.trim();
+                    if (!bookingData.guestName) {
+                        logger.warn(`Empty guest name for chat ${chatId}`);
+                        await utils.safeSendMessage(bot, chatId, '❌ Имя не может быть пустым. Введите ваше имя:', {
+                            parse_mode: 'Markdown',
+                            ...mainMenuKeyboards.getBackToMenuKeyboard()
+                        });
+                        return;
+                    }
+                    await saveBookingSession(chatId, 'guestEmail', bookingData);
+                    logger.info(`Guest name saved for chat ${chatId}: ${bookingData.guestName}`);
+                    await utils.safeSendMessage(bot, chatId, '📧 Введите ваш email:', {
                         parse_mode: 'Markdown',
                         ...mainMenuKeyboards.getBackToMenuKeyboard()
                     });
-                    return;
+                } else if (session.step === 'guestEmail') {
+                    if (!isValidEmail(text)) {
+                        logger.warn(`Invalid email format for chat ${chatId}: ${text}`);
+                        await utils.safeSendMessage(bot, chatId, '❌ Неверный формат email. Попробуйте снова:', {
+                            parse_mode: 'Markdown',
+                            ...mainMenuKeyboards.getBackToMenuKeyboard()
+                        });
+                        return;
+                    }
+                    bookingData.guestEmail = text.trim();
+                    await saveBookingSession(chatId, 'guestPhone', bookingData);
+                    logger.info(`Guest email saved for chat ${chatId}: ${bookingData.guestEmail}`);
+                    await utils.safeSendMessage(bot, chatId, '📱 Введите ваш номер телефона:', {
+                        parse_mode: 'Markdown',
+                        ...mainMenuKeyboards.getBackToMenuKeyboard()
+                    });
+                } else if (session.step === 'guestPhone') {
+                    bookingData.guestPhone = text.trim();
+                    if (!/^\+?\d{10,15}$/.test(bookingData.guestPhone.replace(/\s/g, ''))) {
+                        logger.warn(`Invalid phone format for chat ${chatId}: ${text}`);
+                        await utils.safeSendMessage(bot, chatId, '❌ Неверный формат телефона. Введите номер в формате +7XXXXXXXXXX:', {
+                            parse_mode: 'Markdown',
+                            ...mainMenuKeyboards.getBackToMenuKeyboard()
+                        });
+                        return;
+                    }
+                    await saveBookingSession(chatId, 'paymentType', bookingData);
+                    logger.info(`Guest phone saved for chat ${chatId}: ${bookingData.guestPhone}`);
+                    await utils.safeSendMessage(
+                        bot,
+                        chatId,
+                        '💳 Выберите тип оплаты:\n1. Полная оплата\n2. Предоплата 50%',
+                        {
+                            parse_mode: 'Markdown',
+                            reply_markup: {
+                                inline_keyboard: [
+                                    [{ text: 'Полная оплата', callback_data: 'payment_full' }],
+                                    [{ text: 'Предоплата 50%', callback_data: 'payment_prepayment' }]
+                                ]
+                            }
+                        }
+                    );
                 }
-                await saveBookingSession(chatId, 'paymentType', bookingData);
-                logger.info(`Guest phone saved for chat ${chatId}: ${bookingData.guestPhone}`);
+            } catch (error) {
+                logger.error(`Error processing message for chat ${chatId}`, { error });
                 await utils.safeSendMessage(
                     bot,
                     chatId,
-                    '💳 Выберите тип оплаты:\n1. Полная оплата\n2. Предоплата 50%',
+                    `❌ Ошибка: ${error.message}`,
                     {
                         parse_mode: 'Markdown',
-                        reply_markup: {
-                            inline_keyboard: [
-                                [{ text: 'Полная оплата', callback_data: 'payment_full' }],
-                                [{ text: 'Предоплата 50%', callback_data: 'payment_prepayment' }]
-                            ]
-                        }
+                        ...mainMenuKeyboards.getBackToMenuKeyboard()
                     }
                 );
+                await deleteBookingSession(chatId);
+                userStates.set(userId, states.MAIN_MENU);
             }
-        } catch (error) {
-            logger.error(`Error processing message for chat ${chatId}`, { error });
-            await utils.safeSendMessage(
-                bot,
-                chatId,
-                `❌ Ошибка: ${error.message}`,
-                {
-                    parse_mode: 'Markdown',
-                    ...mainMenuKeyboards.getBackToMenuKeyboard()
-                }
-            );
-            await deleteBookingSession(chatId);
-            userStates.set(userId, states.MAIN_MENU);
+        } else if (state === states.ASKING_QUESTIONS && text.trim().length > 0) {
+            logger.info(`Processing question in ASKING_QUESTIONS for user ${userId} in chat ${chatId}: ${text}`);
+            const answer = services.knowledgeBase.findAnswerInKnowledgeBase(text);
+            if (answer) {
+                await utils.safeSendMessage(bot, chatId, answer, {
+                    parse_mode: 'Markdown'
+                });
+            } else {
+                logger.info(`Forwarding question from user ${userId} in chat ${chatId}: ${text}`);
+                await utils.forwardToAdmins(bot, userId, msg.from.username, msg.text);
+            }
+        } else if (state === states.MAIN_MENU && text.trim().length > 0) {
+            // Игнорируем текст в MAIN_MENU, так как вопросы только через кнопку
+            logger.info(`Ignored text message in MAIN_MENU for chat ${chatId}: ${text}`);
+            await utils.safeSendMessage(bot, chatId, 'Пожалуйста, используйте кнопки меню для навигации. Если у вас вопрос, нажмите "Задать вопрос администратору".', {
+                parse_mode: 'Markdown',
+                ...mainMenuKeyboards.getMainMenuKeyboard()
+            });
         }
     });
 
@@ -295,33 +313,80 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                 const paymentType = data === 'payment_full' ? 'full' : 'prepayment';
                 bookingData.paymentType = paymentType;
 
-                const nights = Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24));
+                // Найти выбранный номер
                 const room = bookingData.rooms.find(r => r.id === bookingData.roomId);
-                const localRoom = services.roomsData.getRoomById(bookingData.roomId);
-                bookingData.nights = nights;
-                bookingData.totalPrice = localRoom && localRoom.Цена ? localRoom.Цена * nights : calculateTotalPrice(room.pricePerDay || {}, bookingData.checkIn, bookingData.checkOut);
-
-                const bookingResult = await bookingModule.createBooking(bookingData);
-                logger.info(`Booking created for chat ${chatId}: bookingNumber ${bookingResult.bookingNumber}, amount ${bookingResult.paymentAmount}`);
-
-                // Уведомление администраторов
-                await utils.forwardToAdmins(
-                    bot,
-                    userId,
-                    callbackQuery.from.username,
-                    `Новое бронирование №${bookingResult.bookingNumber} от ${bookingData.guestName} на даты ${formatDateForDisplay(bookingData.checkIn)} - ${formatDateForDisplay(bookingData.checkOut)}`
-                );
-                logger.info(`Admin notification sent for booking ${bookingResult.bookingNumber}`);
-
-                await utils.safeSendMessage(
-                    bot,
-                    chatId,
-                    `✅ Бронирование создано!\nНомер брони: ${bookingResult.bookingNumber}\nСумма: ${bookingResult.paymentAmount} ₽\n\nПерейдите по ссылке для оплаты:\n[${paymentType === 'prepayment' ? 'Предоплата' : 'Полная оплата'}](${bookingResult.paymentUrl})\n\nДаты: ${formatDateForDisplay(bookingData.checkIn)} - ${formatDateForDisplay(bookingData.checkOut)}`,
-                    {
+                if (!room) {
+                    logger.error(`Room with roomId ${bookingData.roomId} not found in rooms list for chat ${chatId}`);
+                    await utils.safeSendMessage(bot, chatId, '❌ Ошибка: номер не найден.', {
                         parse_mode: 'Markdown',
                         ...mainMenuKeyboards.getBackToMenuKeyboard()
-                    }
-                );
+                    });
+                    await deleteBookingSession(chatId);
+                    userStates.set(userId, states.MAIN_MENU);
+                    return;
+                }
+
+                // Установить totalPrice и nights
+                bookingData.totalPrice = room.totalPrice;
+                if (!bookingData.totalPrice || bookingData.totalPrice <= 0) {
+                    logger.error(`Invalid totalPrice for roomId ${bookingData.roomId} in chat ${chatId}: ${bookingData.totalPrice}`);
+                    await utils.safeSendMessage(bot, chatId, '❌ Ошибка: цена бронирования не указана или некорректна.', {
+                        parse_mode: 'Markdown',
+                        ...mainMenuKeyboards.getBackToMenuKeyboard()
+                    });
+                    await deleteBookingSession(chatId);
+                    userStates.set(userId, states.MAIN_MENU);
+                    return;
+                }
+
+                const nights = Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24));
+                bookingData.nights = nights;
+
+                // Добавить telegramChatId
+                bookingData.telegramChatId = chatId.toString(); // Добавляем chatId
+
+                logger.info(`Payment type selected for chat ${chatId}: ${bookingData.paymentType}, totalPrice: ${bookingData.totalPrice}, nights: ${bookingData.nights}, telegramChatId: ${bookingData.telegramChatId}`);
+                await saveBookingSession(chatId, 'confirmBooking', bookingData);
+
+                let bookingResult;
+                try {
+                    logger.debug(`Creating booking for chat ${chatId}: ${JSON.stringify(bookingData)}`);
+                    bookingResult = await bookingModule.createBooking(bookingData);
+                } catch (err) {
+                    logger.error(`Error creating booking for chat ${chatId}`, { err });
+                    await utils.safeSendMessage(
+                        bot,
+                        chatId,
+                        '❌ Ошибка создания бронирования. Попробуйте позже.',
+                        {
+                            parse_mode: 'Markdown',
+                            ...mainMenuKeyboards.getBackToMenuKeyboard()
+                        }
+                    );
+                    await deleteBookingSession(chatId);
+                    userStates.set(userId, states.MAIN_MENU);
+                    return;
+                }
+
+                // Исправление проверки результата
+                if (!bookingResult || !bookingResult.success || !bookingResult.bookingNumber || !bookingResult.paymentUrl || !bookingResult.paymentAmount) {
+                    logger.error(`Invalid booking result for chat ${chatId}: ${JSON.stringify(bookingResult)}`);
+                    await utils.safeSendMessage(
+                        bot,
+                        chatId,
+                        '❌ Ошибка создания бронирования. Попробуйте позже.',
+                        {
+                            parse_mode: 'Markdown',
+                            ...mainMenuKeyboards.getBackToMenuKeyboard()
+                        }
+                    );
+                    await deleteBookingSession(chatId);
+                    userStates.set(userId, states.MAIN_MENU);
+                    return;
+                }
+
+                logger.info(`Booking created for chat ${chatId}: bookingNumber ${bookingResult.bookingNumber}, paymentAmount ${bookingResult.paymentAmount}`);
+
 
                 await deleteBookingSession(chatId);
                 userStates.set(userId, states.MAIN_MENU);
@@ -334,7 +399,7 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                             await utils.safeSendMessage(
                                 bot,
                                 chatId,
-                                `🎉 Оплата бронирования №${bookingResult.bookingNumber} успешно подтверждена!`,
+                                `🎉 Оплата бронирования №${escapeMarkdown(bookingResult.bookingNumber)} успешно подтверждена!`,
                                 {
                                     parse_mode: 'Markdown',
                                     ...mainMenuKeyboards.getBackToMenuKeyboard()
@@ -344,7 +409,7 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                             await utils.safeSendMessage(
                                 bot,
                                 chatId,
-                                `⏰ Время оплаты бронирования №${bookingResult.bookingNumber} истекло.`,
+                                `⏰ Время оплаты бронирования №${escapeMarkdown(bookingResult.bookingNumber)} истекло.`,
                                 {
                                     parse_mode: 'Markdown',
                                     ...mainMenuKeyboards.getBackToMenuKeyboard()
@@ -365,11 +430,12 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                 case "rooms":
                     const roomsData = services.roomsData.getRoomsData();
                     logger.info(`Displaying rooms for chat ${chatId}, count: ${roomsData.length}`);
+                    const keyboard = mainMenuKeyboards.getRoomsKeyboard(roomsData);
                     await utils.safeSendMessage(
                         bot,
                         chatId,
                         "Выберите номер:",
-                        mainMenuKeyboards.getRoomsKeyboard(roomsData)
+                        keyboard.reply_markup // Передаем только reply_markup напрямую
                     );
                     break;
                 case "entertainment":
@@ -396,7 +462,7 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     await utils.safeSendMessage(
                         bot,
                         chatId,
-                        "Были ли вы у нас?",
+                        "Добро пожаловать в модуль бронирования! Подскажите вы ознакомились с нашими условиями проживания?",
                         mainMenuKeyboards.getBookingKeyboard()
                     );
                     break;
@@ -415,6 +481,33 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     break;
                 case "booking_no":
                     await handleBookingNo(bot, chatId);
+                    break;
+                case "ask_admin":
+                    userStates.set(userId, states.ASKING_QUESTIONS);
+                    logger.info(`Started asking questions mode for chat ${chatId}`);
+                    await utils.safeSendMessage(
+                        bot,
+                        chatId,
+                        "Задайте ваш вопрос администратору. Вы можете отправить несколько сообщений. Для завершения нажмите кнопку ниже.",
+                        {
+                            parse_mode: 'Markdown',
+                            reply_markup: {
+                                inline_keyboard: [
+                                    [{ text: 'Завершить вопросы', callback_data: 'end_questions' }]
+                                ]
+                            }
+                        }
+                    );
+                    break;
+                case "end_questions":
+                    userStates.set(userId, states.MAIN_MENU);
+                    logger.info(`Ended asking questions mode for chat ${chatId}`);
+                    await utils.safeSendMessage(
+                        bot,
+                        chatId,
+                        "Вопросы завершены. Выберите команду из меню:",
+                        mainMenuKeyboards.getMainMenuKeyboard()
+                    );
                     break;
                 default:
                     if (data.startsWith("room_")) {
@@ -583,9 +676,8 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             await bot.sendDocument(
                 chatId,
                 "./Правила проживания и отдыха.docx.pdf",
-                {
-                    caption: "Прошу ознакомиться с правилами проживания",
-                },
+                { caption: "Прошу ознакомиться с правилами проживания" },
+                { contentType: 'application/pdf' }
             );
 
             await bot.sendPhoto(
