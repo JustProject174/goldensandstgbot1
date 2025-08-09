@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "knowledge:test": "node scripts/test-knowledge.js"
   },
-  "dependencies": {
+   "dependencies": {
     "@huggingface/inference": "^2.8.0",
     "@supabase/supabase-js": "^2.52.1",
     "axios": "^1.7.2",
