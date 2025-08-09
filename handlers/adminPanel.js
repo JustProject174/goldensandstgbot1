@@ -1,3 +1,4 @@
+const logger = require("../logger");
 const keyboards = require("../keyboards/adminPanel");
 const mainKeyboards = require("../keyboards/mainMenu");
 const utils = require("../utils");
@@ -8,35 +9,44 @@ const services = {
     adminAnswers: require("../services/adminAnswers"),
 };
 
-const targetChatId = "-1002826990012"; // Глобальная переменная для чата админов
+const targetChatId = "-1002826990012"; // Чат админов
+const threadId = 102; // ID темы в форуме (если используется)
+
+// Функция экранирования Markdown
+function escapeMarkdown(text) {
+    return String(text).replace(/([_*[\]()~`>#+\-=|{}.!\\])/g, "\\$1");
+}
 
 module.exports = function setupAdminHandlers(bot, userStates) {
-    // Обработка команды /answer
+    // Команда /answer
     bot.onText(/\/answer (\d+) (.+)/, async (msg, match) => {
-        const chatId = msg.chat.id;
         const userId = msg.from.id;
-
         if (!(await utils.isAdmin(bot, userId))) return;
 
         const targetUserId = parseInt(match[1]);
-        let answer = match[2];
+        let answer = escapeMarkdown(match[2]);
 
-        // Очищаем ответ от потенциально проблематичных символов
-        answer = answer.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, "");
+        // Проверяем, есть ли вопрос у этого пользователя
+        const pendingQuestions = services.adminAnswers.getPendingQuestions();
+        if (!pendingQuestions.has(targetUserId.toString())) {
+            return utils.safeSendMessage(
+                bot,
+                targetChatId,
+                `⚠️ Пользователь с ID ${targetUserId} не найден в очереди.`,
+                { parse_mode: "Markdown", message_thread_id: threadId }
+            );
+        }
 
         try {
             await utils.safeSendMessage(
                 bot,
-                targetUserId, // Отправка пользователю
+                targetUserId,
                 `💬 Ответ от менеджера:\n\n${answer}`,
-                {
-                    parse_mode: "Markdown",
-                    ...mainKeyboards.getBackToMenuKeyboard(),
-                },
+                { parse_mode: "Markdown", ...mainKeyboards.getBackToMenuKeyboard() }
             );
 
-            // Удаляем вопрос из списка ожидающих
-            services.adminAnswers.getPendingQuestions().delete(targetUserId.toString());
+            // Удаляем вопрос единым способом
+            await services.adminAnswers.removeQuestion(targetUserId);
 
             userStates.set(userId, states.ADMIN_ANSWERING);
             userStates.set(`${userId}_answer_data`, { targetUserId, answer });
@@ -45,300 +55,245 @@ module.exports = function setupAdminHandlers(bot, userStates) {
                 bot,
                 targetChatId,
                 `✅ Ответ отправлен пользователю.\n\n🔤 Укажите ключевые слова через запятую для добавления в базу знаний в Supabase:\n\n_Например: бронирование, резерв, забронировать_\n\n💡 Или напишите "авто" для автоматической генерации ключевых слов с помощью AI`,
-                {
-                    parse_mode: "Markdown",
-                    message_thread_id: 102,
-                    ...keyboards.getBackToAdminKeyboard(),
-                },
+                { parse_mode: "Markdown", message_thread_id: threadId, ...keyboards.getBackToAdminKeyboard() }
             );
         } catch (error) {
             await utils.safeSendMessage(
                 bot,
                 targetChatId,
-                `❌ Ошибка при отправке ответа: ${error.message}`,
-                {
-                    parse_mode: "Markdown",
-                    message_thread_id: 102,
-                },
+                `❌ Ошибка при отправке ответа: ${escapeMarkdown(error.message)}`,
+                { parse_mode: "Markdown", message_thread_id: threadId }
             );
         }
     });
 
-    // Обработка callback запросов админ-панели
+    // Обработка callback_query
     bot.on("callback_query", async (callbackQuery) => {
-        const msg = callbackQuery.message;
-        const chatId = msg.chat.id;
-        const userId = callbackQuery.from.id;
         const data = callbackQuery.data;
-
+        const userId = callbackQuery.from.id;
         if (!(await utils.isAdmin(bot, userId))) return;
 
-        try {
-            try {
-                await bot.answerCallbackQuery(callbackQuery.id);
-            } catch (error) {
-                console.error(
-                    "Ошибка при ответе на callback query:",
-                    error.message,
-                );
-            }
+        // Отвечаем на callback один раз
+        await bot.answerCallbackQuery(callbackQuery.id).catch(console.error);
 
+        try {
             switch (data) {
                 case "admin_panel":
                     userStates.set(userId, states.ADMIN_PANEL);
-                    await utils.safeSendMessage(
+                    return utils.safeSendMessage(
                         bot,
                         targetChatId,
                         "⚙️ Панель администратора",
-                        {
-                            parse_mode: "Markdown",
-                            message_thread_id: 102,
-                            ...keyboards.getAdminKeyboard(),
-                        },
+                        { parse_mode: "Markdown", message_thread_id: threadId, ...keyboards.getAdminKeyboard() }
                     );
-                    break;
 
                 case "admin_stats":
-                    await handleAdminStats(bot, chatId);
-                    break;
+                    return handleAdminStats();
 
                 case "admin_kb":
-                    await handleAdminKnowledgeBase(bot, chatId);
-                    break;
+                    return handleAdminKnowledgeBase();
 
                 case "admin_pending":
-                    await handleAdminPending(bot, chatId);
-                    break;
+                    return handleAdminPending();
 
                 case "admin_reload":
-                    await handleAdminReload(bot, chatId);
-                    break;
+                    return handleAdminReload();
             }
 
-            // Обработка просмотра конкретного вопроса
             if (data.startsWith("view_question_")) {
-                const targetUserId = data.replace("view_question_", "");
-                await handleViewQuestion(bot, chatId, targetUserId);
+                return handleViewQuestion(data.replace("view_question_", ""));
             }
 
-            // Обработка ответа на вопрос через кнопку
             if (data.startsWith("answer_btn_")) {
                 const targetUserId = data.replace("answer_btn_", "");
+                const pending = services.adminAnswers.getPendingQuestions().get(targetUserId);
+
+                if (!pending) {
+                    return utils.safeSendMessage(
+                        bot,
+                        targetChatId,
+                        "⚠️ Вопрос уже удалён или не найден.",
+                        { parse_mode: "Markdown", message_thread_id: threadId, ...keyboards.getBackToAdminKeyboard() }
+                    );
+                }
+
                 userStates.set(userId, states.ADMIN_ANSWERING_BUTTON);
                 userStates.set(`${userId}_target_user`, targetUserId);
 
-                const questionData = services.adminAnswers
-                    .getPendingQuestions()
-                    .get(targetUserId);
-                const questionText = questionData
-                    ? questionData.question
-                    : "Вопрос не найден";
-
-                await utils.safeSendMessage(
+                return utils.safeSendMessage(
                     bot,
                     targetChatId,
-                    `📝 Напишите ответ на вопрос:\n\n"${questionText}"`,
-                    {
-                        parse_mode: "Markdown",
-                        message_thread_id: 102,
-                    },
+                    `📝 Напишите ответ на вопрос:\n\n"${escapeMarkdown(pending.question)}"`,
+                    { parse_mode: "Markdown", message_thread_id: threadId }
                 );
             }
 
-            // Обработка отклонения вопроса через кнопку
             if (data.startsWith("reject_btn_")) {
-                const targetUserId = data.replace("reject_btn_", "");
-                await handleRejectQuestion(bot, chatId, targetUserId);
+                return handleRejectQuestion(data.replace("reject_btn_", ""));
             }
         } catch (error) {
-            console.error(
-                "Ошибка в admin callback query обработчике:",
-                error.message,
+            console.error("Ошибка в admin callback:", error.message);
+            return utils.safeSendMessage(
+                bot,
+                targetChatId,
+                `❌ Произошла ошибка: ${escapeMarkdown(error.message)}`,
+                { parse_mode: "Markdown", message_thread_id: threadId }
             );
-            try {
-                await bot.answerCallbackQuery(callbackQuery.id);
-            } catch (answerError) {
-                console.error(
-                    "Не удалось ответить на admin callback query:",
-                    answerError.message,
-                );
-            }
         }
     });
 
-    async function handleAdminStats(bot, chatId) {
-        const stats = `📊 Статистика бота:
+    // Функции-обработчики
+    async function handleAdminStats() {
+        const stats = `📊 Статистика бота:\n
+👥 Активных пользователей в сессии: ${userStates.size}
+❓ Вопросов в очереди: ${services.adminAnswers.getPendingQuestions().size}
+📚 Записей в базе знаний: ${services.knowledgeBase.getKnowledgeBase().length}
+🏠 Номеров в базе данных: ${services.roomsData.getRoomsData().length}`;
 
-    👥 Активных пользователей в сессии: ${userStates.size}
-    ❓ Вопросов в очереди: ${services.adminAnswers.getPendingQuestions().size}
-    📚 Записей в базе знаний: ${await services.knowledgeBase.getKnowledgeBaseLength()}
-    🏠 Номеров в базе данных: ${services.roomsData.getRoomsData().length}`;
-
-        await utils.safeSendMessage(bot, targetChatId, stats, {
+        return utils.safeSendMessage(bot, targetChatId, escapeMarkdown(stats), {
             parse_mode: "Markdown",
-            message_thread_id: 102,
+            message_thread_id: threadId,
             ...keyboards.getBackToAdminKeyboard(),
         });
     }
 
-    async function handleAdminKnowledgeBase(bot, chatId) {
-        let kbInfo = "📚 База знаний:\n\n";
-        const knowledgeBase = await services.knowledgeBase.getKnowledgeBase();
+    async function handleAdminKnowledgeBase() {
+        const knowledgeBase = services.knowledgeBase.getKnowledgeBase().length;
 
         if (knowledgeBase.length === 0) {
-            kbInfo += "База знаний пуста";
-        } else {
-            knowledgeBase.forEach((item, index) => {
-                kbInfo += `${index + 1}. Ключевые слова: ${item.keywords.join(", ")}\n`;
-                kbInfo += `   Ответ: ${item.answer.substring(0, 100)}${item.answer.length > 100 ? "..." : ""}\n\n`;
+            return utils.safeSendMessage(bot, targetChatId, "📚 База знаний пуста", {
+                parse_mode: "Markdown",
+                message_thread_id: threadId,
+                ...keyboards.getBackToAdminKeyboard(),
             });
         }
 
-        await utils.safeSendMessage(bot, targetChatId, kbInfo, {
+        let kbInfo = "📚 База знаний:\n\n";
+        const messages = [];
+
+        knowledgeBase.forEach((item, index) => {
+            kbInfo += `${index + 1}. Ключевые слова: ${escapeMarkdown(item.keywords.join(", "))}\n`;
+            kbInfo += `   Ответ: ${escapeMarkdown(item.answer.substring(0, 100))}${item.answer.length > 100 ? "..." : ""}\n\n`;
+
+            // Если длина текста близка к лимиту Telegram (4096), отправляем как отдельное сообщение
+            if (kbInfo.length > 3500) {
+                messages.push(kbInfo);
+                kbInfo = "";
+            }
+        });
+
+        if (kbInfo.trim()) messages.push(kbInfo);
+
+        // Отправляем куски по очереди
+        for (const msgText of messages) {
+            await utils.safeSendMessage(bot, targetChatId, msgText, {
+                parse_mode: "Markdown",
+                message_thread_id: threadId,
+            });
+        }
+
+        // В конце добавляем клавиатуру для возврата
+        await utils.safeSendMessage(bot, targetChatId, "⬅️ Назад", {
             parse_mode: "Markdown",
-            message_thread_id: 102,
+            message_thread_id: threadId,
             ...keyboards.getBackToAdminKeyboard(),
         });
     }
 
-    async function handleAdminPending(bot, chatId) {
+    async function handleAdminPending() {
         const pendingQuestions = services.adminAnswers.getPendingQuestions();
 
         if (pendingQuestions.size === 0) {
-            await utils.safeSendMessage(
+            return utils.safeSendMessage(
                 bot,
                 targetChatId,
                 "❓ Нет неотвеченных вопросов",
-                {
-                    parse_mode: "Markdown",
-                    message_thread_id: 102,
-                    ...keyboards.getBackToAdminKeyboard(),
-                },
-            );
-        } else {
-            await utils.safeSendMessage(
-                bot,
-                targetChatId,
-                "❓ Выберите вопрос для ответа:",
-                {
-                    parse_mode: "Markdown",
-                    message_thread_id: 102,
-                    ...keyboards.getPendingQuestionsListKeyboard(
-                        pendingQuestions,
-                    ),
-                },
+                { parse_mode: "Markdown", message_thread_id: threadId, ...keyboards.getBackToAdminKeyboard() }
             );
         }
+
+        return utils.safeSendMessage(
+            bot,
+            targetChatId,
+            "❓ Выберите вопрос для ответа:",
+            { parse_mode: "Markdown", message_thread_id: threadId, ...keyboards.getPendingQuestionsListKeyboard(pendingQuestions) }
+        );
     }
 
-    async function handleViewQuestion(bot, chatId, userId) {
-        const pendingQuestions = services.adminAnswers.getPendingQuestions();
-        const questionData = pendingQuestions.get(userId);
+    async function handleViewQuestion(userId) {
+        const questionData = services.adminAnswers.getPendingQuestions().get(userId);
 
         if (!questionData) {
-            await utils.safeSendMessage(
+            return utils.safeSendMessage(
                 bot,
                 targetChatId,
                 "❌ Вопрос не найден",
-                {
-                    parse_mode: "Markdown",
-                    message_thread_id: 102,
-                    ...keyboards.getBackToAdminKeyboard(),
-                },
+                { parse_mode: "Markdown", message_thread_id: threadId, ...keyboards.getBackToAdminKeyboard() }
             );
-            return;
         }
 
-        const timestamp = new Date(questionData.timestamp).toLocaleString(
-            "ru-RU",
-        );
-        const questionInfo = `📋 **НОВЫЙ ВОПРОС**
+        const timestamp = new Date(questionData.timestamp).toLocaleString("ru-RU");
+        const questionInfo = `📋 НОВЫЙ ВОПРОС\n
+👤 Пользователь: ID ${userId}
+📅 Время получения: ${timestamp}\n
+❓ Текст вопроса:
+${escapeMarkdown(questionData.question)}\n
+🔽 Выберите действие:`;
 
-    👤 **Пользователь:** ID ${userId}
-    📅 **Время получения:** ${timestamp}
-
-    ❓ **Текст вопроса:**
-    ${questionData.question}
-
-    🔽 **Выберите действие:`;
-
-        await utils.safeSendMessage(bot, targetChatId, questionInfo, {
+        return utils.safeSendMessage(bot, targetChatId, questionInfo, {
             parse_mode: "Markdown",
-            message_thread_id: 102,
+            message_thread_id: threadId,
             ...keyboards.getQuestionManagementKeyboard(userId),
         });
     }
 
-    async function handleRejectQuestion(bot, chatId, targetUserId) {
+    async function handleRejectQuestion(targetUserId) {
         try {
-            const rejectionMessage =
-                "Ваш вопрос некорректен, сформулируйте пожалуйста снова";
+            const rejectionMessage = "Ваш вопрос некорректен, сформулируйте пожалуйста снова";
 
-            const userChatId =
-                typeof targetUserId === "string"
-                    ? parseInt(targetUserId)
-                    : targetUserId;
-
-            await utils.safeSendMessage(bot, userChatId, rejectionMessage, {
+            await utils.safeSendMessage(bot, parseInt(targetUserId), rejectionMessage, {
                 parse_mode: "Markdown",
                 ...mainKeyboards.getBackToMenuKeyboard(),
             });
 
-            // Удаляем из очереди в Supabase
             await services.adminAnswers.removeQuestion(targetUserId);
 
-            await utils.safeSendMessage(
+            return utils.safeSendMessage(
                 bot,
                 targetChatId,
-                `✅ Вопрос отклонен и удален из очереди`,
-                {
-                    parse_mode: "Markdown",
-                    message_thread_id: 102,
-                    ...keyboards.getBackToAdminKeyboard(),
-                },
+                "✅ Вопрос отклонен и удален из очереди",
+                { parse_mode: "Markdown", message_thread_id: threadId, ...keyboards.getBackToAdminKeyboard() }
             );
         } catch (error) {
             console.error("Ошибка при отклонении вопроса:", error);
-            await utils.safeSendMessage(
+            return utils.safeSendMessage(
                 bot,
                 targetChatId,
-                `❌ Ошибка при отклонении вопроса: ${error.message}`,
-                {
-                    parse_mode: "Markdown",
-                    message_thread_id: 102,
-                    ...keyboards.getBackToAdminKeyboard(),
-                },
+                `❌ Ошибка при отклонении вопроса: ${escapeMarkdown(error.message)}`,
+                { parse_mode: "Markdown", message_thread_id: threadId, ...keyboards.getBackToAdminKeyboard() }
             );
         }
     }
 
-    async function handleAdminReload(bot, chatId) {
+    async function handleAdminReload() {
         try {
             await services.knowledgeBase.loadKnowledgeBase();
             await services.adminAnswers.loadAndProcessAdminAnswers();
             await services.roomsData.loadRoomsData();
 
-            await utils.safeSendMessage(
+            return utils.safeSendMessage(
                 bot,
                 targetChatId,
-                `✅ База данных обновлена:\n\n📚 Записей в базе знаний: ${await services.knowledgeBase.getKnowledgeBaseLength()}\n🏠 Номеров загружено: ${services.roomsData.getRoomsData().length}`,
-                {
-                    parse_mode: "Markdown",
-                    message_thread_id: 102,
-                    ...keyboards.getBackToAdminKeyboard(),
-                },
+                `✅ База данных обновлена:\n\n📚 Записей в базе знаний: ${services.knowledgeBase.getKnowledgeBase().length}\n🏠 Номеров загружено: ${services.roomsData.getRoomsData().length}`,
+                { parse_mode: "Markdown", message_thread_id: threadId, ...keyboards.getBackToAdminKeyboard() }
             );
         } catch (error) {
-            console.error("Ошибка при обновлении базы данных:", error);
-            await utils.safeSendMessage(
+            console.error("Ошибка при обновлении базы:", error);
+            return utils.safeSendMessage(
                 bot,
                 targetChatId,
-                `❌ Ошибка обновления: ${error.message}`,
-                {
-                    parse_mode: "Markdown",
-                    message_thread_id: 102,
-                    ...keyboards.getBackToAdminKeyboard(),
-                },
+                `❌ Ошибка обновления: ${escapeMarkdown(error.message)}`,
+                { parse_mode: "Markdown", message_thread_id: threadId, ...keyboards.getBackToAdminKeyboard() }
             );
         }
     }

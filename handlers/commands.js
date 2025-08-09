@@ -1,6 +1,6 @@
 // Импорт необходимых клавиатур
 const mainMenuKeyboards = require("../keyboards/mainMenu"); // Путь к вашему файлу с клавиатурами
-const { getMainMenuKeyboard } = require("../keyboards/mainMenu"); // Если функция в том же файле
+mainMenuKeyboards.getMainMenuKeyboard()
 const config = require("../config"); // Импорт конфигурации
 
 function setupCommandHandlers(bot, userStates) {

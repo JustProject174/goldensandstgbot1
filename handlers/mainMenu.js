@@ -161,12 +161,29 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                         return;
                     }
 
-                    let roomList = '🏠 Доступные номера:\n';
-                    filteredRooms.forEach((room, index) => {
-                        const localRoom = localRooms.find(lr => lr.ID === room.id);
-                        roomList += `${index + 1}. ${mainMenuKeyboards.escapeHtml(room.name)} (${room.type}, вместимость: ${room.capacity}${localRoom && localRoom.Цена ? `, цена от ${localRoom.Цена} ₽/ночь` : ''})\n`;
+                    function getLocalRoomId(googleRoomId) {
+                        const idStr = googleRoomId.toString();
+                        if (idStr.length === 3) return parseInt(idStr[0]); // Для 3-значных - первая цифра
+                        if (idStr.length === 4) return parseInt(idStr.substring(0, 2)); // Для 4-значных - первые 2 цифры
+                        return googleRoomId; // Для остальных (1-2 значных) - как есть
+                    }
+
+                    // Фильтрация номеров (убрано повторное объявление const)
+                    const availableRooms = rooms.filter(googleRoom => {
+                        const localId = getLocalRoomId(googleRoom.id);
+                        return localRooms.some(localRoom => localRoom.ID == localId);
                     });
-                    roomList += '\nВыберите номер (введите номер из списка):';
+
+                    // Формирование списка номеров
+                    let roomList = '🏠 Доступные номера (введите порядковый номер, понравившегося номера):\n';
+                    availableRooms.forEach((room, index) => {
+                        const localId = getLocalRoomId(room.id);
+                        const localRoom = localRooms.find(lr => lr.ID == localId);
+
+                        roomList += `${index + 1}. ${room.name.replace(/"/g, '')} (${room.type}, цена: ${room.totalPrice} ₽${
+                            localRoom && localRoom.Вместимость ? `, вместимость: ${localRoom.Вместимость}` : ''
+                        })\n`;
+                    });
 
                     bookingData.rooms = filteredRooms;
                     await saveBookingSession(chatId, 'roomSelection', bookingData);
