@@ -15,7 +15,11 @@ async function saveBookingSession(chatId, step, data) {
   const { error } = await supabase
     .from('booking_sessions')
     .upsert({ chat_id: chatId, step, data }, { onConflict: 'chat_id' });
-  if (error) throw error;
+
+  if (error) {
+    return { error }; // Возвращаем объект с ошибкой
+  }
+  return { success: true }; // Возвращаем объект при успехе
 }
 
 async function deleteBookingSession(chatId) {

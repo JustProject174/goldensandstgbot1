@@ -22,11 +22,6 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
         return isNaN(date) ? null : date;
     }
 
-    function formatDateForDisplay(date) {
-        const d = new Date(date);
-        return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
-    }
-
     function formatDateForGAS(date) {
         const d = new Date(date);
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -36,23 +31,105 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
-    function calculateTotalPrice(pricePerDay, checkIn, checkOut) {
-        const nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
-        let total = 0;
-        let currentDate = new Date(checkIn);
-        while (currentDate < new Date(checkOut)) {
-            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-            const day = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][currentDate.getDay()];
-            const key = `${month}${day}`;
-            total += pricePerDay[key] || 0;
-            currentDate.setDate(currentDate.getDate() + 1);
+    function getLocalRoomId(googleRoomId) {
+        // Для номеров типа "Эконом" преобразуем ID (например, 101 → 1)
+        if (googleRoomId >= 100) {
+            return Math.floor(googleRoomId / 100);
         }
-        return total;
+        return googleRoomId;
     }
 
-    function escapeMarkdown(text) {
-        if (!text) return '';
-        return text.replace(/([_*[\]()~`>#+-=|{}.!])/g, '\\$1');
+    async function sendGroupedRooms(bot, chatId, availableRooms, localRooms, bookingData) {
+        try {
+            // Валидация данных
+            if (!Array.isArray(availableRooms) || !Array.isArray(localRooms)) {
+                throw new Error('Invalid rooms data');
+            }
+
+            // Создаем маппинг для быстрого доступа
+            const localRoomsMap = localRooms.reduce((map, room) => {
+                map[room.ID] = room;
+                return map;
+            }, {});
+
+            // Группируем номера по типам
+            const roomsByType = availableRooms.reduce((groups, room) => {
+                const type = room.type || 'Другие';
+                if (!groups[type]) groups[type] = [];
+                groups[type].push(room);
+                return groups;
+            }, {});
+
+            let message = '🏠 *Доступные номера*\n\n';
+            const flatRoomsList = [];
+
+            // Формируем сообщение
+            Object.entries(roomsByType).forEach(([type, rooms]) => {
+                message += `*${type}*\n`;
+
+                rooms.forEach((room, index) => {
+                    const localData = localRoomsMap[room.id] || {};
+                    const roomNumber = flatRoomsList.length + 1;
+                    const fridgeStatus = room.name.includes('с холодильником') ? '❄' :
+                                       room.name.includes('без холодильника') ? '.' : '';
+
+                    message += `${roomNumber}. ${room.name.replace(/"/g, '')} — ${room.totalPrice} ₽`;
+                    if (localData.Вместимость) message += ` 🛏 ${localData.Вместимость}`;
+                    if (fridgeStatus) message += ` ${fridgeStatus}`;
+                    message += '\n';
+
+                    flatRoomsList.push(room);
+                });
+
+                message += '\n';
+            });
+
+            message += '_Выберите номер или используйте фильтры_';
+
+            // Сохраняем полный список номеров
+            bookingData.rooms = flatRoomsList;
+            if (!bookingData.allRooms) {
+                bookingData.allRooms = [...flatRoomsList];
+            }
+
+            // Клавиатура с фильтрами
+            const keyboard = {
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            { text: 'Коттеджи', callback_data: 'filter_cottages' },
+                            { text: 'Комнаты', callback_data: 'filter_rooms' }
+                        ],
+                        [
+                            { text: 'По цене ↑', callback_data: 'sort_price_asc' },
+                            { text: 'По цене ↓', callback_data: 'sort_price_desc' }
+                        ],
+                        ...mainMenuKeyboards.getBackToMenuKeyboard().reply_markup.inline_keyboard
+                    ]
+                }
+            };
+
+            await saveBookingSession(chatId, 'roomSelection', bookingData);
+            await bot.sendMessage(chatId, message, {
+                parse_mode: 'Markdown',
+                ...keyboard
+            });
+
+        } catch (error) {
+            logger.error('Ошибка формирования списка номеров', {
+                chatId,
+                error: error.message,
+                availableRooms: availableRooms?.slice(0, 3),
+                localRooms: localRooms?.slice(0, 3)
+            });
+
+            await utils.safeSendMessage(bot, chatId, '❌ Не удалось загрузить список номеров', {
+                parse_mode: 'Markdown',
+                ...mainMenuKeyboards.getBackToMenuKeyboard()
+            });
+
+            throw error;
+        }
     }
 
     // Обработка текстовых сообщений
@@ -132,8 +209,32 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     }
                     bookingData.checkOut = formatDateForGAS(checkOut);
 
-                    const rooms = await bookingModule.getAvailableRooms(bookingData.checkIn, bookingData.checkOut);
-                    if (!rooms || rooms.length === 0) {
+                    let rooms;
+                    try {
+                        rooms = await bookingModule.getAvailableRooms(bookingData.checkIn, bookingData.checkOut);
+                        logger.debug(`Fetched available rooms for chat ${chatId}`, { roomCount: rooms?.length });
+                    } catch (error) {
+                        logger.error(`Error fetching available rooms for chat ${chatId}`, { error });
+                        await utils.safeSendMessage(bot, chatId, '❌ Ошибка при получении списка номеров. Попробуйте позже.', {
+                            parse_mode: 'Markdown',
+                            ...mainMenuKeyboards.getBackToMenuKeyboard()
+                        });
+                        await deleteBookingSession(chatId);
+                        userStates.set(userId, states.MAIN_MENU);
+                        return;
+                    }
+
+                    if (!Array.isArray(rooms)) {
+                        logger.error(`Invalid rooms data from getAvailableRooms for chat ${chatId}`, { rooms });
+                        await utils.safeSendMessage(bot, chatId, '❌ Ошибка: данные о номерах недоступны. Попробуйте позже.', {
+                            parse_mode: 'Markdown',
+                            ...mainMenuKeyboards.getBackToMenuKeyboard()
+                        });
+                        await deleteBookingSession(chatId);
+                        userStates.set(userId, states.MAIN_MENU);
+                        return;
+                    }
+                    if (rooms.length === 0) {
                         logger.warn(`No available rooms for dates ${bookingData.checkIn} to ${bookingData.checkOut} for chat ${chatId}`);
                         await utils.safeSendMessage(bot, chatId, '❌ Нет доступных номеров на указанные даты.', {
                             parse_mode: 'Markdown',
@@ -144,11 +245,24 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                         return;
                     }
 
-                    // Фильтрация номеров через services.roomsData
                     const localRooms = services.roomsData.getRoomsData();
-                    const filteredRooms = rooms.filter(googleRoom =>
-                        localRooms.some(localRoom => localRoom.ID === googleRoom.id)
-                    );
+                    if (!Array.isArray(localRooms)) {
+                        logger.error(`Invalid localRooms data for chat ${chatId}`, { localRooms });
+                        await utils.safeSendMessage(bot, chatId, '❌ Ошибка: данные о локальных номерах недоступны. Попробуйте позже.', {
+                            parse_mode: 'Markdown',
+                            ...mainMenuKeyboards.getBackToMenuKeyboard()
+                        });
+                        await deleteBookingSession(chatId);
+                        userStates.set(userId, states.MAIN_MENU);
+                        return;
+                    }
+
+                    logger.debug(`Rooms data before filtering:`, { roomsCount: rooms.length, localRoomsCount: localRooms.length });
+                    const filteredRooms = rooms.filter(googleRoom => {
+                        const localId = getLocalRoomId(googleRoom.id);
+                        return localRooms.some(localRoom => String(localRoom.ID) === String(localId));
+                    });
+                    logger.debug(`Filtered rooms:`, { filteredRoomsCount: filteredRooms.length });
 
                     if (filteredRooms.length === 0) {
                         logger.warn(`No matching rooms in local data for chat ${chatId}`);
@@ -161,37 +275,18 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                         return;
                     }
 
-                    function getLocalRoomId(googleRoomId) {
-                        const idStr = googleRoomId.toString();
-                        if (idStr.length === 3) return parseInt(idStr[0]); // Для 3-значных - первая цифра
-                        if (idStr.length === 4) return parseInt(idStr.substring(0, 2)); // Для 4-значных - первые 2 цифры
-                        return googleRoomId; // Для остальных (1-2 значных) - как есть
+                    try {
+                        await sendGroupedRooms(bot, chatId, filteredRooms, localRooms, bookingData);
+                    } catch (error) {
+                        logger.error(`Error in sendGroupedRooms for chat ${chatId}`, { error });
+                        await utils.safeSendMessage(bot, chatId, '❌ Ошибка при отображении списка номеров. Попробуйте позже.', {
+                            parse_mode: 'Markdown',
+                            ...mainMenuKeyboards.getBackToMenuKeyboard()
+                        });
+                        await deleteBookingSession(chatId);
+                        userStates.set(userId, states.MAIN_MENU);
+                        return;
                     }
-
-                    // Фильтрация номеров (убрано повторное объявление const)
-                    const availableRooms = rooms.filter(googleRoom => {
-                        const localId = getLocalRoomId(googleRoom.id);
-                        return localRooms.some(localRoom => localRoom.ID == localId);
-                    });
-
-                    // Формирование списка номеров
-                    let roomList = '🏠 Доступные номера (введите порядковый номер, понравившегося номера):\n';
-                    availableRooms.forEach((room, index) => {
-                        const localId = getLocalRoomId(room.id);
-                        const localRoom = localRooms.find(lr => lr.ID == localId);
-
-                        roomList += `${index + 1}. ${room.name.replace(/"/g, '')} (${room.type}, цена: ${room.totalPrice} ₽${
-                            localRoom && localRoom.Вместимость ? `, вместимость: ${localRoom.Вместимость}` : ''
-                        })\n`;
-                    });
-
-                    bookingData.rooms = filteredRooms;
-                    await saveBookingSession(chatId, 'roomSelection', bookingData);
-                    logger.info(`Available rooms sent to chat ${chatId}, count: ${filteredRooms.length}`);
-                    await utils.safeSendMessage(bot, chatId, roomList, {
-                        parse_mode: 'Markdown',
-                        ...mainMenuKeyboards.getBackToMenuKeyboard()
-                    });
                 } else if (session.step === 'roomSelection') {
                     const roomIndex = parseInt(text) - 1;
                     if (isNaN(roomIndex) || roomIndex < 0 || roomIndex >= bookingData.rooms.length) {
@@ -294,7 +389,6 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                 await utils.forwardToAdmins(bot, userId, msg.from.username, msg.text);
             }
         } else if (state === states.MAIN_MENU && text.trim().length > 0) {
-            // Игнорируем текст в MAIN_MENU, так как вопросы только через кнопку
             logger.info(`Ignored text message in MAIN_MENU for chat ${chatId}: ${text}`);
             await utils.safeSendMessage(bot, chatId, 'Пожалуйста, используйте кнопки меню для навигации. Если у вас вопрос, нажмите "Задать вопрос администратору".', {
                 parse_mode: 'Markdown',
@@ -307,18 +401,76 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
     bot.on("callback_query", async (callbackQuery) => {
         const msg = callbackQuery.message;
         const chatId = msg.chat.id;
-        const userId = callbackQuery.from.id;
         const data = callbackQuery.data;
+        const userId = callbackQuery.from.id;
 
         try {
             await bot.answerCallbackQuery(callbackQuery.id);
-            logger.info(`Callback query received for chat ${chatId}: ${data}`);
 
-            if (data === 'payment_full' || data === 'payment_prepayment') {
+            if (data.startsWith('filter_')) {
                 const { data: session, error } = await getBookingSession(chatId);
-                if (error || !session || session.step !== 'paymentType') {
-                    logger.warn(`Invalid or expired booking session for payment selection in chat ${chatId}`);
-                    await utils.safeSendMessage(bot, chatId, '❌ Сессия бронирования истекла. Начните заново.', {
+                if (error || !session || session.step !== 'roomSelection') {
+                    await utils.safeSendMessage(bot, chatId, '❌ Сессия бронирования устарела. Начните заново.', {
+                        parse_mode: 'Markdown',
+                        ...mainMenuKeyboards.getBackToMenuKeyboard()
+                    });
+                    return;
+                }
+
+                const bookingData = session.data || {};
+                const allRooms = bookingData.allRooms || bookingData.rooms || [];
+                let filteredRooms = [...allRooms];
+
+                // Применяем фильтр
+                switch(data) {
+                    case 'filter_cottages':
+                        filteredRooms = allRooms.filter(room =>
+                            room.type.includes('Коттедж') ||
+                            room.type.includes('Дом'));
+                        break;
+                    case 'filter_rooms':
+                        filteredRooms = allRooms.filter(room =>
+                            room.type.includes('Комната') ||
+                            room.type.includes('Эконом'));
+                        break;
+                    case 'sort_price_asc':
+                        filteredRooms.sort((a, b) => a.totalPrice - b.totalPrice);
+                        break;
+                    case 'sort_price_desc':
+                        filteredRooms.sort((a, b) => b.totalPrice - a.totalPrice);
+                        break;
+                }
+
+                // Получаем актуальные данные о комнатах
+                const localRooms = services.roomsData.getRoomsData();
+
+                // Обновляем данные сессии
+                bookingData.rooms = filteredRooms;
+                await saveBookingSession(chatId, 'roomSelection', bookingData);
+
+                // Удаляем старое сообщение
+                try {
+                    await bot.deleteMessage(chatId, msg.message_id);
+                } catch (e) {
+                    logger.warn('Не удалось удалить сообщение', { error: e.message });
+                }
+
+                // Отправляем новый список
+                await sendGroupedRooms(bot, chatId, filteredRooms, localRooms, bookingData);
+                return;
+            }
+
+            // Обработка выбора типа оплаты
+            if (data === 'payment_full' || data === 'payment_prepayment') {
+                logger.info(`Processing payment type selection for chat ${chatId}`, { paymentType: data });
+                const { data: session, error: sessionError } = await getBookingSession(chatId);
+                if (sessionError || !session || session.step !== 'paymentType') {
+                    logger.warn(`Invalid booking session during payment selection for chat ${chatId}`, {
+                        error: sessionError,
+                        sessionExists: !!session,
+                        currentStep: session?.step
+                    });
+                    await utils.safeSendMessage(bot, chatId, '❌ Сессия бронирования истекла. Пожалуйста, начните процесс заново.', {
                         parse_mode: 'Markdown',
                         ...mainMenuKeyboards.getBackToMenuKeyboard()
                     });
@@ -330,11 +482,14 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                 const paymentType = data === 'payment_full' ? 'full' : 'prepayment';
                 bookingData.paymentType = paymentType;
 
-                // Найти выбранный номер
+                logger.debug(`Payment type selected for chat ${chatId}`, { paymentType: paymentType });
                 const room = bookingData.rooms.find(r => r.id === bookingData.roomId);
                 if (!room) {
-                    logger.error(`Room with roomId ${bookingData.roomId} not found in rooms list for chat ${chatId}`);
-                    await utils.safeSendMessage(bot, chatId, '❌ Ошибка: номер не найден.', {
+                    logger.error(`Selected room not found during payment processing for chat ${chatId}`, {
+                        roomId: bookingData.roomId,
+                        availableRooms: bookingData.rooms.map(r => r.id)
+                    });
+                    await utils.safeSendMessage(bot, chatId, '❌ Ошибка: выбранный номер не найден в системе. Пожалуйста, начните процесс заново.', {
                         parse_mode: 'Markdown',
                         ...mainMenuKeyboards.getBackToMenuKeyboard()
                     });
@@ -343,11 +498,14 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     return;
                 }
 
-                // Установить totalPrice и nights
                 bookingData.totalPrice = room.totalPrice;
                 if (!bookingData.totalPrice || bookingData.totalPrice <= 0) {
-                    logger.error(`Invalid totalPrice for roomId ${bookingData.roomId} in chat ${chatId}: ${bookingData.totalPrice}`);
-                    await utils.safeSendMessage(bot, chatId, '❌ Ошибка: цена бронирования не указана или некорректна.', {
+                    logger.error(`Invalid room price during payment processing for chat ${chatId}`, {
+                        roomId: room.id,
+                        roomName: room.name,
+                        price: bookingData.totalPrice
+                    });
+                    await utils.safeSendMessage(bot, chatId, '❌ Ошибка: цена бронирования не указана или некорректна. Пожалуйста, начните процесс заново.', {
                         parse_mode: 'Markdown',
                         ...mainMenuKeyboards.getBackToMenuKeyboard()
                     });
@@ -358,23 +516,39 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
 
                 const nights = Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24));
                 bookingData.nights = nights;
+                bookingData.telegramChatId = chatId.toString();
 
-                // Добавить telegramChatId
-                bookingData.telegramChatId = chatId.toString(); // Добавляем chatId
+                logger.info(`Saving payment details to booking session for chat ${chatId}`, {
+                    totalPrice: bookingData.totalPrice,
+                    nights: bookingData.nights,
+                    paymentType: bookingData.paymentType
+                });
 
-                logger.info(`Payment type selected for chat ${chatId}: ${bookingData.paymentType}, totalPrice: ${bookingData.totalPrice}, nights: ${bookingData.nights}, telegramChatId: ${bookingData.telegramChatId}`);
-                await saveBookingSession(chatId, 'confirmBooking', bookingData);
+                const saveResult = await saveBookingSession(chatId, 'confirmBooking', bookingData);
+                if (!saveResult || saveResult.error) {
+                  logger.error(`Ошибка сохранения: ${saveResult?.error || 'saveResult undefined'}`);
+                  throw new Error('Не удалось сохранить данные оплаты');
+                }
 
                 let bookingResult;
                 try {
-                    logger.debug(`Creating booking for chat ${chatId}: ${JSON.stringify(bookingData)}`);
+                    logger.info(`Creating booking for chat ${chatId}`, {
+                        bookingData: {
+                            checkIn: bookingData.checkIn,
+                            checkOut: bookingData.checkOut,
+                            roomId: bookingData.roomId,
+                            guestName: bookingData.guestName,
+                            totalPrice: bookingData.totalPrice
+                        }
+                    });
                     bookingResult = await bookingModule.createBooking(bookingData);
+                    logger.debug(`Booking creation response for chat ${chatId}`, { bookingResult });
                 } catch (err) {
-                    logger.error(`Error creating booking for chat ${chatId}`, { err });
+                    logger.error(`Error creating booking for chat ${chatId}`, { error: err });
                     await utils.safeSendMessage(
                         bot,
                         chatId,
-                        '❌ Ошибка создания бронирования. Попробуйте позже.',
+                        '❌ Ошибка создания бронирования. Пожалуйста, попробуйте позже или свяжитесь с администратором.',
                         {
                             parse_mode: 'Markdown',
                             ...mainMenuKeyboards.getBackToMenuKeyboard()
@@ -385,13 +559,12 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     return;
                 }
 
-                // Исправление проверки результата
                 if (!bookingResult || !bookingResult.success || !bookingResult.bookingNumber || !bookingResult.paymentUrl || !bookingResult.paymentAmount) {
-                    logger.error(`Invalid booking result for chat ${chatId}: ${JSON.stringify(bookingResult)}`);
+                    logger.error(`Invalid booking result for chat ${chatId}`, { bookingResult });
                     await utils.safeSendMessage(
                         bot,
                         chatId,
-                        '❌ Ошибка создания бронирования. Попробуйте позже.',
+                        '❌ Ошибка создания бронирования. Получен некорректный ответ от системы бронирования. Пожалуйста, попробуйте позже или свяжитесь с администратором.',
                         {
                             parse_mode: 'Markdown',
                             ...mainMenuKeyboards.getBackToMenuKeyboard()
@@ -402,21 +575,25 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     return;
                 }
 
-                logger.info(`Booking created for chat ${chatId}: bookingNumber ${bookingResult.bookingNumber}, paymentAmount ${bookingResult.paymentAmount}`);
-
+                logger.info(`Booking successfully created for chat ${chatId}`, {
+                    bookingNumber: bookingResult.bookingNumber,
+                    paymentAmount: bookingResult.paymentAmount,
+                    bookingId: bookingResult.bookingId
+                });
 
                 await deleteBookingSession(chatId);
                 userStates.set(userId, states.MAIN_MENU);
 
                 setTimeout(async () => {
                     try {
+                        logger.debug(`Checking payment status for booking ${bookingResult.bookingId} from chat ${chatId}`);
                         const status = await bookingModule.checkPaymentStatus(bookingResult.bookingId);
-                        logger.info(`Payment status checked for booking ${bookingResult.bookingId}: ${status.status}`);
+                        logger.info(`Payment status check result for booking ${bookingResult.bookingId}`, { status: status.status });
                         if (status.status === 'paid') {
                             await utils.safeSendMessage(
                                 bot,
                                 chatId,
-                                `🎉 Оплата бронирования №${escapeMarkdown(bookingResult.bookingNumber)} успешно подтверждена!`,
+                                `🎉 Оплата бронирования №${escapeMarkdown(bookingResult.bookingNumber)} успешно подтверждена! Спасибо за выбор нашей базы отдыха!`,
                                 {
                                     parse_mode: 'Markdown',
                                     ...mainMenuKeyboards.getBackToMenuKeyboard()
@@ -426,7 +603,7 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                             await utils.safeSendMessage(
                                 bot,
                                 chatId,
-                                `⏰ Время оплаты бронирования №${escapeMarkdown(bookingResult.bookingNumber)} истекло.`,
+                                `⏰ Время оплаты бронирования №${escapeMarkdown(bookingResult.bookingNumber)} истекло. Для нового бронирования воспользуйтесь меню.`,
                                 {
                                     parse_mode: 'Markdown',
                                     ...mainMenuKeyboards.getBackToMenuKeyboard()
@@ -436,56 +613,66 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     } catch (error) {
                         logger.error(`Error checking payment status for booking ${bookingResult.bookingId}`, { error });
                     }
-                }, 5 * 60 * 1000);
+                }, 5 * 60 * 1000); // 5 минут
+
                 return;
             }
 
             switch (data) {
                 case "important_info":
+                    logger.debug(`Processing 'important_info' callback for chat ${chatId}`);
                     await handleImportantInfo(bot, chatId);
                     break;
                 case "rooms":
                     const roomsData = services.roomsData.getRoomsData();
-                    logger.info(`Displaying rooms for chat ${chatId}, count: ${roomsData.length}`);
-                    const keyboard = mainMenuKeyboards.getRoomsKeyboard(roomsData);
+                    console.log(
+                        "Отображение номеров. Количество:",
+                        roomsData.length,
+                    );
                     await utils.safeSendMessage(
                         bot,
                         chatId,
                         "Выберите номер:",
-                        keyboard.reply_markup // Передаем только reply_markup напрямую
+                        roomsKeyboards.getRoomsKeyboard(roomsData),
                     );
                     break;
                 case "entertainment":
+                    logger.debug(`Processing 'entertainment' callback for chat ${chatId}`);
                     await handleEntertainment(bot, chatId);
                     break;
                 case "facilities":
+                    logger.debug(`Processing 'facilities' callback for chat ${chatId}`);
                     await handleFacilities(bot, chatId);
                     break;
                 case "camping":
+                    logger.debug(`Processing 'camping' callback for chat ${chatId}`);
                     await handleCamping(bot, chatId);
                     break;
                 case "our_beach":
+                    logger.debug(`Processing 'our_beach' callback for chat ${chatId}`);
                     await handleOur_beach(bot, chatId);
                     break;
                 case "Mangalchik":
+                    logger.debug(`Processing 'Mangalchik' callback for chat ${chatId}`);
                     await handleMangalchik(bot, chatId);
                     break;
                 case "directions":
+                    logger.debug(`Processing 'directions' callback for chat ${chatId}`);
                     await handleDirections(bot, chatId);
                     break;
                 case "booking":
+                    logger.info(`Starting booking process for chat ${chatId}`);
                     userStates.set(userId, states.BOOKING_PROCESS);
-                    logger.info(`Started booking process for chat ${chatId}`);
                     await utils.safeSendMessage(
                         bot,
                         chatId,
-                        "Добро пожаловать в модуль бронирования! Подскажите вы ознакомились с нашими условиями проживания?",
+                        "Добро пожаловать в модуль бронирования! Подскажите, вы ознакомились с нашими условиями проживания?",
                         mainMenuKeyboards.getBookingKeyboard()
                     );
                     break;
                 case "back_to_menu":
+                    logger.info(`Returning to main menu for chat ${chatId}`);
                     userStates.set(userId, states.MAIN_MENU);
-                    logger.info(`Returned to main menu for chat ${chatId}`);
                     await utils.safeSendMessage(
                         bot,
                         chatId,
@@ -494,14 +681,16 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     );
                     break;
                 case "booking_yes":
+                    logger.debug(`Processing 'booking_yes' callback for chat ${chatId}`);
                     await handleBookingYes(bot, chatId);
                     break;
                 case "booking_no":
+                    logger.debug(`Processing 'booking_no' callback for chat ${chatId}`);
                     await handleBookingNo(bot, chatId);
                     break;
                 case "ask_admin":
+                    logger.info(`Starting admin questions mode for chat ${chatId}`);
                     userStates.set(userId, states.ASKING_QUESTIONS);
-                    logger.info(`Started asking questions mode for chat ${chatId}`);
                     await utils.safeSendMessage(
                         bot,
                         chatId,
@@ -517,39 +706,37 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     );
                     break;
                 case "end_questions":
+                    logger.info(`Ending admin questions mode for chat ${chatId}`);
                     userStates.set(userId, states.MAIN_MENU);
-                    logger.info(`Ended asking questions mode for chat ${chatId}`);
                     await utils.safeSendMessage(
                         bot,
                         chatId,
-                        "Вопросы завершены. Выберите команду из меню:",
+                        "Спасибо за ваши вопросы! Мы ответим вам в ближайшее время. Выберите команду из меню:",
                         mainMenuKeyboards.getMainMenuKeyboard()
                     );
                     break;
                 default:
                     if (data.startsWith("room_")) {
+                        logger.debug(`Processing room details callback for chat ${chatId}`, { roomData: data });
                         await handleRoomDetails(bot, chatId, data);
+                    } else {
+                        logger.warn(`Unknown callback data received from chat ${chatId}`, { callbackData: data });
                     }
                     break;
             }
-        } catch (error) {
-            logger.error(`Error processing callback query for chat ${chatId}: ${data}`, { error });
-            try {
-                await bot.answerCallbackQuery(callbackQuery.id);
-            } catch (answerError) {
-                logger.error(`Failed to answer callback query for chat ${chatId}`, { answerError });
-            }
-            await utils.safeSendMessage(
-                bot,
-                chatId,
-                `❌ Ошибка: ${error.message}`,
-                {
+            } catch (error) {
+                logger.error('Ошибка обработки callback', {
+                    chatId,
+                    error: error.message,
+                    stack: error.stack
+                });
+
+                await utils.safeSendMessage(bot, chatId, '❌ Произошла ошибка. Попробуйте снова.', {
                     parse_mode: 'Markdown',
                     ...mainMenuKeyboards.getBackToMenuKeyboard()
-                }
-            );
-        }
-    });
+                });
+            }
+        });
 
     // Обработка команды проверки статуса
     bot.onText(/\/checkpayment (.+)/, async (msg, match) => {
@@ -630,15 +817,10 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     parse_mode: "Markdown",
                     reply_markup: {
                         inline_keyboard: [
-                            [
-                                {
-                                    text: "⚙️ Админ-панель",
-                                    callback_data: "admin_panel",
-                                },
-                            ],
+                            [{ text: "⚙️ Админ-панель", callback_data: "admin_panel" }],
                         ],
                     },
-                },
+                }
             );
         }
     });
@@ -654,7 +836,7 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             bot,
             chatId,
             "Главное меню:",
-            mainMenuKeyboards.getMainMenuKeyboard(),
+            mainMenuKeyboards.getMainMenuKeyboard()
         );
     });
 
@@ -702,28 +884,23 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                 "content/importantinfo/Important1.png.webp",
                 {
                     caption: `📌 Наша база расположена на берегу озера в заповедной зоне.
-    💧 В целях сохранения экологии:
-    • Центральная канализация и водопровод отсутствуют
-    • Душа нет, но есть прекрасные русские бани на дровах (как для помывки, так и для отдыха)
-    • Удобства на улице
-    🧻 Большой дачный туалет на территории
-    
-    🦟 *Противоклещевая обработка:*
-    • Территория базы обрабатывается от клещей.  
-    • Однако мы *рекомендуем взять с собой защитные аэрозоли* для дополнительной безопасности.
-
-    💰 Скидки и предложения:  
-    • Скидки постоянным клиентам при повторном бронировании  
-    • Длительное проживание (от 5 дней) - баня в подарок один раз и бесплатная парковка.
-    • Уточняйте актуальные предложения при бронировании  
-    Какие либо льготы для конкретных групп людей не предусмотрены. 
-    
-    Если такие условия вас устраивают, давайте расскажу подробнее 😊
-    
-    Выберите команду из меню или задайте вопрос в чате:`,
+💧 В целях сохранения экологии:
+• Центральная канализация и водопровод отсутствуют
+• Душа нет, но есть прекрасные русские бани на дровах (как для помывки, так и для отдыха)
+• Удобства на улице
+🧻 Большой дачный туалет на территории
+🦟 *Противоклещевая обработка:*
+• Территория базы обрабатывается от клещей.
+• Однако мы *рекомендуем взять с собой защитные аэрозоли* для дополнительной безопасности.
+💰 Скидки и предложения:
+• Длительное проживание (от 5 дней) - баня в подарок один раз и бесплатная парковка.
+• Уточняйте актуальные предложения при бронировании
+Какие либо льготы для конкретных групп людей не предусмотрены.
+Если такие условия вас устраивают, давайте расскажу подробнее 😊
+Выберите команду из меню или задайте вопрос в чате:`,
                     parse_mode: "Markdown",
                     ...mainMenuKeyboards.getBackToMenuKeyboard(),
-                },
+                }
             );
         } catch (error) {
             logger.error(`Error sending important info to chat ${chatId}`, { error });
@@ -731,19 +908,19 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                 bot,
                 chatId,
                 `📌 Наша база расположена на берегу озера в заповедной зоне.
-    💧 В целях сохранения экологии:
-    • Центральная канализация и водопровод отсутствуют
-    • Душа нет, но есть прекрасные русские бани на дровах (как для помывки, так и для отдыха)
-    • Удобства на улице
-    🧻 Большой дачный туалет на территории
-    👶 Дети до 5 лет — бесплатно (если без отдельного спального места)
-    Если такие условия вас устраивают, давайте расскажу подробнее 😊
-    Выберите команду из меню или задайте вопрос в чате:
-    Произошла ошибка при загрузке дополнительных материалов.`,
+💧 В целях сохранения экологии:
+• Центральная канализация и водопровод отсутствуют
+• Душа нет, но есть прекрасные русские бани на дровах (как для помывки, так и для отдыха)
+• Удобства на улице
+🧻 Большой дачный туалет на территории
+👶 Дети до 5 лет — бесплатно (если без отдельного спального места)
+Если такие условия вас устраивают, давайте расскажу подробнее 😊
+Выберите команду из меню или задайте вопрос в чате:
+Произошла ошибка при загрузке дополнительных материалов.`,
                 {
                     parse_mode: "Markdown",
                     ...mainMenuKeyboards.getBackToMenuKeyboard(),
-                },
+                }
             );
         }
     }
@@ -760,35 +937,34 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
         ];
 
         const message = `Размещение с палатками:
-            у нас есть отдельная зона кемпинга, где можно размещаться со своей палаткой. Эта территория — продолжение базы, но палатки на участке с домиками не размещаются.
-        📍 *Расположение:*  
-        На самом берегу озера Тургояк, с выходом на бухту, шикарным песчаным пляжем и видом на остров Веры.  
-        🔹 Заезд: 50 м от красных ворот — поворот налево по синему указателю «Кемпинг Золотые пески».
-        🚗 *Парковка:*  
-        — Машины рядом с палатками ставить нельзя (береговая зона)  
-        — Автомобиль будет в 30–50 м  
-        — Хотите ближе? Ставьте палатку ближе к парковке
-        🔥 *Что есть на территории:*  
-        — Костровище  
-        — Освещение  
-        — Туалет дачного типа  
-        — Столы (по мере занятости, лучше привозить свои)  
-        🚫 Умывальников нет (нет водоснабжения)  
-        🧖‍♂ *Есть две отличные русские бани на дровах!*
-        💰 *Стоимость:*  
-        — От 1000 до 1500 ₽ в сутки за палатку или шатёр  
-        — Цена зависит от сезона и дня недели  
-        — Размер палатки не влияет на цену  
-        — Учитываем только *кол-во ночей*  
-        — Шатёр = палатка  
-        — *Бронирование* — только для групп от 8–10 палаток. Остальные выбирают место на месте с администратором.
-        🏖 Гости кемпинга могут пользоваться нашим *основным песчаным пляжем* — одним из лучших на всём озере!
-        *Будем рады видеть вас у воды! 🌊*
-        
-        📍 *Как добраться:*
-        От главного поворота на нашу базу, проехать еще 100 метров и повернуть налево, перед вывеской синего цвета (последние 2 фото)
-        Координаты 55.186718, 60.055969
-        [https://yandex.ru/maps/?ll=60.057310%2C55.186488&mode=routes&rtext=~55.186718%2C60.055969&rtt=auto&ruri=~&source=serp_navig&z=19]`;
+у нас есть отдельная зона кемпинга, где можно размещаться со своей палаткой. Эта территория — продолжение базы, но палатки на участке с домиками не размещаются.
+📍 *Расположение:*
+На самом берегу озера Тургояк, с выходом на бухту, шикарным песчаным пляжем и видом на остров Веры.
+🔹 Заезд: 50 м от красных ворот — поворот налево по синему указателю «Кемпинг Золотые пески».
+🚗 *Парковка:*
+— Машины рядом с палатками ставить нельзя (береговая зона)
+— Автомобиль будет в 30–50 м
+— Хотите ближе? Ставьте палатку ближе к парковке
+🔥 *Что есть на территории:*
+— Костровище
+— Освещение
+— Туалет дачного типа
+— Столы (по мере занятости, лучше привозить свои)
+🚫 Умывальников нет (нет водоснабжения)
+🧖‍♂ *Есть две отличные русские бани на дровах!*
+💰 *Стоимость:*
+— От 1000 до 1500 ₽ в сутки за палатку или шатёр
+— Цена зависит от сезона и дня недели
+— Размер палатки не влияет на цену
+— Учитываем только *кол-во ночей*
+— Шатёр = палатка
+— *Бронирование* — только для групп от 8–10 палаток. Остальные выбирают место на месте с администратором.
+🏖 Гости кемпинга могут пользоваться нашим *основным песчаным пляжем* — одним из лучших на всём озере!
+*Будем рады видеть вас у воды! 🌊*
+📍 *Как добраться:*
+От главного поворота на нашу базу, проехать еще 100 метров и повернуть налево, перед вывеской синего цвета (последние 2 фото)
+Координаты 55.186718, 60.055969
+[https://yandex.ru/maps/?ll=60.057310%2C55.186488&mode=routes&rtext=~55.186718%2C60.055969&rtt=auto&ruri=~&source=serp_navig&z=19]`;
 
         try {
             logger.info(`Sending camping info to chat ${chatId}`);
@@ -799,7 +975,6 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     media: photo,
                 })),
             );
-
             await utils.safeSendMessage(bot, chatId, message, {
                 parse_mode: "Markdown",
                 ...mainMenuKeyboards.getBackToMenuKeyboard(),
@@ -815,16 +990,15 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
 
     async function handleOur_beach(bot, chatId) {
         const photos = ["content/beach/1.jfif", "content/beach/2.jfif"];
-
         const message = `🏖🌞 *Дневное пребывание и посещение пляжа*
-    🚗 *Парковка для гостей* — 1000 ₽ без ограничения по времени.
-    📍 Вы можете находиться на территории и пользоваться пляжем, используя свои покрывала и полотенца.
-    🪑 *Использование своих стульев, кресел, шезлонгов* — 200 ₽ с единицы.
-    🛋 *Аренда наших шезлонгов* — 500 ₽ в день.
-    ✅ Если вы припарковались на нашей платной парковке, плата за использование своих кресел не взимается.
-    🐕 *Посещение с собаками любого размера* — 1000 ₽ с человека за все время проживания, обязательно использовать поводок и намордник (для больших собак), даже если собака очень добрая и милая!
-    ‼️ *Установка своих мангалов, столов и другого оборудования на территории пляжа ЗАПРЕЩЕНА!*  
-    🔥 *Хотите пожарить шашлыки? Арендуйте мангальную зону!*`;
+🚗 *Парковка для гостей* — 1000 ₽.
+📍 Вы можете находиться на территории и пользоваться пляжем, используя свои покрывала и полотенца.
+🪑 *Использование своих стульев, кресел, шезлонгов* — 200 ₽ с единицы.
+🛋 *Аренда наших шезлонгов* — 500 ₽ в день.
+✅ Если вы припарковались на нашей платной парковке, плата за использование своих кресел не взимается.
+🐕 *Посещение с собаками любого размера* — 1000 ₽ с человека за все время проживания, обязательно использовать поводок и намордник (для больших собак), даже если собака очень добрая и милая!
+‼️ *Установка своих мангалов, столов и другого оборудования на территории пляжа ЗАПРЕЩЕНА!*
+🔥 *Хотите пожарить шашлыки? Арендуйте мангальную зону!*`;
 
         try {
             logger.info(`Sending beach info to chat ${chatId}`);
@@ -835,7 +1009,6 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     media: photo,
                 })),
             );
-
             await utils.safeSendMessage(bot, chatId, message, {
                 parse_mode: "Markdown",
                 ...mainMenuKeyboards.getBackToMenuKeyboard(),
@@ -858,33 +1031,33 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             "content/Entertaiment/5.webp",
             "content/Entertaiment/6.webp",
         ];
-
         const message = `🏖 Развлечения:
-    1. Купание в озере
-    2. Русская баня с парением ❄️:
-        - Баня русская на дровах. Большая, от 8 до 30 человек. Вместительность высокая. Мангальная зона и мангал перед баней. Большая парилка, моечное отделение, большой предбанник с большим столом и скамейками - Стоимость 2500 час, бронирование от трех часов.
-        - Баня русская на дровах. Малая - максимальная вместимость 6 человек. Стоимость 2000 час от 1.5 часов. 
-      📍Посещение по обязательной предварительной брони, за четыре часа большую и за два малую. 
-      📍Бани находятся в 25 метрах от озера. 
-    3. Прокат:
-        - Сапборд — 1200₽/час, 3000₽ на 3 часа
-        - Байдарка (3 чел.) - 1500₽/час, 3500₽ на 3 часа
-        - Лодка двухместная надувная - 1500₽/час, 3500₽ на 3 часа
-        - Лодка надувная четырехместная - 1500₽/час, 3500₽ на 3 часа
-      📍 Спасательные жилеты включены в стоимость!
-      📍 Плавсредства выдаются под обеспечительный залог!
-    4. Волейбольная площадка 
-    5. Йога на открытом воздухе, с поющими чашами для гостей каждую среду, субботу и воскресенье в 9.00 при условии хорошей погоды.
-    6. 🍖 *Аренда мангальной зоны*
-        У нас есть мангальные зоны прямо на берегу — большие столы со скамейками и мангалом. Зоны открытые (не крытые), отлично подходят для пикника у воды.
-        💰 *Стоимость аренды:*  
-        — *Выходные:* 2500 ₽ за 3 часа  
-        — *Продление:* 500 ₽ за каждый дополнительный час  
-        — *Будние дни:* 2500 ₽ за весь день
-        🚗 *Парковка оплачивается отдельно* — 500 ₽ в сутки.
-        При бронировании номера мангальная зона входит в стоимость номера.
-        Мангальная зона — отличное место для отдыха с друзьями и семьёй у самого берега озера! 🌅
-        Остались вопросы? Выберите команду из меню или задайте вопрос в чате:`;
+1. Купание в озере
+2. Русская баня с парением ❄️:
+    - Баня русская на дровах. Большая, от 8 до 30 человек. Вместительность высокая. Мангальная зона и мангал перед баней. Большая парилка, моечное отделение, большой предбанник с большим столом и скамейками - Стоимость 2500 час, бронирование от трех часов.
+    - Баня русская на дровах. Малая - максимальная вместимость 6 человек. Стоимость 2000 час от 1.5 часов.
+  📍Посещение по обязательной предварительной брони.
+  📍Бани находятся в 25 метрах от озера.
+3. Прокат:
+    - Сапборд — 1200₽/час, 3000₽ на 3 часа
+    - Байдарка (3 чел.) - 1500₽/час, 3500₽ на 3 часа
+    - Лодка двухместная надувная - 1500₽/час, 3500₽ на 3 часа
+    - Лодка надувная четырехместная - 1500₽/час, 3500₽ на 3 часа
+  📍 Спасательные жилеты включены в стоимость!
+  📍 Плавсредства выдаются под обеспечительный залог!
+4. Волейбольная площадка
+5. Йога на открытом воздухе, с поющими чашами для гостей каждую среду, субботу и воскресенье в 9.00 при условии хорошей погоды.
+6. 🍖 *Аренда мангальной зоны*
+    У нас есть мангальные зоны прямо на берегу — большие столы со скамейками и мангалом. Зоны открытые (не крытые), отлично подходят для пикника у воды.
+    💰 *Стоимость аренды:*
+    — *Выходные:* 2500 ₽ за 3 часа
+    — *Продление:* 500 ₽ за каждый дополнительный час
+    — *Будние дни:* 2500 ₽ за весь день
+7. Организация поездок на катере по озеру и до острова Веры.
+    🚗 *Парковка оплачивается отдельно* — 1000 ₽ в сутки.
+    При бронировании номера мангальная зона входит в стоимость номера (мангальная зона, расположенная около домиков).
+    Мангальная зона — отличное место для отдыха с друзьями и семьёй у самого берега озера! 🌅
+    Остались вопросы? Выберите команду из меню или задайте вопрос в чате:`;
 
         try {
             logger.info(`Sending entertainment info to chat ${chatId}`);
@@ -895,7 +1068,6 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     media: photo,
                 })),
             );
-
             await utils.safeSendMessage(bot, chatId, message, {
                 parse_mode: "Markdown",
                 ...mainMenuKeyboards.getBackToMenuKeyboard(),
@@ -917,16 +1089,14 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             `🍽️ Удобства:
 • Общая кухня с газовыми плитами
 • Парковка:
-  - Легковой авто — 500₽/сутки
-  - Газель — 1000₽/сутки
+  1000 руб день / сутки , если вы ничего не арендуете на базе.
 • Чистейшая родниковая вода из озера
 • Запас питьевой воды, решётки и угли — берите с собой
-
 Остались вопросы? Выберите команду из меню или задайте вопрос в чате:`,
             {
                 parse_mode: "Markdown",
                 ...mainMenuKeyboards.getBackToMenuKeyboard(),
-            },
+            }
         );
     }
 
@@ -935,18 +1105,16 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             "content/mangalchik/1.jfif",
             "content/mangalchik/2.jfif",
         ];
-
-        const message = `🍖 *Аренда мангальной зоны*  
-У нас есть мангальные зоны прямо на берегу — большие столы со скамейками и мангалом. Зоны открытые (не крытые), отлично подходят для пикника у воды.  
-💰 *Стоимость аренды:*  
-— *Выходные:* 2500 ₽ за 3 часа  
-— *Продление:* 500 ₽ за каждый дополнительный час  
-— *Будние дни:* 2500 ₽ за весь день  
-🚗 *Парковка оплачивается отдельно* — 500 ₽ в сутки.  
-Мангальная зона — отличное место для отдыха с друзьями и семьёй у самого берега озера! 🌅  
-‼️ *Установка своих мангалов, столов и другого оборудования на территории пляжа ЗАПРЕЩЕНА!*  
+        const message = `🍖 *Аренда мангальной зоны*
+У нас есть мангальные зоны прямо на берегу — большие столы со скамейками и мангалом. Зоны открытые (не крытые), отлично подходят для пикника у воды.
+💰 *Стоимость аренды:*
+— *Выходные:* 2500 ₽ за 3 часа
+— *Продление:* 500 ₽ за каждый дополнительный час
+— *Будние дни:* 2500 ₽ за весь день
+🚗 *Парковка оплачивается отдельно* — 500 ₽ в сутки.
+Мангальная зона — отличное место для отдыха с друзьями и семьёй у самого берега озера! 🌅
+‼️ *Установка своих мангалов, столов и другого оборудования на территории пляжа ЗАПРЕЩЕНА!*
 🔥 *Хотите пожарить шашлыки? Арендуйте мангальную зону!*
-
 Остались вопросы? Выберите команду из меню или задайте вопрос в чате:`;
 
         try {
@@ -958,7 +1126,6 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     media: photo,
                 })),
             );
-
             await utils.safeSendMessage(bot, chatId, message, {
                 parse_mode: "Markdown",
                 ...mainMenuKeyboards.getBackToMenuKeyboard(),
@@ -978,15 +1145,11 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             "content/road/50c10319-d3d4-4488-bccf-58b2f16b00df.jfif",
             "content/road/d6f84703-8cba-4217-a3ca-b42d2da16d27.jfif",
         ];
-
-        const message = `
-        📍 Координаты: 
-            55.1881079369311, 60.05969764417703
-            [https://yandex.ru/maps/?ll=60.061851%2C55.187183&mode=routes&rtext=~55.187969%2C60.059069&rtt=auto&ruri=~ymapsbm1%3A%2F%2Forg%3Foid%3D109014041624&source=serp_navig&z=15.3]
-
-        🚙 Возможен заезд на автомобиле, парковка платная.
-
-        *Остались вопросы? Выберите команду из меню или задайте вопрос в чате:*`;
+        const message = `📍 Координаты:
+55.1881079369311, 60.05969764417703
+[https://yandex.ru/maps/?ll=60.061851%2C55.187183&mode=routes&rtext=~55.187969%2C60.059069&rtt=auto&ruri=~ymapsbm1%3A%2F%2Forg%3Foid%3D109014041624&source=serp_navig&z=15.3]
+🚙 Возможен заезд на автомобиле, парковка платная.
+*Остались вопросы? Выберите команду из меню или задайте вопрос в чате:*`;
 
         try {
             logger.info(`Sending directions info to chat ${chatId}`);
@@ -997,7 +1160,6 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     media: photo,
                 })),
             );
-
             await utils.safeSendMessage(bot, chatId, message, {
                 parse_mode: "Markdown",
                 ...mainMenuKeyboards.getBackToMenuKeyboard(),
@@ -1017,25 +1179,20 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             bot,
             chatId,
             `📌 Наша база расположена на берегу озера в заповедной зоне.
-
 💧 В целях сохранения экологии:
 • Центральная канализация и водопровод отсутствуют
 • Душа нет, но есть прекрасные русские бани на дровах (как для помывки, так и для отдыха)
 • Удобства на улице
-
 🧻 Большой дачный туалет на территории
 👶 Дети до 5 лет — бесплатно (если без отдельного спального места)
-
 Если такие условия вас устраивают, перейдите к бронированию:
 [Забронировать номер](https://script.google.com/macros/s/AKfycbywmbK6PsGIqGEJQGEK2ix-IQXPG0TNSBXNr-19QODCRxDXWv-ntNllrh5O6X-amWwV/exec)
-
 Или напишите менеджеру прямо в этом чате для подбора подходящего варианта!
-
 Остались вопросы? Выберите команду из меню или задайте вопрос в чате:`,
             {
                 parse_mode: "Markdown",
                 ...mainMenuKeyboards.getBackToMenuKeyboard(),
-            },
+            }
         );
     }
 
@@ -1049,13 +1206,10 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             if (room.Описание) roomInfo += `📝 ${mainMenuKeyboards.escapeHtml(room.Описание)}\n\n`;
             if (room.Тип) roomInfo += `🏷️ Объект аренды: ${mainMenuKeyboards.escapeHtml(room.Тип)}\n`;
             if (room.Комнат) roomInfo += `🏠 Комнат: ${room.Комнат}\n`;
-            if (room.Вместимость)
-                roomInfo += `👥 Вместимость: ${room.Вместимость} чел. в комнате\n`;
+            if (room.Вместимость) roomInfo += `👥 Вместимость: ${room.Вместимость} чел. в комнате\n`;
             if (room.Цена) roomInfo += `💰 Цена: от ${room.Цена}₽\n`;
             if (room.Удобства) roomInfo += `🛏️ Удобства: ${mainMenuKeyboards.escapeHtml(room.Удобства)}\n`;
-            if (room.Входит)
-                roomInfo += `ℹ️ В размещение входит: ${mainMenuKeyboards.escapeHtml(room.Входит)}\n`;
-
+            if (room.Входит) roomInfo += `ℹ️ В размещение входит: ${mainMenuKeyboards.escapeHtml(room.Входит)}\n`;
             roomInfo += `\n❓ Остались вопросы? Выберите команду из меню или задайте вопрос в чате:`;
 
             let photos = services.roomsData.getRoomPhotos(room.ID);
@@ -1079,16 +1233,14 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                             caption: index === 0 ? roomInfo : undefined,
                             parse_mode: index === 0 ? "Markdown" : undefined,
                         }));
-
                         await bot.sendMediaGroup(chatId, mediaGroup);
-
                         await utils.safeSendMessage(
                             bot,
                             chatId,
                             "Выберите действие:",
                             {
                                 ...mainMenuKeyboards.getRoomDetailsKeyboard(),
-                            },
+                            }
                         );
                     }
                 } catch (error) {
@@ -1126,7 +1278,7 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                         "Выберите действие:",
                         {
                             ...mainMenuKeyboards.getRoomDetailsKeyboard(),
-                        },
+                        }
                     );
                 }
             } else {
@@ -1145,15 +1297,10 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                     parse_mode: "Markdown",
                     reply_markup: {
                         inline_keyboard: [
-                            [
-                                {
-                                    text: "🔙 К списку номеров",
-                                    callback_data: "rooms",
-                                },
-                            ],
+                            [{ text: "🔙 К списку номеров", callback_data: "rooms" }],
                         ],
                     },
-                },
+                }
             );
         }
     }
