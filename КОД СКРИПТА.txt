@@ -1,0 +1,1846 @@
+/**
+ * Конфигурация системы бронирования
+ */
+const CONFIG = {
+  sheetId: SpreadsheetApp.getActiveSpreadsheet().getId(),
+  sheets: {
+    rooms: 'Номера',
+    bookings: 'Бронирования',
+    calendar: 'Календарь',
+    payments: 'Платежи',
+    settings: 'Настройки',
+    prices: 'Цены'
+  },
+  yookassa: {
+    apiUrl: 'https://api.yookassa.ru/v3/',
+    returnUrl: ScriptApp.getService().getUrl() + '?action=close_window',
+    prepaymentPercentage: 0.5 // 50% предоплата
+  },
+  email: {
+    from: 'no-reply@example.com',
+    subject: 'Подтверждение бронирования'
+  }
+};
+
+/**
+ * Получение секретов из свойств скрипта
+ */
+function getYooKassaCredentials() {
+  const scriptProperties = PropertiesService.getScriptProperties();
+  return {
+    shopId: scriptProperties.getProperty('YOOKASSA_SHOP_ID'),
+    secretKey: scriptProperties.getProperty('YOOKASSA_SECRET_KEY')
+  };
+}
+
+function getTelegramCredentials() {
+  const scriptProperties = PropertiesService.getScriptProperties();
+  return {
+    botToken: scriptProperties.getProperty('TELEGRAM_BOT_TOKEN'),
+    chatId: scriptProperties.getProperty('TELEGRAM_CHAT_ID')
+  };
+}
+
+/**
+ * Получение листа по имени с проверкой
+ */
+function getSheet(sheetName) {
+  if (!sheetName) {
+    throw new Error('Не указано имя листа');
+  }
+  const sheet = SpreadsheetApp.openById(CONFIG.sheetId).getSheetByName(sheetName);
+  if (!sheet) {
+    throw new Error(`Лист "${sheetName}" не найден. Проверьте настройки CONFIG.`);
+  }
+  return sheet;
+}
+
+/**
+ * Основной обработчик веб-запросов
+ */
+function doGet(e) {
+  try {
+    const params = e?.parameter || {};
+    const action = params.action || 'main';
+
+    if (action === 'check_payment') {
+      return ContentService.createTextOutput(
+        JSON.stringify(checkPaymentStatus(params.booking_id))
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (action === 'get_free_rooms') {
+      const from = params.from;
+      const to = params.to;
+      const data = getFreeRooms(from, to);
+      return ContentService.createTextOutput(JSON.stringify(data))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (action === 'get_calendar_data') {
+      const from = params.from;
+      const to = params.to;
+      const bookingId = params.bookingId || null;
+      const data = getCalendarOccupancy(from, to, bookingId);
+      return ContentService.createTextOutput(JSON.stringify(data))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (action === 'get_room_occupancy') {
+      const from = params.from;
+      const to = params.to;
+      const data = getRoomOccupancy(from, to);
+      return ContentService.createTextOutput(JSON.stringify(data))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (action === 'simulate_payment') {
+      return ContentService.createTextOutput(
+        JSON.stringify(simulateYooKassaPayment(params.booking_id))
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (action === 'close_window') {
+      return HtmlService.createHtmlOutput(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Оплата прошла успешно</title>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.close();
+              }, 2000);
+              if (!window.closed) {
+                document.body.innerHTML = '<h1>Вы можете закрыть эту вкладку</h1>';
+              }
+            };
+          </script>
+        </head>
+        <body>
+          <h1>Оплата прошла успешно!</h1>
+          <p>Эта вкладка закроется автоматически...</p>
+        </body>
+        </html>
+      `);
+    }
+
+    if (action === 'payment_success') {
+      return HtmlService.createHtmlOutput(`
+        <h1>Оплата прошла успешно!</h1>
+        <p>Ваше бронирование подтверждено.</p>
+        <a href="${ScriptApp.getService().getUrl()}">Вернуться на главную</a>
+      `);
+    }
+
+    const template = params.view === 'addBooking' ? 'addBooking' : 'Index';
+    return HtmlService.createHtmlOutputFromFile(template)
+      .setTitle('Система бронирования')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+  } catch (error) {
+    console.error('Ошибка в doGet:', error);
+    return HtmlService.createHtmlOutput(`
+      <h1>Ошибка</h1>
+      <p>${error.message}</p>
+      <a href="${ScriptApp.getService().getUrl()}">На главную</a>
+    `);
+  }
+}
+
+/**
+ * Обработчик POST-запросов
+ */
+function doPost(e) {
+  try {
+    const params = JSON.parse(e.postData.contents);
+    const action = params.action || '';
+
+    if (action === 'add_manual_booking') {
+      const result = addManualBooking(params.bookingData);
+      return ContentService.createTextOutput(JSON.stringify(result))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (e.headers && e.headers['HTTP-YOOKASSA-SIGNATURE']) {
+      if (!verifyWebhookSignature(e)) {
+        throw new Error('Invalid webhook signature');
+      }
+
+      if (params.event === 'payment.succeeded') {
+        const payment = params.object;
+        updatePaymentStatus(payment);
+      }
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({ success: true }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    console.error('Webhook error:', error);
+    return ContentService.createTextOutput(JSON.stringify({ error: error.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Проверка подписи вебхука
+ */
+function verifyWebhookSignature(e) {
+  try {
+    const signature = e.headers['HTTP-YOOKASSA-SIGNATURE'];
+    const body = e.postData.contents;
+    const credentials = getYooKassaCredentials();
+
+    const hmac = Utilities.computeHmacSha256Signature(body, credentials.secretKey);
+    const encodedSignature = Utilities.base64Encode(hmac);
+
+    return signature === encodedSignature;
+  } catch (error) {
+    console.error('Signature verification failed:', error);
+    return false;
+  }
+}
+
+/**
+ * Получение списка доступных номеров
+ */
+function getAvailableRooms(checkIn, checkOut) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    const roomsSh = getSheet(CONFIG.sheets.rooms);
+    const calendarSh = getSheet(CONFIG.sheets.calendar);
+    const pricesSh = getSheet(CONFIG.sheets.prices);
+
+    const booked = calendarSh.getDataRange().getValues();
+    const roomsData = roomsSh.getDataRange().getValues();
+    const pricesData = pricesSh.getDataRange().getValues();
+    const pricesHeaders = pricesData[0];
+
+    const available = [];
+
+    for (let i = 1; i < roomsData.length; i++) {
+      const roomRow = roomsData[i];
+      const roomId = roomRow[0];
+
+      const isFree = !booked.some(b =>
+        b[0] == roomId && isDateOverlap(checkIn, checkOut, b[1], b[2])
+      );
+      if (!isFree) continue;
+
+      const pricePerDay = {};
+
+      for (let j = 1; j < pricesData.length; j++) {
+        const priceRow = pricesData[j];
+        if (priceRow[0] == roomId) {
+          const month = String(priceRow[1]).padStart(2, '0');
+          const days = {
+            'Пн': 2, 'Вт': 3, 'Ср': 4, 'Чт': 5, 'Пт': 6, 'Сб': 7, 'Вс': 8
+          };
+
+          for (const [dayName, colIndex] of Object.entries(days)) {
+            const priceKey = `${month}${dayName}`;
+            pricePerDay[priceKey] = getCorrectNumber(priceRow[colIndex]);
+          }
+        }
+      }
+
+      available.push({
+        id: roomRow[0],
+        name: roomRow[1],
+        type: roomRow[2],
+        capacity: roomRow[3],
+        description: roomRow[4] || '',
+        pricePerDay: pricePerDay
+      });
+    }
+
+    return available;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Отправка сообщения в Telegram
+ */
+function sendTelegramMessage(message) {
+  try {
+    const credentials = getTelegramCredentials();
+    
+    if (!credentials.botToken || !credentials.chatId) {
+      console.error('Отсутствуют credentials для Telegram');
+      return false;
+    }
+    
+    const url = `https://api.telegram.org/bot${credentials.botToken}/sendMessage`;
+    
+    const payload = {
+      chat_id: credentials.chatId,
+      text: message,
+      parse_mode: 'HTML'
+    };
+    
+    const options = {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    };
+    
+    const response = UrlFetchApp.fetch(url, options);
+    const result = JSON.parse(response.getContentText());
+    
+    if (!result.ok) {
+      console.error('Ошибка отправки в Telegram:', result);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Ошибка при отправке в Telegram:', error);
+    return false;
+  }
+}
+
+/**
+ * Форматирование сообщения о платеже для Telegram и Email
+ */
+function formatPaymentMessage(bookingData, paymentUrl) {
+  const checkInDate = new Date(bookingData.checkIn).toLocaleDateString('ru-RU');
+  const checkOutDate = new Date(bookingData.checkOut).toLocaleDateString('ru-RU');
+  
+  const paymentTypeText = bookingData.paymentType === 'prepayment' 
+    ? `Предоплата ${bookingData.prepaymentPercentage}%`
+    : 'Полная оплата';
+  
+  // Формат для Telegram (HTML)
+  const telegramMessage = `🏨 <b>Новое бронирование!</b>
+
+📝 <b>Номер брони:</b> ${bookingData.bookingNumber}
+👤 <b>Гость:</b> ${bookingData.guestName}
+📧 <b>Email:</b> ${bookingData.email}
+📱 <b>Телефон:</b> ${bookingData.guestPhone}
+🏠 <b>Номер:</b> ${bookingData.roomId}
+📅 <b>Заезд:</b> ${checkInDate}
+📅 <b>Выезд:</b> ${checkOutDate}
+💰 <b>Общая стоимость:</b> ${bookingData.totalPrice} ₽
+💳 <b>Тип оплаты:</b> ${paymentTypeText}
+
+🔗 <a href="${paymentUrl}">Ссылка на оплату</a>`;
+
+  // Формат для Email (plain text с HTML-тегами удалены)
+  const emailMessage = `Новое бронирование!
+
+Номер брони: ${bookingData.bookingNumber}
+Гость: ${bookingData.guestName}
+Email: ${bookingData.email}
+Телефон: ${bookingData.guestPhone}
+Номер: ${bookingData.roomId}
+Заезд: ${checkInDate}
+Выезд: ${checkOutDate}
+Общая стоимость: ${bookingData.totalPrice} ₽
+Тип оплаты: ${paymentTypeText}
+
+Ссылка на оплату: ${paymentUrl}
+
+Данная ссылка действительна в течении часа, если у вас возникли проблемы с оплатой или вы не успели оплатить, свяжитесь пожалуйста с администратором +7 (908) 068-60-60, для проведения оплаты`;
+
+  return { telegramMessage, emailMessage };
+}
+
+function createBooking(bookingData) {
+  const lock = LockService.getScriptLock();
+  let bookingId;
+  
+  try {
+    lock.waitLock(30000);
+    
+    // Валидация входных данных
+    if (!bookingData || !bookingData.roomId || !bookingData.checkIn || !bookingData.checkOut || !bookingData.paymentType || !bookingData.guestEmail) {
+      throw new Error('Недостаточно данных для бронирования или не указан тип оплаты/почта');
+    }
+    
+    if (!['full', 'prepayment'].includes(bookingData.paymentType)) {
+      throw new Error('Недопустимый тип оплаты');
+    }
+    
+    // Получение листов
+    const bookingsSheet = getSheet(CONFIG.sheets.bookings);
+    const paymentsSheet = getSheet(CONFIG.sheets.payments);
+    const calendarSheet = getSheet(CONFIG.sheets.calendar);
+    
+    // Проверка доступности номера
+    const calendarData = calendarSheet.getDataRange().getValues();
+    const isAvailable = !calendarData.some(b =>
+      b[0] == bookingData.roomId && isDateOverlap(bookingData.checkIn, bookingData.checkOut, b[1], b[2])
+    );
+    
+    if (!isAvailable) {
+      throw new Error('Выбранный номер уже занят на указанные даты.');
+    }
+    
+    // Генерация данных бронирования
+    bookingId = Utilities.getUuid();
+    const bookingNumber = generateBookingNumber();
+    const expiresAt = new Date(Date.now() + 3600000);
+    
+    // Унифицированный расчет сумм
+    const totalPrice = bookingData.totalPrice || 0;
+    const prepaymentPercentage = bookingData.paymentType === 'prepayment' 
+      ? (CONFIG.yookassa?.prepaymentPercentage || 50) 
+      : 1;
+    const paymentAmount = totalPrice * prepaymentPercentage;
+    const pricePerNight = (bookingData.nights && bookingData.nights > 0) ? totalPrice / bookingData.nights : 0;
+    
+    // Запись в календарь
+    calendarSheet.appendRow([
+      bookingData.roomId,
+      bookingData.checkIn,
+      bookingData.checkOut,
+      bookingId,
+      bookingData.guestName || '',
+      bookingData.guestPhone || '',
+      paymentAmount,
+      'Через сайт',
+      bookingData.paymentType,
+      prepaymentPercentage,
+      totalPrice,
+    ]);
+    
+    // Запись в бронирования
+    bookingsSheet.appendRow([
+      bookingId,
+      bookingNumber,
+      bookingData.roomId,
+      bookingData.guestName || '',
+      bookingData.guestEmail || '',
+      bookingData.guestPhone || '',
+      bookingData.checkIn,
+      bookingData.checkOut,
+      new Date(),
+      'Ожидает оплаты',
+      expiresAt,
+      pricePerNight,
+      paymentAmount,
+      bookingData.paymentType,
+      prepaymentPercentage,
+      totalPrice
+    ]);
+    
+    // Создание платежа
+    const paymentResult = createYooKassaPayment(
+      paymentAmount,
+      bookingId,
+      `Бронирование №${bookingNumber} (${bookingData.paymentType === 'prepayment' ? 'Предоплата ' + prepaymentPercentage + '%' : 'Полная оплата'})`
+    );
+    
+    // Запись платежа
+    paymentsSheet.appendRow([
+      paymentResult.id,
+      bookingId,
+      'no',
+      expiresAt,
+      paymentAmount,
+      paymentResult.status,
+      '',
+      '',
+      paymentResult.confirmationUrl,
+      bookingData.paymentType
+    ]);
+    
+    // ОТПРАВКА УВЕДОМЛЕНИЙ
+    try {
+      const telegramData = {
+        bookingNumber: bookingNumber,
+        guestName: bookingData.guestName || '',
+        email: bookingData.guestEmail || '',
+        guestPhone: bookingData.guestPhone || '',
+        roomId: bookingData.roomId,
+        checkIn: bookingData.checkIn,
+        checkOut: bookingData.checkOut,
+        totalPrice: totalPrice,
+        paymentType: bookingData.paymentType,
+        prepaymentPercentage: prepaymentPercentage
+      };
+      
+      const { telegramMessage, emailMessage } = formatPaymentMessage(telegramData, paymentResult.confirmationUrl);
+      
+      // Отправка в Telegram
+      sendTelegramMessage(telegramMessage);
+      
+      // Отправка на email
+      MailApp.sendEmail({
+        to: bookingData.guestEmail,
+        subject: `Подтверждение бронирования №${bookingNumber}`,
+        body: emailMessage
+      });
+    } catch (notificationError) {
+      console.error('Ошибка отправки уведомлений:', notificationError);
+      // Продолжаем выполнение, даже если уведомления не отправлены
+    }
+    
+    return {
+      success: true,
+      paymentUrl: paymentResult.confirmationUrl,
+      bookingId: bookingId,
+      bookingNumber: bookingNumber,
+      paymentType: bookingData.paymentType,
+      paymentAmount: paymentAmount,
+      totalPrice: totalPrice,
+      prepaymentPercentage: prepaymentPercentage,
+      simulateUrl: ScriptApp.getService().getUrl() + `?action=simulate_payment&booking_id=${bookingId}`
+    };
+    
+  } catch (error) {
+    // Откат бронирования в случае ошибки
+    if (bookingId) {
+      try {
+        const calendarSheet = getSheet(CONFIG.sheets.calendar);
+        const calendarData = calendarSheet.getDataRange().getValues();
+        for (let i = calendarData.length - 1; i >= 0; i--) {
+          if (calendarData[i][3] === bookingId) {
+            calendarSheet.deleteRow(i + 1);
+            break;
+          }
+        }
+      } catch (e) {
+        console.error('Ошибка при откате бронирования:', e);
+      }
+    }
+    
+    console.error('Ошибка в createBooking:', error);
+    throw error;
+    
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Создание платежа в ЮКассе
+ */
+function createYooKassaPayment(amount, bookingId, description) {
+  const credentials = getYooKassaCredentials();
+  const url = CONFIG.yookassa.apiUrl + 'payments';
+  const auth = credentials.shopId + ':' + credentials.secretKey;
+
+  const booking = getBookingDetails(bookingId);
+  const customerEmail = booking?.email || 'default@example.com'; // Укажите резервный email, если booking.email отсутствует
+
+  const payload = {
+    amount: {
+      value: amount.toFixed(2),
+      currency: "RUB"
+    },
+    capture: true,
+    confirmation: {
+      type: "redirect",
+      return_url: CONFIG.yookassa.returnUrl
+    },
+    description: description,
+    metadata: {
+      booking_id: bookingId
+    },
+    receipt: {
+      customer: {
+        email: customerEmail
+      },
+      items: [
+        {
+          description: `Бронирование номера (ID: ${bookingId})`,
+          quantity: "1",
+          amount: {
+            value: amount.toFixed(2),
+            currency: "RUB"
+          },
+          vat_code: "1",
+          payment_mode: 'full_payment',
+          payment_subject: "service"
+        }
+      ]
+    }
+  };
+
+  const options = {
+    method: 'post',
+    headers: {
+      'Authorization': 'Basic ' + Utilities.base64Encode(auth),
+      'Idempotence-Key': Utilities.getUuid(),
+      'Content-Type': 'application/json'
+    },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  };
+
+  try {
+    const response = UrlFetchApp.fetch(url, options);
+    const responseCode = response.getResponseCode();
+    const result = JSON.parse(response.getContentText());
+
+    // Логирование полного ответа для диагностики
+    console.log('Ответ от ЮKassa:', JSON.stringify(result, null, 2));
+    console.log('Код ответа:', responseCode);
+
+    if (result.error) {
+      throw new Error(`ЮKassa ошибка: ${result.description} (код: ${result.code})`);
+    }
+
+    if (!result.confirmation || !result.confirmation.confirmation_url) {
+      throw new Error('confirmation_url отсутствует в ответе ЮKassa');
+    }
+
+    return {
+      id: result.id,
+      status: result.status,
+      confirmationUrl: result.confirmation.confirmation_url
+    };
+  } catch (error) {
+    console.error('Ошибка в createYooKassaPayment:', error);
+    throw error;
+  }
+}
+
+/**
+ * Обновление статуса платежа
+ */
+function updatePaymentStatus(payment) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(30000);
+
+    const paymentsSheet = getSheet(CONFIG.sheets.payments);
+    const data = paymentsSheet.getDataRange().getValues();
+
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] === payment.id) {
+        const row = i + 1;
+
+        paymentsSheet.getRange(row, 6).setValue(payment.status);
+
+        if (payment.status === 'succeeded') {
+          paymentsSheet.getRange(row, 3).setValue('yes');
+          paymentsSheet.getRange(row, 7).setValue(payment.payment_method?.id || '');
+          paymentsSheet.getRange(row, 8).setValue(new Date());
+
+          const bookingId = payment.metadata.booking_id;
+          const bookingRow = findBookingRow(bookingId);
+
+          if (bookingRow > 0) {
+            getSheet(CONFIG.sheets.bookings)
+              .getRange(bookingRow, 10)
+              .setValue('Подтверждено');
+
+            const booking = getBookingDetails(bookingId);
+            if (booking) {
+              sendConfirmationEmail({
+                email: booking.email,
+                bookingNumber: booking.bookingNumber,
+                guestName: booking.guestName,
+                guestPhone: booking.guestPhone,
+                roomId: booking.roomId,
+                checkIn: booking.checkIn,
+                checkOut: booking.checkOut,
+                totalPrice: booking.totalPrice,
+                paymentType: booking.paymentType,
+                prepaymentPercentage: booking.prepaymentPercentage
+              });
+              
+              // ОТПРАВКА УВЕДОМЛЕНИЯ ОБ УСПЕШНОЙ ОПЛАТЕ В TELEGRAM
+              try {
+                const successMessage = `✅ <b>Платеж успешно выполнен!</b>
+
+📝 <b>Номер брони:</b> ${booking.bookingNumber}
+👤 <b>Гость:</b> ${booking.guestName}
+📱 <b>Телефон:</b> ${booking.guestPhone}
+🏠 <b>Номер:</b> ${booking.roomId}
+💰 <b>Сумма:</b> ${booking.totalPrice} ₽
+💳 <b>Тип оплаты:</b> ${booking.paymentType === 'prepayment' ? `Предоплата ${booking.prepaymentPercentage*100}%` : 'Полная оплата'}
+
+🎉 Бронирование подтверждено!`;
+                
+                sendTelegramMessage(successMessage);
+              } catch (telegramError) {
+                console.error('Ошибка отправки уведомления об оплате в Telegram:', telegramError);
+              }
+            }
+          }
+        }
+        break;
+      }
+    }
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Проверка статуса платежа
+ */
+function checkPaymentStatus(bookingId) {
+  const payment = findPaymentByBookingId(bookingId);
+
+  if (!payment) {
+    return { status: 'not_found' };
+  }
+
+  if (payment.is_paid === 'yes') {
+    return { status: 'paid' };
+  }
+
+  if (new Date(payment.expires_at) < new Date()) {
+    return { status: 'expired' };
+  }
+
+  try {
+    const status = getYooKassaPaymentStatus(payment.id);
+    if (status === 'succeeded') {
+      updatePaymentStatus({
+        id: payment.id,
+        status: 'succeeded',
+        metadata: { booking_id: bookingId },
+        payment_method: { id: 'manual_check' }
+      });
+      return { status: 'paid' };
+    }
+  } catch (e) {
+    console.error('Ошибка проверки статуса ЮКассы:', e);
+  }
+
+  return { status: 'pending' };
+}
+
+/**
+ * Проверка статуса платежа через API ЮКассы
+ */
+function getYooKassaPaymentStatus(paymentId) {
+  const credentials = getYooKassaCredentials();
+  const url = CONFIG.yookassa.apiUrl + 'payments/' + paymentId;
+  const auth = credentials.shopId + ':' + credentials.secretKey;
+
+  const options = {
+    headers: {
+      'Authorization': 'Basic ' + Utilities.base64Encode(auth),
+      'Content-Type': 'application/json'
+    },
+    muteHttpExceptions: true
+  };
+
+  const response = UrlFetchApp.fetch(url, options);
+  const result = JSON.parse(response.getContentText());
+
+  if (result.error) {
+    throw new Error(`ЮКасса ошибка: ${result.description}`);
+  }
+
+  return result.status;
+}
+
+/**
+ * Имитация оплаты
+ */
+function simulateYooKassaPayment(bookingId) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(30000);
+
+    const payment = findPaymentByBookingId(bookingId);
+
+    if (!payment) {
+      return { success: false, message: 'Бронирование не найдено' };
+    }
+
+    if (payment.is_paid === 'yes') {
+      return { success: false, message: 'Оплата уже выполнена' };
+    }
+
+    if (new Date(payment.expires_at) < new Date()) {
+      return { success: false, message: 'Время оплаты истекло' };
+    }
+
+    updatePaymentStatus({
+      id: payment.id,
+      status: 'succeeded',
+      metadata: { booking_id: bookingId },
+      payment_method: { id: 'simulated_' + Utilities.getUuid() }
+    });
+
+    return {
+      success: true,
+      message: 'Оплата успешно имитирована',
+      bookingId: bookingId,
+      amount: payment.amount
+    };
+  } catch (error) {
+    return { success: false, message: error.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Генерация 9-значного номера брони
+ */
+function generateBookingNumber() {
+  const min = 100000000;
+  const max = 999999999;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * Поиск платежа по ID брони
+ */
+function findPaymentByBookingId(bookingId) {
+  const data = getSheet(CONFIG.sheets.payments).getDataRange().getDisplayValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][1] === bookingId) {
+      return {
+        row: i + 1,
+        id: data[i][0],
+        booking_id: data[i][1],
+        is_paid: data[i][2],
+        expires_at: data[i][3],
+        amount: getCorrectNumber(data[i][4]),
+        status: data[i][5],
+        paymentType: data[i][9]
+      };
+    }
+  }
+  return null;
+}
+
+/**
+ * Поиск строки бронирования
+ */
+function findBookingRow(bookingId) {
+  const data = getSheet(CONFIG.sheets.bookings).getDataRange().getDisplayValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === bookingId) return i + 1;
+  }
+  return -1;
+}
+
+/**
+ * Получение данных бронирования
+ */
+function getBookingDetails(bookingId) {
+  const data = getSheet(CONFIG.sheets.bookings).getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === bookingId) {
+      return {
+        email: data[i][4],
+        bookingNumber: data[i][1],
+        guestName: data[i][3],
+        guestPhone: data[i][5],
+        roomId: data[i][2],
+        checkIn: data[i][6],
+        checkOut: data[i][7],
+        totalPrice: getCorrectNumber(data[i][12]),
+        paymentType: data[i][13],
+        prepaymentPercentage: getCorrectNumber(data[i][14]),
+        fullPrice: getCorrectNumber(data[i][15])
+      };
+    }
+  }
+  return null;
+}
+/**
+ * Получение данных номера
+ */
+function getRoomById(roomId) {
+  const data = getSheet(CONFIG.sheets.rooms).getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] == roomId) {
+      return {
+        id: data[i][0],
+        name: data[i][1],
+        type: data[i][2],
+        pricePerNight: getCorrectNumber(data[i][4])
+      };
+    }
+  }
+  return null;
+}
+
+/**
+ * Отправка письма с подтверждением
+ */
+function sendConfirmationEmail(booking) {
+  try {
+    const room = getRoomById(booking.roomId);
+    if (!room) {
+      console.error('Комната не найдена для бронирования:', booking.roomId);
+      return;
+    }
+
+    const paymentTypeText = booking.paymentType === 'prepayment' ? 'Предоплата 50%' : 'Полная оплата';
+    const paidAmount = booking.paymentType === 'prepayment' 
+      ? booking.totalPrice * CONFIG.yookassa.prepaymentPercentage 
+      : booking.totalPrice;
+
+    const subject = `${CONFIG.email.subject} №${booking.bookingNumber}`;
+
+    const htmlBody = `
+      <h2>Ваше бронирование подтверждено!</h2>
+      <p><strong>Номер брони:</strong> ${booking.bookingNumber}</p>
+      <p><strong>Гость:</strong> ${booking.guestName}</p>
+      <p><strong>Номер:</strong> ${room.name} (${room.type})</p>
+      <p><strong>Даты:</strong> ${formatDateForEmail(booking.checkIn)} - ${formatDateForEmail(booking.checkOut)}</p>
+      <p><strong>Тип оплаты:</strong> ${paymentTypeText}</p>
+      <p><strong>Оплачено:</strong> ${formatCurrency(booking.totalPrice)}</p>
+      <p><strong>Полная стоимость:</strong> ${formatCurrency(booking.totalPrice)}</p>
+      ${booking.paymentType === 'prepayment' ? `<p><strong>Остаток к оплате:</strong> ${formatCurrency(booking.totalPrice)}</p>` : ''}
+      <p>Спасибо за выбор базы отдыха Золотые пески!</p>
+    `;
+
+    MailApp.sendEmail({
+      to: booking.email,
+      subject: subject,
+      htmlBody: htmlBody
+    });
+
+    const scriptEmail = Session.getActiveUser().getEmail();
+    MailApp.sendEmail({
+      to: scriptEmail,
+      subject: "Новое бронирование",
+      htmlBody: htmlBody
+    });
+
+    console.log(`Подтверждение отправлено клиенту: ${booking.email} и копия на: ${scriptEmail}`);
+  } catch (e) {
+    console.error('Ошибка отправки email:', e);
+  }
+}
+
+/**
+ * Форматирование даты для email
+ */
+function formatDateForEmail(dateString) {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  } catch (e) {
+    return dateString;
+  }
+}
+
+/**
+ * Форматирование валюты
+ */
+function formatCurrency(amount) {
+  return Utilities.formatString('%.2f ₽', getCorrectNumber(amount));
+}
+
+/**
+ * Проверка пересечения дат
+ */
+function isDateOverlap(checkIn, checkOut, bookedFrom, bookedTo) {
+  try {
+    const ci = new Date(checkIn);
+    const co = new Date(checkOut);
+    const bf = new Date(bookedFrom);
+    const bt = new Date(bookedTo);
+    return ci < bt && co > bf;
+  } catch (e) {
+    console.error('Ошибка в isDateOverlap:', e);
+    return true;
+  }
+}
+
+/**
+ * Корректное преобразование числа
+ */
+function getCorrectNumber(value) {
+  try {
+    if (value === null || value === undefined) return 0;
+    if (typeof value === 'number') return value;
+    if (value instanceof Date) return value.getTime();
+
+    const str = value.toString().trim();
+    if (!str) return 0;
+
+    const numStr = str.replace(/,/g, '.').replace(/\s/g, '');
+    const num = parseFloat(numStr);
+    return isNaN(num) ? 0 : num;
+  } catch (e) {
+    console.error('Ошибка в getCorrectNumber:', e);
+    return 0;
+  }
+}
+
+/**
+ * Пакетное обновление статусов платежей
+ */
+function simpleUpdateAllPending() {
+  try {
+    console.log('Пакетное обновление всех ожидающих платежей');
+
+    const lock = LockService.getScriptLock();
+    lock.waitLock(30000);
+
+    const paymentsSheet = getSheet(CONFIG.sheets.payments);
+    const paymentsData = paymentsSheet.getDataRange().getValues();
+    const bookingsSheet = getSheet(CONFIG.sheets.bookings);
+    const bookingsData = bookingsSheet.getDataRange().getValues();
+
+    let updatedCount = 0;
+
+    for (let i = 1; i < paymentsData.length; i++) {
+      const paymentRow = paymentsData[i];
+      const paymentId = paymentRow[0];
+      const bookingId = paymentRow[1];
+      const isPaid = paymentRow[2];
+      const paymentStatus = paymentRow[5];
+
+      if (isPaid === 'no' || isPaid === '') {
+        console.log('Проверяем платеж:', paymentId, 'для бронирования:', bookingId);
+
+        const realPaymentStatus = getYooKassaPaymentStatus(paymentId);
+
+        if (realPaymentStatus) {
+          if (realPaymentStatus === 'succeeded') {
+            paymentsSheet.getRange(i + 1, 3).setValue('yes');
+            paymentsSheet.getRange(i + 1, 6).setValue('succeeded');
+            paymentsSheet.getRange(i + 1, 8).setValue(new Date());
+
+            for (let j = 1; j < bookingsData.length; j++) {
+              if (String(bookingsData[j][0]).trim() === String(bookingId).trim()) {
+                bookingsSheet.getRange(j + 1, 10).setValue('Подтверждено');
+                console.log(`Бронирование ${bookingId} обновлено на строке ${j + 1}`);
+                break;
+              }
+            }
+
+            updatedCount++;
+            console.log(`Платеж ${paymentId} успешно обновлен`);
+          } else if (realPaymentStatus === 'canceled') {
+            paymentsSheet.getRange(i + 1, 6).setValue('canceled');
+
+            for (let j = 1; j < bookingsData.length; j++) {
+              if (String(bookingsData[j][0]).trim() === String(bookingId).trim()) {
+                bookingsSheet.getRange(j + 1, 10).setValue('Отменено');
+                console.log(`Бронирование ${bookingId} отменено на строке ${j + 1}`);
+                break;
+              }
+            }
+
+            console.log(`Платеж ${paymentId} отменен`);
+          } else {
+            console.log(`Платеж ${paymentId} все еще в статусе: ${realPaymentStatus}`);
+          }
+        } else {
+          console.log(`Не удалось получить статус платежа ${paymentId}`);
+        }
+      }
+    }
+
+    lock.releaseLock();
+    console.log(`Обновлено ${updatedCount} платежей`);
+    return updatedCount;
+  } catch (error) {
+    console.error('Ошибка пакетного обновления:', error);
+    return 0;
+  }
+}
+
+/**
+ * Меню Google Sheets
+ */
+function onOpen() {
+  const ui = SpreadsheetApp.getUi();
+  ui.createMenu('🔄 Управление базой отдыха')
+    .addItem('Обновить все статусы', 'runUpdateAllPayments')
+    .addItem('Обновить один платеж', 'runUpdateSinglePayment')
+    .addSeparator()
+    .addItem('Статистика платежей', 'showPaymentStats')
+    .addSeparator()
+    .addItem('Управление бронированиями', 'showBookingManagerPage')
+    .addToUi();
+}
+
+/**
+ * Показ страницы управления бронированиями
+ */
+function showBookingManagerPage() {
+  const html = HtmlService.createHtmlOutputFromFile('BookingManager')
+    .setWidth(1600)
+    .setHeight(1000)
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+
+  SpreadsheetApp.getUi().showModalDialog(html, 'Управление бронированиями');
+}
+
+/**
+ * Обновление всех платежей
+ */
+function runUpdateAllPayments() {
+  const ui = SpreadsheetApp.getUi();
+
+  const result = ui.alert(
+    'Обновление платежей',
+    'Вы уверены, что хотите обновить все статусы платежей?',
+    ui.ButtonSet.YES_NO
+  );
+
+  if (result === ui.Button.YES) {
+    const startTime = new Date();
+    ui.alert('Начинаем обновление...', 'Процесс может занять несколько минут', ui.ButtonSet.OK);
+
+    try {
+      const updatedCount = simpleUpdateAllPending();
+      const endTime = new Date();
+      const duration = Math.round((endTime - startTime) / 1000);
+
+      ui.alert(
+        'Обновление завершено!',
+        `Обновлено платежей: ${updatedCount}\nВремя выполнения: ${duration} секунд`,
+        ui.ButtonSet.OK
+      );
+    } catch (error) {
+      ui.alert('Ошибка!', `Произошла ошибка: ${error.message}`, ui.ButtonSet.OK);
+    }
+  }
+}
+
+/**
+ * Обновление одного платежа
+ */
+function runUpdateSinglePayment() {
+  const ui = SpreadsheetApp.getUi();
+
+  const result = ui.prompt(
+    'Обновить один платеж',
+    'Введите ID платежа для обновления:',
+    ui.ButtonSet.OK_CANCEL
+  );
+
+  if (result.getSelectedButton() === ui.Button.OK) {
+    const paymentId = result.getResponseText().trim();
+
+    if (paymentId) {
+      try {
+        const status = getYooKassaPaymentStatus(paymentId);
+        ui.alert('Статус платежа', `Платеж ${paymentId}: ${status}`, ui.ButtonSet.OK);
+      } catch (error) {
+        ui.alert('Ошибка!', `Не удалось получить статус: ${error.message}`, ui.ButtonSet.OK);
+      }
+    }
+  }
+}
+
+/**
+ * Статистика платежей
+ */
+function showPaymentStats() {
+  const ui = SpreadsheetApp.getUi();
+  const sheet = getSheet(CONFIG.sheets.payments);
+  const data = sheet.getDataRange().getValues();
+
+  let totalPayments = data.length - 1;
+  let paidCount = 0;
+  let pendingCount = 0;
+  let canceledCount = 0;
+
+  for (let i = 1; i < data.length; i++) {
+    const status = data[i][5];
+    if (status === 'succeeded') paidCount++;
+    else if (status === 'pending') pendingCount++;
+    else if (status === 'canceled') canceledCount++;
+  }
+
+  ui.alert(
+    'Статистика платежей',
+    `Всего платежей: ${totalPayments}\n` +
+    `Оплачено: ${paidCount}\n` +
+    `Ожидают: ${pendingCount}\n` +
+    `Отменено: ${canceledCount}`,
+    ui.ButtonSet.OK
+  );
+}
+
+/**
+ * Форматирование цены
+ */
+function formatPrice(price) {
+  if (!price) return '—';
+  try {
+    let num = 0;
+    if (typeof price === 'string') {
+      num = parseFloat(price.replace(/[^\d.-]/g, ''));
+    } else if (typeof price === 'number') {
+      num = price;
+    }
+
+    if (isNaN(num) || !isFinite(num)) return '—';
+    if (num > 1000000) {
+      console.error('Подозрительно большая цена:', num);
+      return '—';
+    }
+
+    return num.toLocaleString('ru-RU') + ' ₽';
+  } catch (e) {
+    console.error('Ошибка форматирования цены:', e);
+    return '—';
+  }
+}
+
+/**
+ * Форматирование даты
+ */
+function formatDate(date) {
+  if (!date) return '—';
+  try {
+    if (typeof date === 'string') date = new Date(date);
+    if (!(date instanceof Date) || isNaN(date)) return '—';
+    return Utilities.formatDate(date, 'Europe/Moscow', 'dd.MM.yyyy');
+  } catch (e) {
+    console.error('Ошибка форматирования даты:', e);
+    return '—';
+  }
+}
+
+/**
+ * Форматирование статуса
+ */
+function formatStatus(status) {
+  if (!status) return 'Новое';
+  status = String(status).toLowerCase();
+  if (status.includes('подтвержд')) return 'Подтверждено';
+  if (status.includes('ожид')) return 'Ожидает';
+  if (status.includes('отмен')) return 'Отменено';
+  if (status.includes('заверш')) return 'Завершено';
+  if (status.includes('ручн')) return 'Ручная';
+  return 'Новое';
+}
+
+/**
+ * Валидация данных
+ */
+function validateBookingData(data) {
+  if (!data) return {};
+  return {
+    guestName: data.guestName || '—',
+    guestEmail: data.guestEmail || '—',
+    guestPhone: data.guestPhone || '—',
+    status: data.status || 'Новое',
+    totalPrice: data.totalPrice || 0,
+    paymentType: data.paymentType || 'full',
+    prepaymentPercentage: data.prepaymentPercentage || (data.paymentType === 'prepayment' ? 50 : 1),
+    fullPrice: data.totalPrice || 0
+  };
+}
+
+/**
+ * Получение данных о занятости номеров
+ */
+function getRoomOccupancy(fromDate, toDate) {
+  try {
+    const roomsSheet = getSheet(CONFIG.sheets.rooms);
+    const calendarSheet = getSheet(CONFIG.sheets.calendar);
+    const bookingsSheet = getSheet(CONFIG.sheets.bookings);
+
+    const roomsData = roomsSheet.getDataRange().getValues();
+    const calendarData = calendarSheet.getDataRange().getValues();
+    const bookingsData = bookingsSheet.getDataRange().getValues();
+
+    const from = new Date(fromDate);
+    const to = new Date(toDate);
+
+    const roomMap = {};
+    for (let i = 1; i < roomsData.length; i++) {
+      const roomId = roomsData[i][0];
+      roomMap[roomId] = {
+        name: roomsData[i][1] || roomId,
+        type: roomsData[i][2] || 'Неизвестно',
+        bookings: []
+      };
+    }
+
+    for (let i = 1; i < calendarData.length; i++) {
+      const row = calendarData[i];
+      const roomId = row[0];
+      const checkIn = new Date(row[1]);
+      const checkOut = new Date(row[2]);
+      const bookingId = row[3] || '';
+      const guestName = row[4] || '';
+      const guestPhone = row[5] || '';
+      const price = getCorrectNumber(row[6]) || 0;
+      const status = row[7] || '';
+      const paymentType = row[8] || 'full';
+      const prepaymentPercentage = getCorrectNumber(row[9]) || (paymentType === 'prepayment' ? 50 : 1);
+      const fullPrice = getCorrectNumber(row[10]) || price;
+
+      if (status.toLowerCase().includes('не сдается')) continue;
+
+      if (checkIn <= to && checkOut >= from) {
+        if (roomMap[roomId]) {
+          roomMap[roomId].bookings.push({
+            bookingId: bookingId,
+            guestName: guestName,
+            guestPhone: guestPhone,
+            checkIn: Utilities.formatDate(checkIn, Session.getScriptTimeZone(), 'yyyy-MM-dd'),
+            checkOut: Utilities.formatDate(checkOut, Session.getScriptTimeZone(), 'yyyy-MM-dd'),
+            price: price,
+            status: formatStatus(status),
+            paymentType: paymentType,
+            prepaymentPercentage: prepaymentPercentage,
+            fullPrice: fullPrice
+          });
+        }
+      }
+    }
+
+    const result = Object.values(roomMap).filter(room => room.bookings.length > 0 || true);
+    return result;
+  } catch (e) {
+    console.error('Ошибка в getRoomOccupancy:', e);
+    return [];
+  }
+}
+
+/**
+ * Получение данных о занятости номеров с фильтрацией
+ */
+function getCalendarOccupancy(fromDate, toDate, bookingIdFilter) {
+  try {
+    const calendarSheet = getSheet(CONFIG.sheets.calendar);
+    const roomsSheet = getSheet(CONFIG.sheets.rooms);
+    const bookingsSheet = getSheet(CONFIG.sheets.bookings);
+
+    const data = calendarSheet.getDataRange().getValues();
+    const roomsData = roomsSheet.getDataRange().getValues();
+    const bookingsData = bookingsSheet.getDataRange().getValues();
+
+    const roomMap = {};
+    for (let i = 1; i < roomsData.length; i++) {
+      const roomId = roomsData[i][0];
+      roomMap[roomId] = {
+        name: roomsData[i][1],
+        type: roomsData[i][2]
+      };
+    }
+
+    const statusMap = {};
+    for (let i = 1; i < bookingsData.length; i++) {
+      const bookingId = bookingsData[i][0];
+      const status = bookingsData[i][9];
+      if (bookingId) statusMap[bookingId] = status.toString().trim();
+    }
+
+    const result = [];
+    const from = new Date(fromDate);
+    const to = new Date(toDate);
+
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const roomId = row[0];
+      const checkIn = new Date(row[1]);
+      const checkOut = new Date(row[2]);
+      const bookingId = row[3] || '';
+      const guestName = row[4] || '';
+      const guestPhone = row[5] || '';
+      const price = getCorrectNumber(row[6]) || 0;
+      const paymentType = row[8] || 'full';
+      const prepaymentPercentage = getCorrectNumber(row[9]) || (paymentType === 'prepayment' ? 50 : 1);
+      const fullPrice = getCorrectNumber(row[10]) || price;
+
+      if ((row[7] || '').toString().toLowerCase().includes('не сдается')) {
+        continue;
+      }
+
+      if (checkIn <= to && checkOut >= from) {
+        if (bookingIdFilter && !bookingId.toString().includes(bookingIdFilter)) {
+          continue;
+        }
+
+        const isManual = bookingId.toString().startsWith('M-');
+        const status = isManual ? 'Ручная' : (statusMap[bookingId] || 'Подтверждено');
+
+        const roomInfo = roomMap[roomId] || { name: roomId, type: 'Неизвестно' };
+
+        result.push({
+          bookingId: bookingId,
+          roomName: roomInfo.name,
+          roomType: roomInfo.type,
+          guestName: guestName,
+          guestPhone: guestPhone,
+          checkIn: Utilities.formatDate(checkIn, Session.getScriptTimeZone(), 'yyyy-MM-dd'),
+          checkOut: Utilities.formatDate(checkOut, Session.getScriptTimeZone(), 'yyyy-MM-dd'),
+          priceValue: price,
+          status: status,
+          paymentType: paymentType,
+          prepaymentPercentage: prepaymentPercentage,
+          fullPrice: fullPrice
+        });
+      }
+    }
+
+    return result;
+  } catch (e) {
+    console.error('Ошибка в getCalendarOccupancy:', e);
+    return [];
+  }
+}
+
+/**
+ * Проверка доступности номера
+ */
+function isRoomAvailable(roomId, checkIn, checkOut) {
+  const calendarSheet = getSheet(CONFIG.sheets.calendar);
+  const data = calendarSheet.getDataRange().getValues();
+
+  const checkInDate = new Date(checkIn);
+  const checkOutDate = new Date(checkOut);
+
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (row[0] == roomId) {
+      const bookedFrom = new Date(row[1]);
+      const bookedTo = new Date(row[2]);
+
+      if (checkInDate < bookedTo && checkOutDate > bookedFrom) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Добавление ручного бронирования
+ */
+function addManualBooking(bookingData) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(30000);
+
+    // Логирование входных данных
+    console.log('Входные данные bookingData:', JSON.stringify(bookingData));
+
+    // Проверка обязательных полей
+    const missingFields = [];
+    if (!bookingData.roomId) missingFields.push('roomId');
+    if (!bookingData.checkIn) missingFields.push('checkIn');
+    if (!bookingData.checkOut) missingFields.push('checkOut');
+    if (!bookingData.guestName) missingFields.push('guestName');
+
+    if (missingFields.length > 0) {
+      return {
+        success: false,
+        error: `Заполните обязательные поля: ${missingFields.join(', ')}`
+      };
+    }
+
+    // Проверка формата дат
+    const from = new Date(bookingData.checkIn);
+    const to = new Date(bookingData.checkOut);
+    if (isNaN(from.getTime()) || isNaN(to.getTime())) {
+      return {
+        success: false,
+        error: 'Некорректный формат дат заезда или выезда'
+      };
+    }
+
+    // Проверка доступности номера
+    if (!isRoomAvailable(bookingData.roomId, bookingData.checkIn, bookingData.checkOut)) {
+      return {
+        success: false,
+        error: 'Номер занят на выбранные даты'
+      };
+    }
+
+    const calendarSheet = getSheet(CONFIG.sheets.calendar);
+    const bookingId = 'M-' + Utilities.getUuid().substring(0, 8);
+    const paymentType = bookingData.paymentType || 'full';
+    const prepaymentPercentage = bookingData.prepaymentPercentage && paymentType === 'prepayment' 
+      ? parseFloat(bookingData.prepaymentPercentage) 
+      : (paymentType === 'prepayment' ? 0.5 : 1);
+
+    // Расчет полной стоимости
+    let totalPrice = parseFloat(bookingData.price) || 0;
+    if (totalPrice === 0) {
+      const pricesSheet = getSheet(CONFIG.sheets.prices);
+      const pricesData = pricesSheet.getDataRange().getValues();
+      const priceRow = pricesData.find(row => row[0] == bookingData.roomId && row[1] == (from.getMonth() + 1));
+      if (priceRow) {
+        let currentDate = new Date(from);
+        while (currentDate < to) {
+          const dayOfWeek = currentDate.getDay();
+          const priceIndex = dayOfWeek === 0 ? 8 : 2 + dayOfWeek - 1;
+          totalPrice += parseFloat(priceRow[priceIndex]) || 0;
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+      }
+    }
+
+    // Проверка, что totalPrice валиден
+    if (totalPrice <= 0) {
+      return {
+        success: false,
+        error: 'Не удалось определить стоимость бронирования'
+      };
+    }
+
+    const checkInFormatted = Utilities.formatDate(
+      from,
+      Session.getScriptTimeZone(),
+      'dd.MM.yyyy'
+    );
+
+    const checkOutFormatted = Utilities.formatDate(
+      to,
+      Session.getScriptTimeZone(),
+      'dd.MM.yyyy'
+    );
+
+    // Запись в таблицу
+    calendarSheet.appendRow([
+      bookingData.roomId,
+      checkInFormatted,
+      checkOutFormatted,
+      bookingId,
+      bookingData.guestName,
+      bookingData.guestPhone || '',
+      totalPrice * prepaymentPercentage,
+      'Ручная бронь',
+      paymentType,
+      prepaymentPercentage,
+      totalPrice
+    ]);
+
+    // Отправка уведомления в Telegram
+    try {
+      // Создаем безопасное сообщение без специального форматирования
+      const safeMessage = `
+🏨 НОВОЕ БРОНИРОВАНИЕ
+
+📋 Номер брони: ${bookingId}
+👤 Гость: ${bookingData.guestName || ''}
+📞 Телефон: ${bookingData.guestPhone || ''}
+🏠 Номер: ${bookingData.roomId}
+📅 Заезд: ${checkInFormatted}
+📅 Выезд: ${checkOutFormatted}
+💰 Стоимость: ${totalPrice} руб.
+💳 Тип оплаты: ${paymentType === 'full' ? 'Полная оплата' : 'Предоплата'}
+${paymentType === 'prepayment' ? `📊 Процент предоплаты: ${(prepaymentPercentage * 100)}%` : ''}
+🔖 Источник: Ручное бронирование
+      `.trim();
+      
+      sendTelegramMessage(safeMessage);
+    } catch (telegramError) {
+      console.error('Ошибка отправки в Telegram:', telegramError);
+    }
+
+    return {
+      success: true,
+      bookingId: bookingId,
+      message: 'Бронирование успешно добавлено'
+    };
+  } catch (error) {
+    console.error('Ошибка при добавлении бронирования:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+function getFreeRooms(fromDate, toDate) {
+  try {
+    console.log('getFreeRooms вызвана с параметрами:', { fromDate, toDate });
+    
+    if (!fromDate || !toDate) {
+      console.error('Отсутствуют обязательные параметры fromDate или toDate');
+      return [];
+    }
+
+    const lock = LockService.getScriptLock();
+    lock.waitLock(30000);
+    
+    try {
+      // Получаем данные из листов
+      const roomsSheet = getSheet(CONFIG.sheets.rooms);
+      const calendarSheet = getSheet(CONFIG.sheets.calendar);
+      const pricesSheet = getSheet(CONFIG.sheets.prices);
+
+      const roomsData = roomsSheet.getDataRange().getValues();
+      const calendarData = calendarSheet.getDataRange().getValues();
+      const pricesData = pricesSheet.getDataRange().getValues();
+
+      console.log('Получены данные:', {
+        rooms: roomsData.length - 1,
+        calendar: calendarData.length - 1,
+        prices: pricesData.length - 1
+      });
+
+      // Преобразуем даты
+      const checkInDate = new Date(fromDate);
+      const checkOutDate = new Date(toDate);
+      
+      if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
+        throw new Error('Некорректный формат дат');
+      }
+
+      console.log('Проверяем даты:', {
+        checkIn: checkInDate.toISOString(),
+        checkOut: checkOutDate.toISOString()
+      });
+
+      // Создаем карту цен
+      const priceMap = {};
+      for (let i = 1; i < pricesData.length; i++) {
+        const priceRow = pricesData[i];
+        const roomId = priceRow[0];
+        const month = priceRow[1];
+        
+        if (!priceMap[roomId]) {
+          priceMap[roomId] = {};
+        }
+        if (!priceMap[roomId][month]) {
+          priceMap[roomId][month] = {};
+        }
+        
+        // Дни недели: Пн=2, Вт=3, Ср=4, Чт=5, Пт=6, Сб=7, Вс=8
+        const dayPrices = {
+          1: getCorrectNumber(priceRow[2]), // Понедельник
+          2: getCorrectNumber(priceRow[3]), // Вторник
+          3: getCorrectNumber(priceRow[4]), // Среда
+          4: getCorrectNumber(priceRow[5]), // Четверг
+          5: getCorrectNumber(priceRow[6]), // Пятница
+          6: getCorrectNumber(priceRow[7]), // Суббота
+          0: getCorrectNumber(priceRow[8])  // Воскресенье
+        };
+        
+        priceMap[roomId][month] = dayPrices;
+      }
+
+      const freeRooms = [];
+
+      // Проверяем каждый номер
+      for (let i = 1; i < roomsData.length; i++) {
+        const roomRow = roomsData[i];
+        const roomId = roomRow[0];
+        const roomName = roomRow[1];
+        const roomType = roomRow[2];
+
+        if (!roomId || !roomName) {
+          console.warn('Пропускаем номер с пустыми данными:', roomRow);
+          continue;
+        }
+
+        // Проверяем, занят ли номер
+        let isOccupied = false;
+        
+        for (let j = 1; j < calendarData.length; j++) {
+          const calendarRow = calendarData[j];
+          const bookedRoomId = calendarRow[0];
+          const bookedFrom = calendarRow[1];
+          const bookedTo = calendarRow[2];
+
+          // Пропускаем если не тот номер
+          if (bookedRoomId != roomId) continue;
+
+          // Пропускаем записи "не сдается"
+          const status = (calendarRow[7] || '').toString().toLowerCase();
+          if (status.includes('не сдается')) continue;
+
+          try {
+            const bookedFromDate = new Date(bookedFrom);
+            const bookedToDate = new Date(bookedTo);
+
+            // Проверяем пересечение дат
+            if (checkInDate < bookedToDate && checkOutDate > bookedFromDate) {
+              isOccupied = true;
+              console.log(`Номер ${roomId} занят с ${bookedFromDate} по ${bookedToDate}`);
+              break;
+            }
+          } catch (dateError) {
+            console.error('Ошибка обработки дат в календаре:', dateError, calendarRow);
+            continue;
+          }
+        }
+
+        // Если номер свободен, рассчитываем цену
+        if (!isOccupied) {
+          let totalPrice = 0;
+          let currentDate = new Date(checkInDate);
+
+          while (currentDate < checkOutDate) {
+            const month = currentDate.getMonth() + 1;
+            const dayOfWeek = currentDate.getDay();
+            
+            if (priceMap[roomId] && priceMap[roomId][month]) {
+              const dayPrice = priceMap[roomId][month][dayOfWeek] || 0;
+              totalPrice += dayPrice;
+            }
+            
+            currentDate.setDate(currentDate.getDate() + 1);
+          }
+
+          freeRooms.push({
+            id: roomId,
+            name: roomName,
+            type: roomType,
+            totalPrice: totalPrice
+          });
+
+          console.log(`Добавлен свободный номер: ${roomId} (${roomName}) - ${totalPrice} руб.`);
+        }
+      }
+
+      console.log(`Найдено свободных номеров: ${freeRooms.length}`);
+      return freeRooms;
+
+    } finally {
+      lock.releaseLock();
+    }
+
+  } catch (error) {
+    console.error('Ошибка в getFreeRooms:', error);
+    throw new Error(`Ошибка получения свободных номеров: ${error.message}`);
+  }
+}
+/**
+ * Получение количества свободных номеров
+ */
+function getFreeRoomsCount(fromDate, toDate) {
+  try {
+    const cache = CacheService.getScriptCache();
+    const cacheKey = `free_rooms_${fromDate}_${toDate}`;
+    const cached = cache.get(cacheKey);
+
+    if (cached) {
+      return parseInt(cached);
+    }
+
+    const freeRooms = getFreeRooms(fromDate, toDate);
+    const count = freeRooms.length;
+
+    cache.put(cacheKey, count.toString(), 300);
+    return count;
+  } catch (error) {
+    console.error('Ошибка в getFreeRoomsCount:', error);
+    return 0;
+  }
+}
+
+/**
+ * Получение списка номеров для селекта
+ */
+function getAvailableRoomsForSelect() {
+  const roomsSheet = getSheet(CONFIG.sheets.rooms);
+  const roomsData = roomsSheet.getDataRange().getValues();
+
+  const rooms = [];
+  for (let i = 1; i < roomsData.length; i++) {
+    if (!roomsData[i][0] || !roomsData[i][1]) continue;
+
+    rooms.push({
+      id: roomsData[i][0],
+      name: roomsData[i][1],
+      type: roomsData[i][2] || 'Стандарт'
+    });
+  }
+
+  return rooms.sort((a, b) => {
+    if (a.type === b.type) {
+      return a.name.localeCompare(b.name);
+    }
+    return a.type.localeCompare(b.type);
+  });
+}
+
+/**
+ * Вспомогательная функция для пакетного получения данных
+ */
+function batchGetData(requests) {
+  const spreadsheet = SpreadsheetApp.openById(CONFIG.sheetId);
+  const batchRequest = requests.map(req => ({
+    spreadsheetId: CONFIG.sheetId,
+    range: `${req.sheetName}!${req.range}`
+  }));
+
+  const response = Sheets.Spreadsheets.Values.batchGet(spreadsheet.getId(), {
+    ranges: batchRequest.map(r => r.range)
+  });
+
+  return response.valueRanges.map(range => range.values || []);
+}
+
+function deleteBooking(guestName, phone, checkIn, checkOut, fullPrice) {
+  try {
+    console.log('Server deleteBooking called:', { guestName, phone, checkIn, checkOut, fullPrice });
+    
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = spreadsheet.getSheetByName('Календарь');
+    
+    if (!sheet) {
+      console.error('Sheet "Календарь" not found');
+      return { success: false, error: 'Лист "Календарь" не найден' };
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    console.log('Data from Календарь:', data.length, 'rows');
+    
+    // Найти и удалить строку с бронированием
+    let deletedRowIndex = -1;
+    for (let i = 1; i < data.length; i++) {
+      const rowGuestName = data[i][4]; // ФИО
+      const rowPhone = data[i][5];     // телефон
+      const rowCheckIn = data[i][1];   // Дата заезда
+      const rowCheckOut = data[i][2];  // Дата выезда
+      const rowPrice = data[i][6];     // сумма
+      
+      // Преобразуем даты в строки формата YYYY-MM-DD
+      const formatDate = (date) => {
+        if (date instanceof Date) {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        }
+        return date ? date.toString() : '';
+      };
+      
+      // Приводим все к строкам для сравнения
+      const phoneMatch = rowPhone.toString() === phone.toString();
+      const checkInMatch = formatDate(rowCheckIn) === checkIn;
+      const checkOutMatch = formatDate(rowCheckOut) === checkOut;
+      const priceMatch = rowPrice.toString() === fullPrice.toString();
+      const nameMatch = rowGuestName === guestName;
+      
+      console.log(`Row ${i} comparison:`, {
+        nameMatch,
+        phoneMatch,
+        checkInMatch: `${formatDate(rowCheckIn)} === ${checkIn} = ${checkInMatch}`,
+        checkOutMatch: `${formatDate(rowCheckOut)} === ${checkOut} = ${checkOutMatch}`,
+        priceMatch: `${rowPrice} === ${fullPrice} = ${priceMatch}`
+      });
+      
+      if (nameMatch && phoneMatch && checkInMatch && checkOutMatch && priceMatch) {
+        sheet.deleteRow(i + 1);
+        deletedRowIndex = i + 1;
+        console.log('Deleted row:', deletedRowIndex);
+        break;
+      }
+    }
+    
+    if (deletedRowIndex === -1) {
+      console.log('Booking not found for deletion');
+      return { success: false, error: 'Бронирование не найдено для удаления. Проверьте данные.' };
+    }
+    
+    return { success: true, message: `Бронирование удалено из строки ${deletedRowIndex}` };
+    
+  } catch (error) {
+    console.error('Server deleteBooking error:', error);
+    return { success: false, error: error.toString() };
+  }
+}

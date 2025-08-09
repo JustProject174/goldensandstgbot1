@@ -1,0 +1,1006 @@
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 09:18:00"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 09:18:00"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 09:18:01"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 09:18:01"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 09:18:03"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 09:18:03"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 20.08.2025","timestamp":"2025-08-09 09:18:12"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-08-20","timestamp":"2025-08-09 09:18:14"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 22.08.2025","timestamp":"2025-08-09 09:18:18"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 4","timestamp":"2025-08-09 09:18:24"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Test","timestamp":"2025-08-09 09:18:28"}
+{"level":"warn","message":"Invalid room selection for chat 809245787: Test","timestamp":"2025-08-09 09:18:28"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 3","timestamp":"2025-08-09 09:18:33"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 12","timestamp":"2025-08-09 09:18:33"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: TEST","timestamp":"2025-08-09 09:18:37"}
+{"level":"info","message":"Guest name saved for chat 809245787: TEST","timestamp":"2025-08-09 09:18:37"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 09:18:44"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 09:18:45"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 09:18:49"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 09:18:50"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_prepayment","timestamp":"2025-08-09 09:18:53"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 09:28:49"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 09:28:49"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 09:28:51"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 09:28:51"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 09:28:52"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 09:28:52"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11.08.2025","timestamp":"2025-08-09 09:29:00"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-08-11","timestamp":"2025-08-09 09:29:01"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 13.08.2025","timestamp":"2025-08-09 09:29:04"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 09:29:10"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 09:29:12"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-09 09:29:12"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: TEST","timestamp":"2025-08-09 09:29:19"}
+{"level":"info","message":"Guest name saved for chat 809245787: TEST","timestamp":"2025-08-09 09:29:20"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 09:29:30"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 09:29:31"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 09:29:35"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 09:29:35"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_full","timestamp":"2025-08-09 09:29:38"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 09:53:44"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 09:53:44"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 09:53:46"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 09:53:46"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 09:53:48"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 09:53:48"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 10/08/2025","timestamp":"2025-08-09 09:53:53"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-08-10","timestamp":"2025-08-09 09:53:54"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/08/2025","timestamp":"2025-08-09 09:53:59"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 4","timestamp":"2025-08-09 09:54:04"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 09:54:10"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 9","timestamp":"2025-08-09 09:54:10"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Test","timestamp":"2025-08-09 09:54:14"}
+{"level":"info","message":"Guest name saved for chat 809245787: Test","timestamp":"2025-08-09 09:54:14"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 09:54:25"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 09:54:25"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 09:54:29"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 09:54:30"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_full","timestamp":"2025-08-09 09:54:33"}
+{"level":"info","message":"Payment type selected for chat 809245787: full, totalPrice: 21998, nights: 2","timestamp":"2025-08-09 09:54:33"}
+{"level":"error","message":"Invalid booking result for chat 809245787: {\"success\":true,\"bookingNumber\":\"M-1754733276434\",\"bookingId\":\"M-1754733276434\",\"amount\":21998,\"paymentUrl\":\"https://payment.example.com/M-1754733276434\",\"paymentType\":\"full\",\"totalPrice\":21998,\"prepaymentPercentage\":100,\"simulateUrl\":\"https://simulate.example.com/M-1754733276434\"}","timestamp":"2025-08-09 09:54:37"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 10:03:18"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 10:03:18"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 10:03:19"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 10:03:19"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 10:03:21"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 10:03:21"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 10/08/2025","timestamp":"2025-08-09 10:03:26"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-08-10","timestamp":"2025-08-09 10:03:27"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/08/2025","timestamp":"2025-08-09 10:03:31"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 10:03:37"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 4","timestamp":"2025-08-09 10:03:41"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 12","timestamp":"2025-08-09 10:03:41"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: ТЕст","timestamp":"2025-08-09 10:03:54"}
+{"level":"info","message":"Guest name saved for chat 809245787: ТЕст","timestamp":"2025-08-09 10:03:54"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 10:04:03"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 10:04:03"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 10:04:08"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 10:04:09"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_full","timestamp":"2025-08-09 10:04:12"}
+{"level":"info","message":"Payment type selected for chat 809245787: full, totalPrice: 8999, nights: 1","timestamp":"2025-08-09 10:04:12"}
+{"level":"error","message":"Invalid booking result for chat 809245787: {\"success\":true,\"bookingNumber\":\"M-1754733855116\",\"bookingId\":\"M-1754733855116\",\"amount\":8999,\"paymentUrl\":\"https://yoomoney.ru/checkout/payments/v2/contract?orderId=302930e1-000f-5000-b000-14a47231d304\",\"paymentType\":\"full\",\"totalPrice\":8999,\"prepaymentPercentage\":100,\"simulateUrl\":\"https://simulate.example.com/M-1754733855116\"}","timestamp":"2025-08-09 10:04:17"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 10:09:05"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 10:09:05"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 10:09:09"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 10:09:09"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 10:09:10"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 10:09:10"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 10/08/2025","timestamp":"2025-08-09 10:09:16"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-08-10","timestamp":"2025-08-09 10:09:17"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/08/2025","timestamp":"2025-08-09 10:09:24"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 10:09:28"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 4","timestamp":"2025-08-09 10:09:36"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 12","timestamp":"2025-08-09 10:09:37"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: ntcn\\","timestamp":"2025-08-09 10:09:42"}
+{"level":"info","message":"Guest name saved for chat 809245787: ntcn\\","timestamp":"2025-08-09 10:09:42"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 10:09:49"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 10:09:49"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 10:09:57"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 10:09:58"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_full","timestamp":"2025-08-09 10:10:03"}
+{"level":"info","message":"Payment type selected for chat 809245787: full, totalPrice: 17998, nights: 2","timestamp":"2025-08-09 10:10:03"}
+{"level":"error","message":"Invalid booking result for chat 809245787: {\"success\":true,\"bookingNumber\":\"M-1754734207933\",\"bookingId\":\"M-1754734207933\",\"amount\":17998,\"paymentUrl\":\"https://yoomoney.ru/checkout/payments/v2/contract?orderId=30293241-000f-5001-9000-17e6f74b536c\",\"paymentType\":\"full\",\"totalPrice\":17998,\"prepaymentPercentage\":100}","timestamp":"2025-08-09 10:10:09"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 10:12:55"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 10:12:56"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 10:12:57"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 10:12:57"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 10:12:59"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 10:12:59"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 10/08/2025","timestamp":"2025-08-09 10:13:11"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-08-10","timestamp":"2025-08-09 10:13:11"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/08/2025","timestamp":"2025-08-09 10:13:15"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 10:13:20"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 4","timestamp":"2025-08-09 10:13:22"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 12","timestamp":"2025-08-09 10:13:23"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: test","timestamp":"2025-08-09 10:13:29"}
+{"level":"info","message":"Guest name saved for chat 809245787: test","timestamp":"2025-08-09 10:13:30"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 10:13:37"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 10:13:37"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 10:13:42"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 10:13:42"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_full","timestamp":"2025-08-09 10:13:45"}
+{"level":"info","message":"Payment type selected for chat 809245787: full, totalPrice: 17998, nights: 2","timestamp":"2025-08-09 10:13:45"}
+{"level":"info","message":"Booking created for chat 809245787: bookingNumber M-1754734428754, amount 17998","timestamp":"2025-08-09 10:13:50"}
+{"level":"info","message":"Admin notification sent for booking M-1754734428754","timestamp":"2025-08-09 10:13:51"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 10:14:50"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 10:14:50"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 10:18:06"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 10:18:06"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 10:18:08"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 10:18:08"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 06/04/2026","timestamp":"2025-08-09 10:18:21"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-06","timestamp":"2025-08-09 10:18:22"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 08/04/2026","timestamp":"2025-08-09 10:18:26"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 1","timestamp":"2025-08-09 10:18:33"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 10:18:37"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-09 10:18:38"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Test","timestamp":"2025-08-09 10:18:44"}
+{"level":"info","message":"Guest name saved for chat 809245787: Test","timestamp":"2025-08-09 10:18:44"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 10:18:55"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 10:18:55"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 10:19:04"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 10:19:04"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_prepayment","timestamp":"2025-08-09 10:19:08"}
+{"level":"info","message":"Payment type selected for chat 809245787: prepayment, totalPrice: 20, nights: 2","timestamp":"2025-08-09 10:19:08"}
+{"level":"info","message":"Booking created for chat 809245787: bookingNumber M-1754734751290, amount 20","timestamp":"2025-08-09 10:19:12"}
+{"level":"info","message":"Admin notification sent for booking M-1754734751290","timestamp":"2025-08-09 10:19:12"}
+{"level":"info","message":"Payment status checked for booking M-1754734751290: not_found","timestamp":"2025-08-09 10:24:18"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 10:51:37"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 10:51:37"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 10:51:38"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 10:51:38"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 10:51:39"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 10:51:39"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 08/04/2026","timestamp":"2025-08-09 10:51:46"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-08","timestamp":"2025-08-09 10:51:47"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 09/04/2026","timestamp":"2025-08-09 10:51:55"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 1","timestamp":"2025-08-09 10:52:04"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 10:52:06"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-09 10:52:06"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Test","timestamp":"2025-08-09 10:52:12"}
+{"level":"info","message":"Guest name saved for chat 809245787: Test","timestamp":"2025-08-09 10:52:13"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 10:52:19"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 10:52:20"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 10:52:24"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 10:52:24"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_full","timestamp":"2025-08-09 10:52:28"}
+{"level":"info","message":"Payment type selected for chat 809245787: full, totalPrice: 5999, nights: 1","timestamp":"2025-08-09 10:52:28"}
+{"level":"info","message":"Booking created for chat 809245787: bookingNumber M-1754736751987, amount 5999","timestamp":"2025-08-09 10:52:33"}
+{"level":"info","message":"Admin notification sent for booking M-1754736751987","timestamp":"2025-08-09 10:52:33"}
+{"level":"info","message":"Payment status checked for booking M-1754736751987: not_found","timestamp":"2025-08-09 10:57:38"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 11:08:07"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 11:08:07"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 11:08:08"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 11:08:08"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 11:08:11"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 11:08:11"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 08/04/2026","timestamp":"2025-08-09 11:08:22"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-08","timestamp":"2025-08-09 11:08:23"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 09/04/2026","timestamp":"2025-08-09 11:08:27"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 1","timestamp":"2025-08-09 11:08:33"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 11:08:35"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-09 11:08:36"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: TEST","timestamp":"2025-08-09 11:08:41"}
+{"level":"info","message":"Guest name saved for chat 809245787: TEST","timestamp":"2025-08-09 11:08:41"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 11:08:50"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 11:08:50"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 11:08:55"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 11:08:55"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_prepayment","timestamp":"2025-08-09 11:08:57"}
+{"level":"info","message":"Payment type selected for chat 809245787: prepayment, totalPrice: 5999, nights: 1","timestamp":"2025-08-09 11:08:57"}
+{"level":"error","message":"Invalid booking result for chat 809245787: {\"success\":true,\"paymentUrl\":\"https://yoomoney.ru/checkout/payments/v2/contract?orderId=3029400f-000f-5001-8000-10683906119f\",\"bookingId\":\"f6b5b58c-074b-425e-b31b-387a261697df\",\"bookingNumber\":779913643,\"paymentType\":\"prepayment\",\"paymentAmount\":2999.5,\"totalPrice\":5999,\"prepaymentPercentage\":0.5,\"simulateUrl\":\"https://script.google.com/macros/s/AKfycbywmbK6PsGIqGEJQGEK2ix-IQXPG0TNSBXNr-19QODCRxDXWv-ntNllrh5O6X-amWwV/exec?action=simulate_payment&booking_id=f6b5b58c-074b-425e-b31b-387a261697df\"}","timestamp":"2025-08-09 11:09:04"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 11:13:11"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 11:13:11"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 11:13:13"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 11:13:13"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 11:13:16"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 11:13:16"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 06/04/2026","timestamp":"2025-08-09 11:13:21"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-06","timestamp":"2025-08-09 11:13:22"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 07/04/2026","timestamp":"2025-08-09 11:13:25"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 1","timestamp":"2025-08-09 11:13:30"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 11:13:32"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-09 11:13:32"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: NTCN","timestamp":"2025-08-09 11:13:36"}
+{"level":"info","message":"Guest name saved for chat 809245787: NTCN","timestamp":"2025-08-09 11:13:36"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 11:13:48"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 11:13:49"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 11:13:54"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 11:13:55"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_prepayment","timestamp":"2025-08-09 11:13:58"}
+{"level":"info","message":"Payment type selected for chat 809245787: prepayment, totalPrice: 10, nights: 1","timestamp":"2025-08-09 11:13:58"}
+{"level":"error","message":"Invalid booking result for chat 809245787: {\"success\":true,\"paymentUrl\":\"https://yoomoney.ru/checkout/payments/v2/contract?orderId=3029413b-000f-5000-8000-1782c85cb0a6\",\"bookingId\":\"c1b5fcca-0200-4da6-916d-9c5718cd7c75\",\"bookingNumber\":695112507,\"paymentType\":\"prepayment\",\"paymentAmount\":5,\"totalPrice\":10,\"prepaymentPercentage\":0.5,\"simulateUrl\":\"https://script.google.com/macros/s/AKfycbywmbK6PsGIqGEJQGEK2ix-IQXPG0TNSBXNr-19QODCRxDXWv-ntNllrh5O6X-amWwV/exec?action=simulate_payment&booking_id=c1b5fcca-0200-4da6-916d-9c5718cd7c75\"}","timestamp":"2025-08-09 11:14:04"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_prepayment","timestamp":"2025-08-09 11:21:48"}
+{"level":"warn","message":"Invalid or expired booking session for payment selection in chat 809245787","timestamp":"2025-08-09 11:21:49"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 11:21:51"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 11:21:51"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 11:21:52"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 11:21:52"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 11:21:53"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 11:21:53"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 10/04/2025","timestamp":"2025-08-09 11:22:01"}
+{"level":"warn","message":"Check-in date in the past for chat 809245787: 10/04/2025","timestamp":"2025-08-09 11:22:01"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 10/04/2026","timestamp":"2025-08-09 11:22:08"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-10","timestamp":"2025-08-09 11:22:09"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/04/2026","timestamp":"2025-08-09 11:22:13"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 1","timestamp":"2025-08-09 11:22:20"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 11:22:24"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-09 11:22:24"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: ntcn","timestamp":"2025-08-09 11:22:29"}
+{"level":"info","message":"Guest name saved for chat 809245787: ntcn","timestamp":"2025-08-09 11:22:30"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 11:22:38"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 11:22:38"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 11:22:42"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 11:22:42"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_prepayment","timestamp":"2025-08-09 11:22:45"}
+{"level":"info","message":"Payment type selected for chat 809245787: prepayment, totalPrice: 5999, nights: 1","timestamp":"2025-08-09 11:22:45"}
+{"level":"error","message":"Invalid booking result for chat 809245787: {\"success\":true,\"paymentUrl\":\"https://yoomoney.ru/checkout/payments/v2/contract?orderId=3029434b-000f-5001-8000-1d72d0307443\",\"bookingId\":\"6220fd0f-17ef-4221-924e-10db3a73119b\",\"bookingNumber\":329159069,\"paymentType\":\"prepayment\",\"paymentAmount\":2999.5,\"totalPrice\":5999,\"prepaymentPercentage\":0.5,\"simulateUrl\":\"https://script.google.com/macros/s/AKfycbywmbK6PsGIqGEJQGEK2ix-IQXPG0TNSBXNr-19QODCRxDXWv-ntNllrh5O6X-amWwV/exec?action=simulate_payment&booking_id=6220fd0f-17ef-4221-924e-10db3a73119b\"}","timestamp":"2025-08-09 11:22:52"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 11:29:25"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 11:29:25"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 11:29:29"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 11:29:29"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 11:29:31"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 11:29:31"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 05/04/2026","timestamp":"2025-08-09 11:29:37"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-05","timestamp":"2025-08-09 11:29:38"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 06/04/2026","timestamp":"2025-08-09 11:29:41"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 1","timestamp":"2025-08-09 11:29:47"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 11:29:49"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-09 11:29:49"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Тест","timestamp":"2025-08-09 11:29:57"}
+{"level":"info","message":"Guest name saved for chat 809245787: Тест","timestamp":"2025-08-09 11:29:57"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@mail.ru","timestamp":"2025-08-09 11:30:08"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@mail.ru","timestamp":"2025-08-09 11:30:09"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 11:30:13"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 11:30:14"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_prepayment","timestamp":"2025-08-09 11:30:16"}
+{"level":"info","message":"Payment type selected for chat 809245787: prepayment, totalPrice: 7999, nights: 1","timestamp":"2025-08-09 11:30:16"}
+{"level":"error","message":"Invalid booking result for chat 809245787: {\"success\":true,\"paymentUrl\":\"https://yoomoney.ru/checkout/payments/v2/contract?orderId=30294510-000f-5001-9000-127d2b24cf0a\",\"bookingId\":\"2f90a823-b8b6-4467-a41b-81dd683b76c0\",\"bookingNumber\":947256920,\"paymentType\":\"prepayment\",\"paymentAmount\":3999.5,\"totalPrice\":7999,\"prepaymentPercentage\":0.5,\"simulateUrl\":\"https://script.google.com/macros/s/AKfycbywmbK6PsGIqGEJQGEK2ix-IQXPG0TNSBXNr-19QODCRxDXWv-ntNllrh5O6X-amWwV/exec?action=simulate_payment&booking_id=2f90a823-b8b6-4467-a41b-81dd683b76c0\"}","timestamp":"2025-08-09 11:30:25"}
+{"level":"info","message":"Start command received for chat 809245787","timestamp":"2025-08-09 11:40:39"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 11:40:43"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 11:40:43"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 11:40:44"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 11:40:44"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 02/04/2026","timestamp":"2025-08-09 11:40:53"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-02","timestamp":"2025-08-09 11:40:54"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 03/04/2026","timestamp":"2025-08-09 11:40:58"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 1","timestamp":"2025-08-09 11:41:04"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 11:41:06"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-09 11:41:07"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: ТЕстирование телеграм","timestamp":"2025-08-09 11:41:21"}
+{"level":"info","message":"Guest name saved for chat 809245787: ТЕстирование телеграм","timestamp":"2025-08-09 11:41:21"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@mail.ru","timestamp":"2025-08-09 11:41:33"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@mail.ru","timestamp":"2025-08-09 11:41:33"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 11:41:41"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 11:41:42"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_prepayment","timestamp":"2025-08-09 11:41:45"}
+{"level":"info","message":"Payment type selected for chat 809245787: prepayment, totalPrice: 5999, nights: 1, telegramChatId: 809245787","timestamp":"2025-08-09 11:41:45"}
+{"level":"info","message":"Booking created for chat 809245787: bookingNumber 382643454, paymentAmount 2999.5","timestamp":"2025-08-09 11:41:52"}
+{"error":{},"level":"error","message":"Error processing callback query for chat 809245787: payment_prepayment","timestamp":"2025-08-09 11:41:52"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 11:44:55"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 11:44:55"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 11:45:13"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 11:45:13"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 11:45:14"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 11:45:14"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 03/04/2026","timestamp":"2025-08-09 11:45:21"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-03","timestamp":"2025-08-09 11:45:22"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 04/04/2026","timestamp":"2025-08-09 11:45:26"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 1","timestamp":"2025-08-09 11:45:32"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 11:45:34"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-09 11:45:35"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: TEST телеграм","timestamp":"2025-08-09 11:45:43"}
+{"level":"info","message":"Guest name saved for chat 809245787: TEST телеграм","timestamp":"2025-08-09 11:45:44"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 11:45:54"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 11:45:54"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 11:45:58"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 11:45:58"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_full","timestamp":"2025-08-09 11:46:02"}
+{"level":"info","message":"Payment type selected for chat 809245787: full, totalPrice: 5999, nights: 1, telegramChatId: 809245787","timestamp":"2025-08-09 11:46:02"}
+{"level":"info","message":"Booking created for chat 809245787: bookingNumber 799295469, paymentAmount 5999","timestamp":"2025-08-09 11:46:09"}
+{"error":{},"level":"error","message":"Error processing callback query for chat 809245787: payment_full","timestamp":"2025-08-09 11:46:09"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 11:48:20"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 11:48:20"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 11:48:23"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 11:48:23"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 11:48:24"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 11:48:24"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 05/04/2026","timestamp":"2025-08-09 11:48:28"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-05","timestamp":"2025-08-09 11:48:29"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 06/04/2026","timestamp":"2025-08-09 11:48:32"}
+{"level":"warn","message":"No available rooms for dates 2026-04-05 to 2026-04-06 for chat 809245787","timestamp":"2025-08-09 11:48:37"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 11:48:41"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 11:48:41"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 11:48:45"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 11:48:45"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/08/2025","timestamp":"2025-08-09 11:48:51"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-08-12","timestamp":"2025-08-09 11:48:52"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 14/08/2025","timestamp":"2025-08-09 11:49:06"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 11:49:12"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 11:49:22"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-09 11:49:22"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: тест","timestamp":"2025-08-09 11:49:30"}
+{"level":"info","message":"Guest name saved for chat 809245787: тест","timestamp":"2025-08-09 11:49:31"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 11:49:47"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 11:49:48"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 11:49:57"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 11:49:58"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_full","timestamp":"2025-08-09 11:50:01"}
+{"level":"info","message":"Payment type selected for chat 809245787: full, totalPrice: 15998, nights: 2, telegramChatId: 809245787","timestamp":"2025-08-09 11:50:01"}
+{"level":"info","message":"Booking created for chat 809245787: bookingNumber 533036268, paymentAmount 15998","timestamp":"2025-08-09 11:50:09"}
+{"error":{},"level":"error","message":"Error processing callback query for chat 809245787: payment_full","timestamp":"2025-08-09 11:50:09"}
+{"level":"info","message":"Start command received for chat 809245787","timestamp":"2025-08-09 11:53:08"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 11:53:09"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 11:53:09"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 11:53:11"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 11:53:11"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 13/08/2025","timestamp":"2025-08-09 11:53:19"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-08-13","timestamp":"2025-08-09 11:53:20"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 14/08/2025","timestamp":"2025-08-09 11:53:24"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 4","timestamp":"2025-08-09 11:53:31"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 11:53:32"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 9","timestamp":"2025-08-09 11:53:33"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: ntcn","timestamp":"2025-08-09 11:53:36"}
+{"level":"info","message":"Guest name saved for chat 809245787: ntcn","timestamp":"2025-08-09 11:53:37"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 11:53:43"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 11:53:45"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 11:53:49"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 11:53:49"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_prepayment","timestamp":"2025-08-09 11:53:52"}
+{"level":"info","message":"Payment type selected for chat 809245787: prepayment, totalPrice: 10999, nights: 1, telegramChatId: 809245787","timestamp":"2025-08-09 11:53:52"}
+{"level":"info","message":"Booking created for chat 809245787: bookingNumber 944323538, paymentAmount 5499.5","timestamp":"2025-08-09 11:53:59"}
+{"level":"info","message":"Start command received for chat 809245787","timestamp":"2025-08-09 11:58:42"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 11:58:44"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 11:58:44"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_no","timestamp":"2025-08-09 11:58:50"}
+{"level":"info","message":"Handling booking_no for chat 809245787","timestamp":"2025-08-09 11:58:50"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Хочу забронировать номер","timestamp":"2025-08-09 11:59:22"}
+{"error":{"code":"PGRST116","details":"The result contains 0 rows","hint":null,"message":"Cannot coerce the result to a single JSON object"},"level":"error","message":"Booking session not found for chat 809245787","timestamp":"2025-08-09 11:59:23"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 11:59:25"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 11:59:25"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 11:59:28"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 11:59:28"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 11:59:30"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 11:59:30"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 04/04/2026","timestamp":"2025-08-09 11:59:42"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-04","timestamp":"2025-08-09 11:59:43"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 05/04/2026","timestamp":"2025-08-09 11:59:51"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 1","timestamp":"2025-08-09 12:00:00"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 12:00:02"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-09 12:00:02"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Тестирование","timestamp":"2025-08-09 12:00:08"}
+{"level":"info","message":"Guest name saved for chat 809245787: Тестирование","timestamp":"2025-08-09 12:00:08"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 12:00:15"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 12:00:16"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 12:00:21"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 12:00:22"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_prepayment","timestamp":"2025-08-09 12:00:24"}
+{"level":"info","message":"Payment type selected for chat 809245787: prepayment, totalPrice: 5999, nights: 1, telegramChatId: 809245787","timestamp":"2025-08-09 12:00:24"}
+{"level":"info","message":"Booking created for chat 809245787: bookingNumber 228914560, paymentAmount 2999.5","timestamp":"2025-08-09 12:00:32"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 12:01:47"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 12:01:47"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 02/04/2026","timestamp":"2025-08-09 12:01:55"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-02","timestamp":"2025-08-09 12:01:56"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 03/04/2026","timestamp":"2025-08-09 12:01:59"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 1","timestamp":"2025-08-09 12:02:05"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 12:02:06"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 12:02:06"}
+{"level":"info","message":"Ignored text message in MAIN_MENU for chat 809245787: 1","timestamp":"2025-08-09 12:02:10"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 12:02:19"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 12:02:19"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 12:02:22"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 12:02:22"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 03/04/2026","timestamp":"2025-08-09 12:02:26"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-03","timestamp":"2025-08-09 12:02:27"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 04/04/2026","timestamp":"2025-08-09 12:02:39"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 1","timestamp":"2025-08-09 12:02:45"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 12:02:46"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-09 12:02:46"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Тестовая бронь","timestamp":"2025-08-09 12:02:55"}
+{"level":"info","message":"Guest name saved for chat 809245787: Тестовая бронь","timestamp":"2025-08-09 12:02:55"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 12:03:04"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 12:03:05"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 12:03:11"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 12:03:11"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_prepayment","timestamp":"2025-08-09 12:03:14"}
+{"level":"info","message":"Payment type selected for chat 809245787: prepayment, totalPrice: 5999, nights: 1, telegramChatId: 809245787","timestamp":"2025-08-09 12:03:14"}
+{"level":"info","message":"Booking created for chat 809245787: bookingNumber 315208479, paymentAmount 2999.5","timestamp":"2025-08-09 12:03:24"}
+{"level":"info","message":"Payment status checked for booking 4719eecf-87cd-42e3-95cb-0b2e0f63af93: pending","timestamp":"2025-08-09 12:05:38"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 12:06:27"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 12:06:27"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 12:06:31"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 12:06:31"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 12:06:32"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 12:06:32"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 06/04/2026","timestamp":"2025-08-09 12:06:39"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-06","timestamp":"2025-08-09 12:06:41"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 07/04/2026","timestamp":"2025-08-09 12:06:44"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 1","timestamp":"2025-08-09 12:06:51"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1/","timestamp":"2025-08-09 12:06:57"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-09 12:06:57"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Тестовая Бронь","timestamp":"2025-08-09 12:07:07"}
+{"level":"info","message":"Guest name saved for chat 809245787: Тестовая Бронь","timestamp":"2025-08-09 12:07:07"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 12:07:14"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 12:07:14"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 12:07:25"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 12:07:25"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_prepayment","timestamp":"2025-08-09 12:07:28"}
+{"level":"info","message":"Payment type selected for chat 809245787: prepayment, totalPrice: 10, nights: 1, telegramChatId: 809245787","timestamp":"2025-08-09 12:07:28"}
+{"level":"info","message":"Booking created for chat 809245787: bookingNumber 643381907, paymentAmount 5","timestamp":"2025-08-09 12:07:33"}
+{"level":"info","message":"Payment status checked for booking a0413285-dfae-4627-9308-9b33b71228f1: pending","timestamp":"2025-08-09 12:08:29"}
+{"level":"info","message":"Payment status checked for booking 16649949-35af-45aa-9aee-d732cbfdb8ce: paid","timestamp":"2025-08-09 12:12:42"}
+{"error":{},"level":"error","message":"Error checking payment status for booking 16649949-35af-45aa-9aee-d732cbfdb8ce","timestamp":"2025-08-09 12:12:42"}
+{"level":"info","message":"Start command received for chat 809245787","timestamp":"2025-08-09 12:28:07"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 12:28:09"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 12:28:09"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 12:28:11"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 12:28:11"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 08/04/2026","timestamp":"2025-08-09 12:28:19"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-08","timestamp":"2025-08-09 12:28:20"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 09/04/2026","timestamp":"2025-08-09 12:28:23"}
+{"level":"warn","message":"No available rooms for dates 2026-04-08 to 2026-04-09 for chat 809245787","timestamp":"2025-08-09 12:28:28"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 12:28:33"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 12:28:33"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 05/04/2026","timestamp":"2025-08-09 12:28:42"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-05","timestamp":"2025-08-09 12:28:42"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 06/04/2026","timestamp":"2025-08-09 12:28:46"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 12:29:13"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 12:29:13"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 12:29:17"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 12:29:17"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 12:29:18"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 12:29:18"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 1","timestamp":"2025-08-09 12:29:22"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 12:29:25"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-09 12:29:25"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Fylhtq","timestamp":"2025-08-09 12:29:28"}
+{"level":"info","message":"Guest name saved for chat 809245787: Fylhtq","timestamp":"2025-08-09 12:29:29"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 12:29:38"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 12:29:38"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 12:29:42"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 12:29:43"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_prepayment","timestamp":"2025-08-09 12:29:45"}
+{"level":"info","message":"Payment type selected for chat 809245787: prepayment, totalPrice: 7999, nights: 1, telegramChatId: 809245787","timestamp":"2025-08-09 12:29:45"}
+{"level":"info","message":"Booking created for chat 809245787: bookingNumber 306226775, paymentAmount 3999.5","timestamp":"2025-08-09 12:29:52"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 12:31:11"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 12:31:11"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 12:31:15"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 12:31:15"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 06/04/2026","timestamp":"2025-08-09 12:31:20"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2026-04-06","timestamp":"2025-08-09 12:31:20"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 07/04/2026","timestamp":"2025-08-09 12:31:24"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 1","timestamp":"2025-08-09 12:31:29"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 12:31:32"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-09 12:31:33"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Боевой тест","timestamp":"2025-08-09 12:31:40"}
+{"level":"info","message":"Guest name saved for chat 809245787: Боевой тест","timestamp":"2025-08-09 12:31:40"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 12:31:49"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-09 12:31:49"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-09 12:31:54"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-09 12:31:54"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_prepayment","timestamp":"2025-08-09 12:31:56"}
+{"level":"info","message":"Payment type selected for chat 809245787: prepayment, totalPrice: 10, nights: 1, telegramChatId: 809245787","timestamp":"2025-08-09 12:31:56"}
+{"level":"info","message":"Booking created for chat 809245787: bookingNumber 536820045, paymentAmount 5","timestamp":"2025-08-09 12:32:03"}
+{"level":"info","message":"Payment status checked for booking 3caeebbe-1cb8-4844-8247-52442da359e4: pending","timestamp":"2025-08-09 12:34:56"}
+{"level":"info","message":"Payment status checked for booking 5797645b-a3c2-4a0a-93e6-c4cd71767d6c: paid","timestamp":"2025-08-09 12:37:09"}
+{"error":{},"level":"error","message":"Error checking payment status for booking 5797645b-a3c2-4a0a-93e6-c4cd71767d6c","timestamp":"2025-08-09 12:37:09"}
+{"level":"info","message":"Start command received for chat 809245787","timestamp":"2025-08-09 13:00:14"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 13:00:20"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 13:00:20"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 13:00:22"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 13:00:22"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 06.09.2035","timestamp":"2025-08-09 13:00:39"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2035-09-06","timestamp":"2025-08-09 13:00:40"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 06.12.2025","timestamp":"2025-08-09 13:00:51"}
+{"level":"warn","message":"Invalid check-out date for chat 809245787: 06.12.2025","timestamp":"2025-08-09 13:00:52"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 13:00:57"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 13:00:57"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 13:00:59"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 13:00:59"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 13:01:00"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 13:01:00"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 13:01:02"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 13:01:02"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 13:01:04"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 13:01:04"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 13:01:05"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 13:01:05"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 09.08.2025","timestamp":"2025-08-09 13:01:21"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-08-09","timestamp":"2025-08-09 13:01:21"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 10.08.2025","timestamp":"2025-08-09 13:01:28"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 2","timestamp":"2025-08-09 13:01:35"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-09 13:01:40"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 10","timestamp":"2025-08-09 13:01:41"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Тест","timestamp":"2025-08-09 13:01:46"}
+{"level":"info","message":"Guest name saved for chat 809245787: Тест","timestamp":"2025-08-09 13:01:47"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Herreh174@gmail.com","timestamp":"2025-08-09 13:02:06"}
+{"level":"info","message":"Guest email saved for chat 809245787: Herreh174@gmail.com","timestamp":"2025-08-09 13:02:06"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89958606435","timestamp":"2025-08-09 13:02:30"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89958606435","timestamp":"2025-08-09 13:02:30"}
+{"level":"info","message":"Callback query received for chat 809245787: payment_full","timestamp":"2025-08-09 13:02:33"}
+{"level":"info","message":"Payment type selected for chat 809245787: full, totalPrice: 10999, nights: 1, telegramChatId: 809245787","timestamp":"2025-08-09 13:02:33"}
+{"level":"info","message":"Booking created for chat 809245787: bookingNumber 754811039, paymentAmount 10999","timestamp":"2025-08-09 13:02:40"}
+{"level":"info","message":"Payment status checked for booking 6f454060-3007-4eeb-b97a-f75182150353: pending","timestamp":"2025-08-09 13:07:44"}
+{"level":"info","message":"Start command received for chat 375879913","timestamp":"2025-08-09 13:20:53"}
+{"level":"info","message":"Callback query received for chat 375879913: important_info","timestamp":"2025-08-09 13:21:17"}
+{"level":"info","message":"Sending important info to chat 375879913","timestamp":"2025-08-09 13:21:17"}
+{"level":"info","message":"Callback query received for chat 375879913: important_info","timestamp":"2025-08-09 13:21:20"}
+{"level":"info","message":"Sending important info to chat 375879913","timestamp":"2025-08-09 13:21:20"}
+{"level":"info","message":"Callback query received for chat 375879913: back_to_menu","timestamp":"2025-08-09 13:22:16"}
+{"level":"info","message":"Returned to main menu for chat 375879913","timestamp":"2025-08-09 13:22:16"}
+{"level":"info","message":"Callback query received for chat 375879913: rooms","timestamp":"2025-08-09 13:22:19"}
+{"level":"info","message":"Displaying rooms for chat 375879913, count: 11","timestamp":"2025-08-09 13:22:19"}
+{"level":"info","message":"Callback query received for chat 375879913: room_0","timestamp":"2025-08-09 13:22:22"}
+{"level":"info","message":"Showing room details for chat 375879913, room ID: 8","timestamp":"2025-08-09 13:22:22"}
+{"level":"info","message":"Sending 9 photos for room 8 to chat 375879913","timestamp":"2025-08-09 13:22:22"}
+{"level":"info","message":"Callback query received for chat 375879913: rooms","timestamp":"2025-08-09 13:22:48"}
+{"level":"info","message":"Displaying rooms for chat 375879913, count: 11","timestamp":"2025-08-09 13:22:48"}
+{"level":"info","message":"Callback query received for chat 375879913: back_to_menu","timestamp":"2025-08-09 13:59:13"}
+{"level":"info","message":"Returned to main menu for chat 375879913","timestamp":"2025-08-09 13:59:13"}
+{"level":"info","message":"Callback query received for chat 375879913: entertainment","timestamp":"2025-08-09 13:59:46"}
+{"level":"info","message":"Sending entertainment info to chat 375879913","timestamp":"2025-08-09 13:59:46"}
+{"level":"info","message":"Callback query received for chat 375879913: entertainment","timestamp":"2025-08-09 13:59:48"}
+{"level":"info","message":"Sending entertainment info to chat 375879913","timestamp":"2025-08-09 13:59:48"}
+{"level":"info","message":"Callback query received for chat 375879913: back_to_menu","timestamp":"2025-08-09 14:05:17"}
+{"level":"info","message":"Returned to main menu for chat 375879913","timestamp":"2025-08-09 14:05:17"}
+{"level":"info","message":"Callback query received for chat 375879913: facilities","timestamp":"2025-08-09 14:06:11"}
+{"level":"info","message":"Sending facilities info to chat 375879913","timestamp":"2025-08-09 14:06:11"}
+{"level":"info","message":"Callback query received for chat 375879913: back_to_menu","timestamp":"2025-08-09 14:07:00"}
+{"level":"info","message":"Returned to main menu for chat 375879913","timestamp":"2025-08-09 14:07:00"}
+{"level":"info","message":"Callback query received for chat 375879913: back_to_menu","timestamp":"2025-08-09 14:07:01"}
+{"level":"info","message":"Returned to main menu for chat 375879913","timestamp":"2025-08-09 14:07:01"}
+{"level":"info","message":"Callback query received for chat 375879913: back_to_menu","timestamp":"2025-08-09 14:07:02"}
+{"level":"info","message":"Returned to main menu for chat 375879913","timestamp":"2025-08-09 14:07:02"}
+{"level":"info","message":"Callback query received for chat 375879913: our_beach","timestamp":"2025-08-09 14:07:05"}
+{"level":"info","message":"Sending beach info to chat 375879913","timestamp":"2025-08-09 14:07:05"}
+{"level":"info","message":"Callback query received for chat 375879913: back_to_menu","timestamp":"2025-08-09 14:08:04"}
+{"level":"info","message":"Returned to main menu for chat 375879913","timestamp":"2025-08-09 14:08:04"}
+{"level":"info","message":"Callback query received for chat 375879913: camping","timestamp":"2025-08-09 14:08:07"}
+{"level":"info","message":"Sending camping info to chat 375879913","timestamp":"2025-08-09 14:08:07"}
+{"level":"info","message":"Callback query received for chat 375879913: back_to_menu","timestamp":"2025-08-09 14:09:24"}
+{"level":"info","message":"Returned to main menu for chat 375879913","timestamp":"2025-08-09 14:09:24"}
+{"level":"info","message":"Callback query received for chat 375879913: our_beach","timestamp":"2025-08-09 14:09:28"}
+{"level":"info","message":"Sending beach info to chat 375879913","timestamp":"2025-08-09 14:09:28"}
+{"level":"info","message":"Callback query received for chat 375879913: back_to_menu","timestamp":"2025-08-09 14:10:46"}
+{"level":"info","message":"Returned to main menu for chat 375879913","timestamp":"2025-08-09 14:10:46"}
+{"level":"info","message":"Callback query received for chat 375879913: directions","timestamp":"2025-08-09 14:10:50"}
+{"level":"info","message":"Sending directions info to chat 375879913","timestamp":"2025-08-09 14:10:50"}
+{"level":"info","message":"Callback query received for chat 375879913: back_to_menu","timestamp":"2025-08-09 14:11:04"}
+{"level":"info","message":"Returned to main menu for chat 375879913","timestamp":"2025-08-09 14:11:04"}
+{"level":"info","message":"Callback query received for chat 375879913: booking","timestamp":"2025-08-09 14:11:06"}
+{"level":"info","message":"Started booking process for chat 375879913","timestamp":"2025-08-09 14:11:06"}
+{"level":"info","message":"Callback query received for chat 375879913: booking_yes","timestamp":"2025-08-09 14:11:11"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 375879913","timestamp":"2025-08-09 14:11:11"}
+{"level":"info","message":"Processing message for user 375879913 in chat 375879913: 15-17 августа","timestamp":"2025-08-09 14:11:25"}
+{"level":"warn","message":"Invalid check-in date format for chat 375879913: 15-17 августа","timestamp":"2025-08-09 14:11:25"}
+{"level":"info","message":"Processing message for user 375879913 in chat 375879913: 15.08.2025","timestamp":"2025-08-09 14:13:29"}
+{"level":"info","message":"Check-in date saved for chat 375879913: 2025-08-15","timestamp":"2025-08-09 14:13:30"}
+{"level":"info","message":"Processing message for user 375879913 in chat 375879913: 17.08.2025","timestamp":"2025-08-09 14:13:46"}
+{"level":"info","message":"Available rooms sent to chat 375879913, count: 4","timestamp":"2025-08-09 14:13:52"}
+{"level":"info","message":"Callback query received for chat 375879913: back_to_menu","timestamp":"2025-08-09 14:14:03"}
+{"level":"info","message":"Returned to main menu for chat 375879913","timestamp":"2025-08-09 14:14:03"}
+{"level":"info","message":"Callback query received for chat 375879913: ask_admin","timestamp":"2025-08-09 14:14:06"}
+{"level":"info","message":"Started asking questions mode for chat 375879913","timestamp":"2025-08-09 14:14:06"}
+{"level":"info","message":"Processing question in ASKING_QUESTIONS for user 375879913 in chat 375879913: Если нас семь человек . Как нам расселиться ?","timestamp":"2025-08-09 14:16:48"}
+{"level":"info","message":"Forwarding question from user 375879913 in chat 375879913: Если нас семь человек . Как нам расселиться ?","timestamp":"2025-08-09 14:16:48"}
+{"level":"info","message":"Processing question in ASKING_QUESTIONS for user 375879913 in chat -1002826990012: Какой домик вы выбрали ?","timestamp":"2025-08-09 14:17:46"}
+{"level":"info","message":"Forwarding question from user 375879913 in chat -1002826990012: Какой домик вы выбрали ?","timestamp":"2025-08-09 14:17:46"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_pending","timestamp":"2025-08-09 14:28:18"}
+{"level":"info","message":"Callback query received for chat -1002826990012: view_question_375879913","timestamp":"2025-08-09 14:28:22"}
+{"level":"info","message":"Callback query received for chat -1002826990012: answer_btn_375879913","timestamp":"2025-08-09 14:28:28"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_pending","timestamp":"2025-08-09 14:32:13"}
+{"level":"info","message":"Callback query received for chat -1002826990012: view_question_809245787","timestamp":"2025-08-09 14:32:14"}
+{"level":"info","message":"Callback query received for chat -1002826990012: reject_btn_809245787","timestamp":"2025-08-09 14:32:16"}
+{"level":"info","message":"Ignored text message in MAIN_MENU for chat 809245787: Нас шесть человек. Подскажите как нам расселиться?","timestamp":"2025-08-09 14:36:52"}
+{"level":"info","message":"Callback query received for chat 809245787: ask_admin","timestamp":"2025-08-09 14:36:57"}
+{"level":"info","message":"Started asking questions mode for chat 809245787","timestamp":"2025-08-09 14:36:57"}
+{"level":"info","message":"Processing question in ASKING_QUESTIONS for user 809245787 in chat 809245787: Нас 6 человек подскажите как нам расселиться?","timestamp":"2025-08-09 14:37:18"}
+{"level":"info","message":"Forwarding question from user 809245787 in chat 809245787: Нас 6 человек подскажите как нам расселиться?","timestamp":"2025-08-09 14:37:18"}
+{"level":"info","message":"Callback query received for chat 809245787: end_questions","timestamp":"2025-08-09 14:37:21"}
+{"level":"info","message":"Ended asking questions mode for chat 809245787","timestamp":"2025-08-09 14:37:21"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_panel","timestamp":"2025-08-09 14:38:03"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_pending","timestamp":"2025-08-09 14:38:05"}
+{"level":"info","message":"Callback query received for chat -1002826990012: view_question_809245787","timestamp":"2025-08-09 14:38:07"}
+{"level":"info","message":"Callback query received for chat -1002826990012: reject_btn_809245787","timestamp":"2025-08-09 14:38:10"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_panel","timestamp":"2025-08-09 14:38:14"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_kb","timestamp":"2025-08-09 14:38:18"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_reload","timestamp":"2025-08-09 14:38:23"}
+{"level":"info","message":"Callback query received for chat -1002826990012: back_to_menu","timestamp":"2025-08-09 14:38:29"}
+{"level":"info","message":"Returned to main menu for chat -1002826990012","timestamp":"2025-08-09 14:38:29"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_panel","timestamp":"2025-08-09 14:38:32"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_panel","timestamp":"2025-08-09 14:39:05"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_pending","timestamp":"2025-08-09 14:39:12"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_panel","timestamp":"2025-08-09 14:39:14"}
+{"level":"info","message":"Callback query received for chat 809245787: important_info","timestamp":"2025-08-09 14:43:05"}
+{"level":"info","message":"Sending important info to chat 809245787","timestamp":"2025-08-09 14:43:05"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 14:43:11"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 14:43:11"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 14:43:13"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 14:43:13"}
+{"level":"info","message":"Callback query received for chat 809245787: room_0","timestamp":"2025-08-09 14:43:22"}
+{"level":"info","message":"Showing room details for chat 809245787, room ID: 8","timestamp":"2025-08-09 14:43:22"}
+{"level":"info","message":"Sending 9 photos for room 8 to chat 809245787","timestamp":"2025-08-09 14:43:22"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 14:43:29"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 14:43:29"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 14:56:50"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 14:56:50"}
+{"level":"info","message":"Callback query received for chat 809245787: room_5","timestamp":"2025-08-09 14:57:07"}
+{"level":"info","message":"Showing room details for chat 809245787, room ID: 1","timestamp":"2025-08-09 14:57:07"}
+{"level":"info","message":"Sending 3 photos for room 1 to chat 809245787","timestamp":"2025-08-09 14:57:07"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 14:57:12"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 14:57:12"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 14:59:44"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 14:59:44"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 14:59:50"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 14:59:50"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 14:59:55"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 14:59:55"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 15:04:52"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 15:04:52"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 15:04:58"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 15:04:58"}
+{"level":"info","message":"Callback query received for chat 809245787: room_8","timestamp":"2025-08-09 15:05:03"}
+{"level":"info","message":"Showing room details for chat 809245787, room ID: 6","timestamp":"2025-08-09 15:05:03"}
+{"level":"info","message":"Sending 3 photos for room 6 to chat 809245787","timestamp":"2025-08-09 15:05:03"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 15:10:27"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 15:10:27"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 15:14:01"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 15:14:01"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 15:14:03"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 15:14:03"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 15:15:50"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 15:15:50"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 15:15:52"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 15:15:52"}
+{"level":"info","message":"Start command received for chat 809245787","timestamp":"2025-08-09 15:26:41"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 15:26:47"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 15:26:47"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 20:28:55"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 20:28:55"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 20:28:57"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 20:28:57"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 20:31:40"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 20:31:40"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 20:31:41"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 20:31:41"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_pending","timestamp":"2025-08-09 20:46:04"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_panel","timestamp":"2025-08-09 20:46:14"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_stats","timestamp":"2025-08-09 20:46:16"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_stats","timestamp":"2025-08-09 20:48:09"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_stats","timestamp":"2025-08-09 20:49:35"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_kb","timestamp":"2025-08-09 20:50:10"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_kb","timestamp":"2025-08-09 20:52:28"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 21:00:03"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 21:00:03"}
+{"level":"info","message":"Start command received for chat 809245787","timestamp":"2025-08-09 21:00:16"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 21:00:18"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 21:00:18"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_panel","timestamp":"2025-08-09 21:00:56"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_stats","timestamp":"2025-08-09 21:01:01"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_kb","timestamp":"2025-08-09 21:01:08"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_panel","timestamp":"2025-08-09 21:01:24"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_pending","timestamp":"2025-08-09 21:01:35"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_panel","timestamp":"2025-08-09 21:01:37"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_reload","timestamp":"2025-08-09 21:01:44"}
+{"level":"info","message":"Callback query received for chat -1002826990012: admin_reload","timestamp":"2025-08-09 21:08:51"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 21:16:22"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 21:16:22"}
+{"level":"info","message":"Callback query received for chat 809245787: important_info","timestamp":"2025-08-09 21:16:24"}
+{"level":"info","message":"Sending important info to chat 809245787","timestamp":"2025-08-09 21:16:24"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 21:16:29"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 21:16:29"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 21:23:01"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 21:23:01"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 21:23:03"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 21:23:03"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 10/09/2025","timestamp":"2025-08-09 21:23:12"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-10","timestamp":"2025-08-09 21:23:13"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/09/2025","timestamp":"2025-08-09 21:23:20"}
+{"error":{},"level":"error","message":"Error processing message for chat 809245787","timestamp":"2025-08-09 21:23:27"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 21:29:36"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 21:29:36"}
+{"level":"info","message":"Callback query received for chat 809245787: rooms","timestamp":"2025-08-09 21:29:40"}
+{"level":"info","message":"Displaying rooms for chat 809245787, count: 11","timestamp":"2025-08-09 21:29:40"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 21:29:43"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 21:29:43"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 21:29:45"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 21:29:45"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 10/09/2025","timestamp":"2025-08-09 21:29:59"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-10","timestamp":"2025-08-09 21:30:00"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-09 21:30:05"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 21:30:10"}
+{"level":"info","message":"Start command received for chat 357132849","timestamp":"2025-08-09 21:32:21"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 21:32:37"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 21:32:37"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 21:32:42"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 21:32:42"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 21:32:44"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 21:32:44"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 10/09/2025","timestamp":"2025-08-09 21:32:51"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-10","timestamp":"2025-08-09 21:32:52"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-09 21:32:57"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 21:33:03"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 21:38:58"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 21:38:58"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 21:39:04"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 21:39:04"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 21:39:05"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 21:39:05"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 10/09/2025","timestamp":"2025-08-09 21:39:15"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-10","timestamp":"2025-08-09 21:39:15"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-09 21:39:24"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 21:39:42"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 21:49:01"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 21:49:01"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 21:49:05"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 21:49:05"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 21:49:07"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 21:49:07"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 10/09/2025","timestamp":"2025-08-09 21:49:15"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-10","timestamp":"2025-08-09 21:49:16"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-09 21:49:22"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 21:49:29"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 21:59:18"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 21:59:18"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 21:59:21"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 21:59:21"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 21:59:23"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 21:59:23"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 10/09/2025","timestamp":"2025-08-09 21:59:31"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-10","timestamp":"2025-08-09 21:59:32"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-09 21:59:38"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 21:59:43"}
+{"level":"info","message":"Start command received for chat 809245787","timestamp":"2025-08-09 22:19:31"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 22:19:32"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 22:19:32"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 22:19:34"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 22:19:34"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-09 22:19:42"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-11","timestamp":"2025-08-09 22:19:43"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/09/2025","timestamp":"2025-08-09 22:19:49"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 22:19:56"}
+{"level":"info","message":"Callback query received for chat 809245787: room_select_8","timestamp":"2025-08-09 22:20:18"}
+{"error":{},"level":"error","message":"Error processing callback query for chat 809245787: room_select_8","timestamp":"2025-08-09 22:20:18"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 22:31:37"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 22:31:38"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 22:31:40"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 22:31:40"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 22:31:41"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 22:31:41"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 10/09/2025","timestamp":"2025-08-09 22:31:47"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-10","timestamp":"2025-08-09 22:31:49"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-09 22:31:52"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 22:32:02"}
+{"level":"info","message":"Callback query received for chat 809245787: room_select_8","timestamp":"2025-08-09 22:32:09"}
+{"level":"info","message":"Callback query received for chat 809245787: book_room_8","timestamp":"2025-08-09 22:32:15"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-09 22:32:33"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-11","timestamp":"2025-08-09 22:32:34"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/09/2025","timestamp":"2025-08-09 22:32:38"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 22:32:43"}
+{"level":"info","message":"Callback query received for chat 809245787: room_select_8","timestamp":"2025-08-09 22:32:46"}
+{"level":"info","message":"Callback query received for chat 809245787: book_room_8","timestamp":"2025-08-09 22:32:48"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 22:33:32"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 22:33:32"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 22:33:34"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 22:33:34"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 22:33:38"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 22:33:38"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-09 22:33:45"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-11","timestamp":"2025-08-09 22:33:46"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/09/2025","timestamp":"2025-08-09 22:33:49"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 22:33:56"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 22:36:37"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 22:36:37"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 22:36:39"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 22:36:39"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 22:36:40"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 22:36:40"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 10/09/2025","timestamp":"2025-08-09 22:36:51"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-10","timestamp":"2025-08-09 22:36:52"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-09 22:36:57"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 22:37:02"}
+{"level":"info","message":"Callback query received for chat 809245787: back_to_menu","timestamp":"2025-08-09 22:39:34"}
+{"level":"info","message":"Returned to main menu for chat 809245787","timestamp":"2025-08-09 22:39:34"}
+{"level":"info","message":"Callback query received for chat 809245787: booking","timestamp":"2025-08-09 22:39:36"}
+{"level":"info","message":"Started booking process for chat 809245787","timestamp":"2025-08-09 22:39:36"}
+{"level":"info","message":"Callback query received for chat 809245787: booking_yes","timestamp":"2025-08-09 22:39:38"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 22:39:38"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-09 22:39:44"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-11","timestamp":"2025-08-09 22:39:45"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/09/2025","timestamp":"2025-08-09 22:39:49"}
+{"level":"info","message":"Available rooms sent to chat 809245787, count: 5","timestamp":"2025-08-09 22:39:54"}
+{"callbackData":"back_to_menu","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5312,"timestamp":"2025-08-09 23:05:26","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-09 23:05:26"}
+{"callbackData":"booking","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5313,"timestamp":"2025-08-09 23:05:28","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-09 23:05:28"}
+{"callbackData":"booking_yes","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5314,"timestamp":"2025-08-09 23:05:30","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 23:05:30"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-09 23:05:35"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-11","timestamp":"2025-08-09 23:05:36"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/09/2025","timestamp":"2025-08-09 23:05:40"}
+{"error":{},"level":"error","message":"Error processing message for chat 809245787","timestamp":"2025-08-09 23:05:46"}
+{"callbackData":"back_to_menu","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5319,"timestamp":"2025-08-09 23:17:51","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-09 23:17:51"}
+{"callbackData":"booking","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5320,"timestamp":"2025-08-09 23:17:53","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-09 23:17:53"}
+{"callbackData":"booking_yes","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5321,"timestamp":"2025-08-09 23:17:55","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 23:17:55"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-09 23:18:01"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-11","timestamp":"2025-08-09 23:18:02"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/09/2025","timestamp":"2025-08-09 23:18:06"}
+{"error":{},"level":"error","message":"Error processing message for chat 809245787","timestamp":"2025-08-09 23:18:12"}
+{"callbackData":"back_to_menu","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5326,"timestamp":"2025-08-09 23:51:10","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-09 23:51:10"}
+{"callbackData":"booking","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5327,"timestamp":"2025-08-09 23:51:12","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-09 23:51:12"}
+{"callbackData":"booking_yes","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5328,"timestamp":"2025-08-09 23:51:13","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-09 23:51:13"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 15/09/2025","timestamp":"2025-08-09 23:51:22"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-15","timestamp":"2025-08-09 23:51:23"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 16/09/2025","timestamp":"2025-08-09 23:51:28"}
+{"error":{},"level":"error","message":"Error processing message for chat 809245787","timestamp":"2025-08-09 23:51:35"}
+{"callbackData":"back_to_menu","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5333,"timestamp":"2025-08-10 00:00:20","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 00:00:20"}
+{"callbackData":"booking","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5334,"timestamp":"2025-08-10 00:00:21","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-10 00:00:21"}
+{"callbackData":"booking_yes","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5335,"timestamp":"2025-08-10 00:00:24","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-10 00:00:24"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-10 00:00:31"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-11","timestamp":"2025-08-10 00:00:32"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/09/2025","timestamp":"2025-08-10 00:00:36"}
+{"error":{},"level":"error","message":"Error in sendGroupedRooms for chat 809245787","timestamp":"2025-08-10 00:00:43"}
+{"callbackData":"back_to_menu","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5340,"timestamp":"2025-08-10 00:05:30","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 00:05:30"}
+{"callbackData":"booking","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5341,"timestamp":"2025-08-10 00:05:32","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-10 00:05:32"}
+{"callbackData":"booking_yes","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5342,"timestamp":"2025-08-10 00:05:34","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-10 00:05:34"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-10 00:05:40"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-11","timestamp":"2025-08-10 00:05:41"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/09/2025","timestamp":"2025-08-10 00:05:44"}
+{"error":{},"level":"error","message":"Error in sendGroupedRooms for chat 809245787","timestamp":"2025-08-10 00:05:49"}
+{"callbackData":"back_to_menu","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5347,"timestamp":"2025-08-10 00:08:00","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 00:08:00"}
+{"callbackData":"booking","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5348,"timestamp":"2025-08-10 00:08:02","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-10 00:08:02"}
+{"callbackData":"booking_yes","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5349,"timestamp":"2025-08-10 00:08:03","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-10 00:08:03"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-10 00:08:10"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-11","timestamp":"2025-08-10 00:08:11"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 13/09/2025","timestamp":"2025-08-10 00:08:17"}
+{"availableRoomsCount":5,"error":"Cannot read properties of undefined (reading 'map')","level":"error","localRoomsCount":11,"message":"Failed to send room list to chat 809245787","timestamp":"2025-08-10 00:08:23"}
+{"error":{},"level":"error","message":"Error in sendGroupedRooms for chat 809245787","timestamp":"2025-08-10 00:08:24"}
+{"callbackData":"back_to_menu","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5355,"timestamp":"2025-08-10 00:15:30","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 00:15:30"}
+{"callbackData":"booking","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5356,"timestamp":"2025-08-10 00:15:32","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-10 00:15:32"}
+{"callbackData":"booking_yes","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5357,"timestamp":"2025-08-10 00:15:33","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-10 00:15:33"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-10 00:15:42"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-11","timestamp":"2025-08-10 00:15:43"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 13/09/2025","timestamp":"2025-08-10 00:15:49"}
+{"callbackData":"filter_rooms","level":"info","message":"Received callback query from user 809245787 in chat 809245787","messageId":5362,"timestamp":"2025-08-10 00:16:33","user":{"first_name":"Андрей","id":809245787,"last_name":"К. ЧЛБ","username":"andrey_igorevich1474"}}
+{"error":{},"level":"error","message":"Error processing callback query in chat 809245787","timestamp":"2025-08-10 00:16:34"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 00:29:12"}
+{"chatId":809245787,"error":"userId is not defined","level":"error","message":"Ошибка обработки callback","stack":"ReferenceError: userId is not defined\n    at TelegramBot.<anonymous> (E:\\Фриланс\\База отдыха Золотые пески\\goldensandstgbot1\\handlers\\mainMenu.js:675:36)","timestamp":"2025-08-10 00:29:12"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 00:29:14"}
+{"chatId":809245787,"error":"userId is not defined","level":"error","message":"Ошибка обработки callback","stack":"ReferenceError: userId is not defined\n    at TelegramBot.<anonymous> (E:\\Фриланс\\База отдыха Золотые пески\\goldensandstgbot1\\handlers\\mainMenu.js:675:36)","timestamp":"2025-08-10 00:29:14"}
+{"level":"info","message":"Start command received for chat 809245787","timestamp":"2025-08-10 00:29:20"}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-10 00:29:24"}
+{"chatId":809245787,"error":"userId is not defined","level":"error","message":"Ошибка обработки callback","stack":"ReferenceError: userId is not defined\n    at TelegramBot.<anonymous> (E:\\Фриланс\\База отдыха Золотые пески\\goldensandstgbot1\\handlers\\mainMenu.js:665:36)","timestamp":"2025-08-10 00:29:24"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 00:32:44"}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-10 00:32:47"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-10 00:32:49"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 21/09/2025","timestamp":"2025-08-10 00:32:54"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-21","timestamp":"2025-08-10 00:32:57"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 23/09/2025","timestamp":"2025-08-10 00:33:02"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 14","timestamp":"2025-08-10 00:34:04"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 604","timestamp":"2025-08-10 00:34:05"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 00:34:16"}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-10 00:34:18"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-10 00:34:20"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-10 00:37:23"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-11","timestamp":"2025-08-10 00:37:24"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/09/2025","timestamp":"2025-08-10 00:37:31"}
+{"chatId":809245787,"error":"EFATAL: Error: socket hang up","level":"error","message":"Ошибка обработки callback","stack":"RequestError: Error: socket hang up\n    at new RequestError (E:\\Фриланс\\База отдыха Золотые пески\\goldensandstgbot1\\node_modules\\request-promise-core\\lib\\errors.js:14:15)\n    at plumbing.callback (E:\\Фриланс\\База отдыха Золотые пески\\goldensandstgbot1\\node_modules\\request-promise-core\\lib\\plumbing.js:87:29)\n    at Request.RP$callback [as _callback] (E:\\Фриланс\\База отдыха Золотые пески\\goldensandstgbot1\\node_modules\\request-promise-core\\lib\\plumbing.js:46:31)\n    at self.callback (E:\\Фриланс\\База отдыха Золотые пески\\goldensandstgbot1\\node_modules\\@cypress\\request\\request.js:183:22)\n    at Request.emit (node:events:507:28)\n    at Request.onRequestError (E:\\Фриланс\\База отдыха Золотые пески\\goldensandstgbot1\\node_modules\\@cypress\\request\\request.js:869:8)\n    at ClientRequest.emit (node:events:507:28)\n    at emitErrorEvent (node:_http_client:104:11)\n    at TLSSocket.socketOnEnd (node:_http_client:542:5)\n    at TLSSocket.emit (node:events:519:35)\n    at endReadableNT (node:internal/streams/readable:1701:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)","timestamp":"2025-08-10 00:44:22"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 00:44:23"}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-10 00:44:26"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-10 00:44:28"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 00:45:41"}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-10 00:45:43"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-10 00:45:46"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-10 00:45:54"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-11","timestamp":"2025-08-10 00:45:55"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/09/2025","timestamp":"2025-08-10 00:46:00"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 00:46:28"}
+{"level":"info","message":"Starting admin questions mode for chat 809245787","timestamp":"2025-08-10 00:46:54"}
+{"chatId":809245787,"error":"EFATAL: Error: socket hang up","level":"error","message":"Ошибка обработки callback","stack":"RequestError: Error: socket hang up\n    at new RequestError (E:\\Фриланс\\База отдыха Золотые пески\\goldensandstgbot1\\node_modules\\request-promise-core\\lib\\errors.js:14:15)\n    at plumbing.callback (E:\\Фриланс\\База отдыха Золотые пески\\goldensandstgbot1\\node_modules\\request-promise-core\\lib\\plumbing.js:87:29)\n    at Request.RP$callback [as _callback] (E:\\Фриланс\\База отдыха Золотые пески\\goldensandstgbot1\\node_modules\\request-promise-core\\lib\\plumbing.js:46:31)\n    at self.callback (E:\\Фриланс\\База отдыха Золотые пески\\goldensandstgbot1\\node_modules\\@cypress\\request\\request.js:183:22)\n    at Request.emit (node:events:507:28)\n    at Request.onRequestError (E:\\Фриланс\\База отдыха Золотые пески\\goldensandstgbot1\\node_modules\\@cypress\\request\\request.js:869:8)\n    at ClientRequest.emit (node:events:507:28)\n    at emitErrorEvent (node:_http_client:104:11)\n    at TLSSocket.socketOnEnd (node:_http_client:542:5)\n    at TLSSocket.emit (node:events:519:35)\n    at endReadableNT (node:internal/streams/readable:1701:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)","timestamp":"2025-08-10 00:46:55"}
+{"level":"info","message":"Ending admin questions mode for chat 809245787","timestamp":"2025-08-10 00:46:58"}
+{"level":"info","message":"Starting admin questions mode for chat 809245787","timestamp":"2025-08-10 00:46:59"}
+{"level":"info","message":"Processing question in ASKING_QUESTIONS for user 809245787 in chat 809245787: Сколько стоят номера?","timestamp":"2025-08-10 00:47:08"}
+{"level":"info","message":"Processing question in ASKING_QUESTIONS for user 809245787 in chat 809245787: сколько стоит аренда лодки?","timestamp":"2025-08-10 00:49:02"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 01:11:07"}
+{"level":"info","message":"Sending important info to chat 809245787","timestamp":"2025-08-10 01:11:09"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 01:11:12"}
+{"level":"info","message":"Displaying rooms list for chat 809245787","roomsCount":11,"timestamp":"2025-08-10 01:11:14"}
+{"level":"info","message":"Displaying rooms list for chat 809245787","roomsCount":11,"timestamp":"2025-08-10 01:15:33"}
+{"level":"info","message":"Displaying rooms list for chat 809245787","roomsCount":11,"timestamp":"2025-08-10 01:17:32"}
+{"level":"info","message":"Sending entertainment info to chat 809245787","timestamp":"2025-08-10 01:22:45"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 01:22:54"}
+{"level":"info","message":"Sending entertainment info to chat 809245787","timestamp":"2025-08-10 01:22:57"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 01:23:32"}
+{"level":"info","message":"Sending entertainment info to chat 809245787","timestamp":"2025-08-10 01:23:34"}
+{"level":"info","message":"Start command received for chat 809245787","timestamp":"2025-08-10 01:24:08"}
+{"level":"info","message":"Sending entertainment info to chat 809245787","timestamp":"2025-08-10 01:24:10"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 01:24:29"}
+{"level":"info","message":"Sending entertainment info to chat 809245787","timestamp":"2025-08-10 01:24:32"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 01:25:11"}
+{"level":"info","message":"Showing room details for chat 809245787, room ID: 8","timestamp":"2025-08-10 01:25:17"}
+{"level":"info","message":"Sending 9 photos for room 8 to chat 809245787","timestamp":"2025-08-10 01:25:17"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 01:25:24"}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-10 01:25:26"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-10 01:25:28"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 13/09/2025","timestamp":"2025-08-10 01:25:34"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-13","timestamp":"2025-08-10 01:25:35"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 14/09/2025","timestamp":"2025-08-10 01:25:39"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-10 01:25:57"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 101","timestamp":"2025-08-10 01:25:57"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Тестирование","timestamp":"2025-08-10 01:26:04"}
+{"level":"info","message":"Guest name saved for chat 809245787: Тестирование","timestamp":"2025-08-10 01:26:04"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-10 01:26:16"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-10 01:26:17"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-10 01:26:21"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-10 01:26:21"}
+{"level":"info","message":"Processing payment type selection for chat 809245787","paymentType":"payment_prepayment","timestamp":"2025-08-10 01:26:24"}
+{"level":"info","message":"Saving payment details to booking session for chat 809245787","nights":1,"paymentType":"prepayment","timestamp":"2025-08-10 01:26:24","totalPrice":4999}
+{"chatId":809245787,"error":"Cannot read properties of undefined (reading 'error')","level":"error","message":"Ошибка обработки callback","stack":"TypeError: Cannot read properties of undefined (reading 'error')\n    at TelegramBot.<anonymous> (E:\\Фриланс\\База отдыха Золотые пески\\goldensandstgbot1\\handlers\\mainMenu.js:528:32)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)","timestamp":"2025-08-10 01:26:24"}
+{"level":"info","message":"Processing payment type selection for chat 809245787","paymentType":"payment_prepayment","timestamp":"2025-08-10 01:29:13"}
+{"currentStep":"confirmBooking","error":null,"level":"warn","message":"Invalid booking session during payment selection for chat 809245787","sessionExists":true,"timestamp":"2025-08-10 01:29:14"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 01:29:16"}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-10 01:29:18"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-10 01:29:19"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 13/09/2025","timestamp":"2025-08-10 01:29:26"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-13","timestamp":"2025-08-10 01:29:27"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 15/09/2025","timestamp":"2025-08-10 01:29:31"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-10 01:29:40"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-10 01:29:42"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Тестовое","timestamp":"2025-08-10 01:29:50"}
+{"level":"info","message":"Guest name saved for chat 809245787: Тестовое","timestamp":"2025-08-10 01:29:50"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-10 01:30:00"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-10 01:30:01"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-10 01:30:05"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-10 01:30:05"}
+{"level":"info","message":"Processing payment type selection for chat 809245787","paymentType":"payment_prepayment","timestamp":"2025-08-10 01:30:09"}
+{"level":"info","message":"Saving payment details to booking session for chat 809245787","nights":2,"paymentType":"prepayment","timestamp":"2025-08-10 01:30:09","totalPrice":15998}
+{"error":"saveBookingSession вернул undefined","level":"error","message":"Failed to save booking session for chat 809245787 during payment processing","timestamp":"2025-08-10 01:30:10"}
+{"chatId":809245787,"error":"Не удалось сохранить данные оплаты","level":"error","message":"Ошибка обработки callback","stack":"Error: Не удалось сохранить данные оплаты\n    at TelegramBot.<anonymous> (E:\\Фриланс\\База отдыха Золотые пески\\goldensandstgbot1\\handlers\\mainMenu.js:532:27)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)","timestamp":"2025-08-10 01:30:10"}
+{"level":"info","message":"Processing payment type selection for chat 809245787","paymentType":"payment_prepayment","timestamp":"2025-08-10 01:33:12"}
+{"currentStep":"confirmBooking","error":null,"level":"warn","message":"Invalid booking session during payment selection for chat 809245787","sessionExists":true,"timestamp":"2025-08-10 01:33:12"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 01:33:15"}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-10 01:33:16"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-10 01:33:20"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-10 01:33:30"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 01:35:15"}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-10 01:35:17"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-10 01:35:18"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-10 01:35:23"}
+{"level":"info","message":"Returning to main menu for chat 809245787","timestamp":"2025-08-10 01:35:38"}
+{"level":"info","message":"Starting booking process for chat 809245787","timestamp":"2025-08-10 01:35:40"}
+{"level":"info","message":"Starting booking process (booking_yes) for chat 809245787","timestamp":"2025-08-10 01:35:42"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 11/09/2025","timestamp":"2025-08-10 01:35:46"}
+{"level":"info","message":"Check-in date saved for chat 809245787: 2025-09-11","timestamp":"2025-08-10 01:35:47"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 12/09/2025","timestamp":"2025-08-10 01:35:51"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 1","timestamp":"2025-08-10 01:36:07"}
+{"level":"info","message":"Room selected for chat 809245787: roomId 8","timestamp":"2025-08-10 01:36:07"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: Fyl","timestamp":"2025-08-10 01:36:11"}
+{"level":"info","message":"Guest name saved for chat 809245787: Fyl","timestamp":"2025-08-10 01:36:11"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: herreh174@gmail.com","timestamp":"2025-08-10 01:36:23"}
+{"level":"info","message":"Guest email saved for chat 809245787: herreh174@gmail.com","timestamp":"2025-08-10 01:36:24"}
+{"level":"info","message":"Processing message for user 809245787 in chat 809245787: 89123016435","timestamp":"2025-08-10 01:36:29"}
+{"level":"info","message":"Guest phone saved for chat 809245787: 89123016435","timestamp":"2025-08-10 01:36:29"}
+{"level":"info","message":"Processing payment type selection for chat 809245787","paymentType":"payment_prepayment","timestamp":"2025-08-10 01:36:32"}
+{"level":"info","message":"Saving payment details to booking session for chat 809245787","nights":1,"paymentType":"prepayment","timestamp":"2025-08-10 01:36:32","totalPrice":5999}
+{"bookingData":{"checkIn":"2025-09-11","checkOut":"2025-09-12","guestName":"Fyl","roomId":8,"totalPrice":5999},"level":"info","message":"Creating booking for chat 809245787","timestamp":"2025-08-10 01:36:32"}
+{"bookingId":"33bda48c-2c1f-48a1-a401-12f679a806fb","bookingNumber":102478158,"level":"info","message":"Booking successfully created for chat 809245787","paymentAmount":2999.5,"timestamp":"2025-08-10 01:36:38"}
+{"callbackData":"admin_reload","level":"warn","message":"Unknown callback data received from chat -1002826990012","timestamp":"2025-08-10 01:37:02"}
