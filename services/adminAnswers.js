@@ -243,5 +243,6 @@ module.exports = {
     loadPendingQuestions,
     getSafeTextForTelegram,
     getQuestionPreview,
-    removeQuestionFromFile
+    removeQuestion: removeQuestionFromFile,
+    removeQuestionFromFile,
 };
