@@ -934,7 +934,7 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
             "content/camping/6.webp",
             "content/camping/7.jfif",
             "content/camping/8.jfif",
-			"content/camping/9.png",
+			"content/camping/9.jfif",
         ];
 
         const message = `Размещение с палатками:
@@ -1143,7 +1143,7 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
     async function handleDirections(bot, chatId) {
         const photos = [
             "content/road/Маршрут.png",
-            "content/road/50c10319-d3d4-4488-bccf-58b2f16b00df.png",
+            "content/road/50c10319-d3d4-4488-bccf-58b2f16b00df.jfif",
             "content/road/d6f84703-8cba-4217-a3ca-b42d2da16d27.jfif",
         ];
         const message = `📍 Координаты:
