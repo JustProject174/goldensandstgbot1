@@ -377,17 +377,6 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
                 await deleteBookingSession(chatId);
                 userStates.set(userId, states.MAIN_MENU);
             }
-        } else if (state === states.ASKING_QUESTIONS && text.trim().length > 0) {
-            logger.info(`Processing question in ASKING_QUESTIONS for user ${userId} in chat ${chatId}: ${text}`);
-            const answer = services.knowledgeBase.findAnswerInKnowledgeBase(text);
-            if (answer) {
-                await utils.safeSendMessage(bot, chatId, answer, {
-                    parse_mode: 'Markdown'
-                });
-            } else {
-                logger.info(`Forwarding question from user ${userId} in chat ${chatId}: ${text}`);
-                await utils.forwardToAdmins(bot, userId, msg.from.username, msg.text);
-            }
         } else if (state === states.MAIN_MENU && text.trim().length > 0) {
             logger.info(`Ignored text message in MAIN_MENU for chat ${chatId}: ${text}`);
             await utils.safeSendMessage(bot, chatId, 'Пожалуйста, используйте кнопки меню для навигации. Если у вас вопрос, нажмите "Задать вопрос администратору".', {
