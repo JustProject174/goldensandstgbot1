@@ -134,6 +134,7 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
 
     // Обработка текстовых сообщений
     bot.on('message', async (msg) => {
+		logger.info(`Получено сообщение от ${msg.from.id}: ${msg.text}, состояние: ${userStates.get(msg.from.id)} в ${new Date().toISOString()}`);
         const chatId = msg.chat.id;
         const userId = msg.from.id;
         const text = msg.text;
@@ -388,6 +389,7 @@ module.exports = function setupMainMenuHandlers(bot, userStates) {
 
     // Обработка callback запросов
     bot.on("callback_query", async (callbackQuery) => {
+		logger.info(`Получен callback_query: ${callbackQuery.data} от ${callbackQuery.from.id} в ${new Date().toISOString()}`);
         const msg = callbackQuery.message;
         const chatId = msg.chat.id;
         const data = callbackQuery.data;
