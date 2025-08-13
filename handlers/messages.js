@@ -1,6 +1,6 @@
 const logger = require("../logger");
-const utils = require("./utils");
-const states = require("./states");
+const utils = require("../utils");
+const states = require("../states");
 const services = {
     knowledgeBase: require("../services/knowledgeBase"),
     adminAnswers: require("../services/adminAnswers")
